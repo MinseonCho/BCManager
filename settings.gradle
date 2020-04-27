@@ -1,2 +1,2 @@
 rootProject.name='BCManager'
-include ':app'
+include ':app', ':opencv'
