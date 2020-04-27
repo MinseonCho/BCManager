@@ -142,6 +142,7 @@ android {
             path (project.projectDir.toString() + '/libcxx_helper/CMakeLists.txt')
         }
     }
+    ndkVersion = '21.1.6352462'
 }
 
 dependencies {
