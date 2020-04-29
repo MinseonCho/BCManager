@@ -3799,9 +3799,9 @@ CV_EXPORTS_W void findContours( InputArray image, OutputArrayOfArrays contours,
                               OutputArray hierarchy, int mode,
                               int method, Point offset = Point());
 
-/** @overload */
-CV_EXPORTS void findContours( InputArray image, OutputArrayOfArrays contours,
-                              int mode, int method, Point offset = Point());
+///** @overload */
+//CV_EXPORTS void findContours(InputArray image, OutputArrayOfArrays contours,
+//                             int mode, int method, ContourApproximationModes offset = Point());
 
 /** @example samples/cpp/squares.cpp
 A program using pyramid scaling, Canny, contours and contour simplification to find

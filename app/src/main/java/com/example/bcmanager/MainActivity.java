@@ -48,6 +48,16 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         System.loadLibrary("opencv_java4");
         System.loadLibrary("native-lib");
     }
+    static {
+        System.loadLibrary("native-lib");
+
+        if (!OpenCVLoader.initDebug()){
+            Log.d(TAG, "OpenCV is not loaded");
+        }else{
+            Log.d(TAG, "OpenCV is loaded successfully!");
+        }
+    }
+
 
 //    private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
 //        @Override
@@ -98,7 +108,10 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
                     Bitmap bitmapOutput = Bitmap.createBitmap(image.cols(), image.rows(), Bitmap.Config.ARGB_8888);
                     Utils.matToBitmap(output, bitmapOutput);
+                    Bitmap bitmapInput = Bitmap.createBitmap(image.cols(), image.rows(), Bitmap.Config.ARGB_8888);
+                    Utils.matToBitmap(image, bitmapInput);
                     outputImage.setImageBitmap(bitmapOutput);
+                    inputImage.setImageBitmap(bitmapInput);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
