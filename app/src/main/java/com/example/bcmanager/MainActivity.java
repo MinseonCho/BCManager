@@ -97,7 +97,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                 //메소드를 불러서 결과를 outputImage에 저장.
                 try {
                     Log.d("테스트","테스트2");
-                    InputStream is = getAssets().open("test_11.jpg");
+                    InputStream is = getAssets().open("contour2.png");
                     Bitmap bitmap = BitmapFactory.decodeStream(is);
 
                     Mat image = new Mat();
@@ -106,12 +106,14 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
                     BlurImage(image.getNativeObjAddr(), output.getNativeObjAddr());
 
-                    Bitmap bitmapOutput = Bitmap.createBitmap(image.cols(), image.rows(), Bitmap.Config.ARGB_8888);
-                    Utils.matToBitmap(output, bitmapOutput);
-                    Bitmap bitmapInput = Bitmap.createBitmap(image.cols(), image.rows(), Bitmap.Config.ARGB_8888);
-                    Utils.matToBitmap(image, bitmapInput);
-                    outputImage.setImageBitmap(bitmapOutput);
-                    inputImage.setImageBitmap(bitmapInput);
+                    if(output != null && image != null) {
+                        Bitmap bitmapOutput = Bitmap.createBitmap(image.cols(), image.rows(), Bitmap.Config.ARGB_8888);
+                        Utils.matToBitmap(output, bitmapOutput);
+                        Bitmap bitmapInput = Bitmap.createBitmap(image.cols(), image.rows(), Bitmap.Config.ARGB_8888);
+                        Utils.matToBitmap(image, bitmapInput);
+                        outputImage.setImageBitmap(bitmapOutput);
+                        inputImage.setImageBitmap(bitmapInput);
+                    }
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
