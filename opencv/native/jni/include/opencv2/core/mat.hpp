@@ -1185,7 +1185,7 @@ public:
     The method creates a full copy of the array. The original step[] is not taken into account. So, the
     array copy is a continuous array occupying total()*elemSize() bytes.
      */
-    Mat clone() const CV_NODISCARD;
+    Mat & clone() const CV_NODISCARD;
 
     /** @brief Copies the matrix to another one.
 

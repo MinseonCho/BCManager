@@ -805,7 +805,7 @@ Mat Mat::colRange(const Range& r) const
 }
 
 inline
-Mat Mat::clone() const
+Mat & Mat::clone() const
 {
     Mat m;
     copyTo(m);

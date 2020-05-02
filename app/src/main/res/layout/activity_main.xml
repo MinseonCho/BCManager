@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:gravity="center_horizontal"
     tools:context=".MainActivity">
 
 <!--    <org.opencv.android.JavaCameraView-->
@@ -19,8 +20,15 @@
 
     <Button
         android:id="@+id/click"
+        android:text="Click"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
+    <Button
+        android:id="@+id/clickToCamera"
+        android:text="ClickToCamera"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
 
     <ImageView
         android:id="@+id/outputimage"
