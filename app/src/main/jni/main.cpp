@@ -2,6 +2,7 @@
 #include "com_example_bcmanager_MainActivity.h"
 
 #include <opencv2/opencv.hpp>
+#include <android/log.h>
 
 using namespace cv;
 using namespace std;
@@ -24,13 +25,17 @@ JNIEXPORT void JNICALL Java_com_example_bcmanager_CameraActivity_ConvertRGBtoGra
     Mat &output = *(Mat *) matAddrResult;
     vector<int>::iterator it;
 
-    input.convertTo(output,CV_8UC3);
+    LOGD("%d : input.cols", input.cols);
+    LOGD("%d : input.rows", input.rows);
+    input.convertTo(output, CV_8UC3);
     Mat tmp = Mat::zeros(input.rows, input.cols, CV_8UC3);
-    Mat min;
+    Mat grayInput;
+    cvtColor(input, grayInput, COLOR_RGB2GRAY);
 
-    cvtColor(input, min, COLOR_RGB2GRAY);
+//    resize(grayInput, grayInput, Size(0, 0), 0.5,0.5,INTER_AREA);
 
-    Canny(min, tmp, 100, 200, 3, false);
+
+    Canny(grayInput, tmp, 100, 200, 3, false);
     vector<vector<Point>> contours;
     vector<Vec4i> hierarchy;
     findContours(tmp, contours, hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE, Point());
@@ -51,12 +56,16 @@ JNIEXPORT void JNICALL Java_com_example_bcmanager_CameraActivity_ConvertRGBtoGra
         int size = approx.size();
         //Contour를 근사화한 직선을 그린다.
         if (size == 4) {
-            rectangle(output, approx[0], approx[2], Scalar(0, 255, 0),3);
+//            rectangle(output, approx[0], approx[2], Scalar(0, 255, 0),3);
+            line(output, approx[0], approx[approx.size() - 1], Scalar(0, 255, 0), 3);
+            for (int k = 0; k < size - 1; k++)
+                line(output, approx[k], approx[k + 1], Scalar(0, 255, 0), 4);
 
         }
     }
 
-
+    LOGD("%d : output.cols", output.cols);
+    LOGD("%d : output.rows", output.rows);
 
 }
 
@@ -70,14 +79,18 @@ JNIEXPORT void JNICALL Java_com_example_bcmanager_MainActivity_BlurImage(JNIEnv 
     Mat &input = *(Mat *) input_image;
     Mat &output = *(Mat *) output_image;
 
-    input.convertTo(output,CV_8UC3);
+    input.convertTo(output, CV_8UC3);
     Mat tmp = Mat::zeros(input.rows, input.cols, CV_8UC3);
-    Mat min;
+    Mat grayInput;
 
-    cvtColor(input, min, COLOR_RGB2GRAY);
+    cvtColor(input, grayInput, COLOR_RGB2GRAY);
 
+    double sigmaColor = 20.0;
+    double sigmaSpace = 20.0;
+    Mat bilateraledImage;
+    bilateralFilter(grayInput, bilateraledImage, -1, sigmaColor, sigmaSpace);
 
-    Canny(min, tmp, 100, 200, 3, false);
+    Canny(bilateraledImage, tmp, 100, 200, 3, false);
     vector<vector<Point>> contours;
     vector<Vec4i> hierarchy;
     findContours(tmp, contours, hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE, Point());
@@ -97,7 +110,7 @@ JNIEXPORT void JNICALL Java_com_example_bcmanager_MainActivity_BlurImage(JNIEnv 
     {
         int size = approx.size();
         //Contour를 근사화한 직선을 그린다.
-        if (size % 2 ==0 ) {
+        if (size % 2 == 0) {
             line(output, approx[0], approx[approx.size() - 1], Scalar(0, 255, 0), 3);
             for (int k = 0; k < size - 1; k++)
                 line(output, approx[k], approx[k + 1], Scalar(0, 255, 0), 3);
@@ -105,30 +118,6 @@ JNIEXPORT void JNICALL Java_com_example_bcmanager_MainActivity_BlurImage(JNIEnv 
         }
     }
 
-
-
-
-
-
-//    vector<vector<Point>> contours;
-//    vector<Vec4i> hierarchy;
-//
-//    findContours(output, contours, hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE, Point(0, 0));
-//
-//    vector<Point> cnt = contours[0];
-//    drawContours(input, contours, -1, CV_RGB(0, 255, 0), 3);
-//
-//    double epsilon = 0.1 * arcLength(cnt, true);
-//
-//    vector<Point> approx;
-//    vector<vector<Point>> result_approx;
-//
-//    approxPolyDP(cnt, approx, epsilon, true);
-//
-////    result_approx.insert(result_approx.begin(),approx.begin(), approx.end());
-//    result_approx.push_back(approx);
-//    drawContours(tmp, result_approx, -1, CV_RGB(0, 255, 0), 5);
-//    output = tmp;
 
 }
 

@@ -1,7 +1,9 @@
 package com.example.bcmanager;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -122,5 +124,16 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        Log.d("제에에에","바아알");
+        if(resultCode == Activity.RESULT_OK){
+            if(requestCode == 100){
+                if (data != null) {
+                    inputImage.setImageBitmap((Bitmap) data.getParcelableExtra("image"));
+                }
+            }
+        }
+    }
 }

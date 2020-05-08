@@ -2,21 +2,27 @@ package com.example.bcmanager
 
 import android.Manifest.permission.CAMERA
 import android.annotation.TargetApi
+import android.app.Activity
 import android.content.DialogInterface
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.SurfaceView
-import android.view.WindowManager
+import android.view.View
+import android.widget.ImageView
+import android.widget.LinearLayout
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import org.opencv.android.BaseLoaderCallback
-import org.opencv.android.CameraBridgeViewBase
-import org.opencv.android.LoaderCallbackInterface
-import org.opencv.android.OpenCVLoader
+import com.google.android.material.floatingactionbutton.FloatingActionButton
+import kotlinx.android.synthetic.main.activity_camera.*
+import org.opencv.android.*
+import org.opencv.core.CvType
 import org.opencv.core.Mat
 import java.util.*
+import java.util.concurrent.Semaphore
 
 
 class CameraActivity : AppCompatActivity(), CameraBridgeViewBase.CvCameraViewListener2 {
@@ -25,10 +31,32 @@ class CameraActivity : AppCompatActivity(), CameraBridgeViewBase.CvCameraViewLis
     private var matInput: Mat? = null
     private var matResult: Mat? = null
 
+
+    // These variables are used (at the moment) to fix camera orientation from 270degree to 0degree
+    var mRgba: Mat? = null
+    var mRgbaF: Mat? = null
+    var mRgbaT: Mat? = null
+
+    var llBottom: LinearLayout? = null
+
     private var mOpenCvCameraView: CameraBridgeViewBase? = null
 
+    private var image: ImageView? = null
+    private var button: FloatingActionButton? = null
+    private var btnReject: FloatingActionButton? = null
+    private var btnAccept: FloatingActionButton? = null
+    private var bitmapImage: Bitmap? = null
     private external fun ConvertRGBtoGray(matAddrInput: Long, matAddrResult: Long)
 
+    private val writeLock: Semaphore = Semaphore(1);
+
+    public fun getWriteLock() {
+        writeLock.acquire();
+    }
+
+    public fun releaseWriteLock() {
+        writeLock.release();
+    }
 
     init {
         System.loadLibrary("opencv_java4")
@@ -74,34 +102,113 @@ class CameraActivity : AppCompatActivity(), CameraBridgeViewBase.CvCameraViewLis
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
-                WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+//        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+//                WindowManager.LayoutParams.FLAG_FULLSCREEN);
+//        getWindow().setFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
+//                WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         setContentView(R.layout.activity_camera)
 
 
         mOpenCvCameraView = findViewById(R.id.activity_surface_view);
         mOpenCvCameraView!!.visibility = SurfaceView.VISIBLE;
-//        mOpenCvCameraView?.setVisibility(SurfaceView.VISIBLE);
         mOpenCvCameraView?.setCvCameraViewListener(this);
         mOpenCvCameraView?.setCameraIndex(0); // front-camera(1),  back-camera(0)
+
+        image = findViewById(R.id.ivBitmap)
+        button = findViewById(R.id.btnCapture)
+        llBottom = findViewById(R.id.llBottom)
+        btnReject = findViewById(R.id.btnReject)
+        btnAccept = findViewById(R.id.btnAccept)
+
+        button!!.setOnClickListener {
+            val tmpImage = matResult;
+            bitmapImage = Bitmap.createBitmap(tmpImage!!.cols(), tmpImage.rows(), Bitmap.Config.RGB_565)
+            Utils.matToBitmap(tmpImage, bitmapImage)
+            image?.setImageBitmap(bitmapImage)
+            llBottom!!.visibility = View.VISIBLE
+            button!!.hide()
+            mOpenCvCameraView!!.disableView()
+        }
+
+        btnAccept!!.setOnClickListener {
+            mOpenCvCameraView!!.disableView()
+//            val intent = Intent(applicationContext, ConfirmCapture::class.java)
+//            intent.putExtra("image", bitmapImage)
+//            setResult(Activity.RESULT_OK, intent)
+//            finish()
+        }
+        btnReject!!.setOnClickListener {
+            showAcceptedRejectedButton(false)
+
+        }
+//        val button1: Button = findViewById(R.id.button);
+//        button1.setOnClickListener {
+////
+////            val tmpImage = matResult;
+////            val bitmapOutput = Bitmap.createBitmap(tmpImage!!.cols(), tmpImage.rows(), Bitmap.Config.RGB_565)
+////            image!!.setImageBitmap(bitmapOutput)
+////            Utils.matToBitmap(tmpImage, bitmapOutput)
+////            Log.d("테스트","테스트");
+////            val intent = Intent()
+////            intent.putExtra("image", bitmapOutput)
+////            setResult(Activity.RESULT_OK, intent);
+////            mOpenCvCameraView!!.disableView()
+////            Log.d("테스트","테스트2");
+////            finish()
+////
+////
+//            try {
+//                getWriteLock();
+//                val path: File = File(this.getExternalFilesDir(null)?.absolutePath + "/Images/");
+//                path.mkdirs();
+//                val file: File = File(path, "image.png");
+//                val filename = file.toString();
+//                Imgproc.cvtColor(matResult, matResult, Imgproc.COLOR_BGR2RGB, 4);
+//
+//                val bitmapOutput = Bitmap.createBitmap(matResult!!.cols(), matResult!!.rows(), Bitmap.Config.RGB_565)
+//                Utils.matToBitmap(matResult, bitmapOutput)
+//
+//                val intent = Intent(applicationContext, ConfirmCapture::class.java)
+//                intent.putExtra("image", bitmapOutput)
+//                setResult(Activity.RESULT_OK, intent);
+//                mOpenCvCameraView!!.disableView()
+//
+//                val ret = Imgcodecs.imwrite(filename, matResult);
+//                if (ret) Log.d(TAG, "SUCESS");
+//                else Log.d(TAG, "FAIL");
+//                val mediaScanIntent: Intent = Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+//                mediaScanIntent.setData(Uri.fromFile(file));
+//                sendBroadcast(mediaScanIntent);
+//
+//                finish();
+//            } catch (e: InterruptedException) {
+//                e.printStackTrace();
+//            }
+//            releaseWriteLock();
+//        }
+
+
     }
 
     override fun onCameraViewStarted(width: Int, height: Int) {
+        mRgba = Mat(height, width, CvType.CV_8UC4)
+        mRgbaF = Mat(height, width, CvType.CV_8UC4)
+        mRgbaT = Mat(width, width, CvType.CV_8UC4)
+        Log.d("카메라","onCameraViewStarted")
     }
 
     override fun onCameraViewStopped() {
+        Log.d("카메라","onCameraViewStopped")
+
     }
 
     override fun onCameraFrame(inputFrame: CameraBridgeViewBase.CvCameraViewFrame?): Mat {
+
         matInput = inputFrame!!.rgba()
-
         if (matResult == null) matResult = Mat(matInput!!.rows(), matInput!!.cols(), matInput!!.type())
-
         ConvertRGBtoGray(matInput!!.getNativeObjAddr(), matResult!!.getNativeObjAddr())
-
         return matResult as Mat
+
     }
 
 
@@ -109,6 +216,18 @@ class CameraActivity : AppCompatActivity(), CameraBridgeViewBase.CvCameraViewLis
         return Collections.singletonList(mOpenCvCameraView)
     }
 
+    private fun showAcceptedRejectedButton(value: Boolean) {
+        if (value) {
+            finish()
+        } else {
+            mOpenCvCameraView!!.enableView()
+            button!!.show()
+            ivBitmap.visibility = View.GONE
+            llBottom!!.visibility = View.GONE
+            mOpenCvCameraView!!.setVisibility(SurfaceView.VISIBLE)
+            mOpenCvCameraView?.setCameraIndex(0);
+        }
+    }
 
     //여기서부턴 퍼미션 관련 메소드
     private val CAMERA_PERMISSION_REQUEST_CODE = 200
@@ -164,4 +283,6 @@ class CameraActivity : AppCompatActivity(), CameraBridgeViewBase.CvCameraViewLis
         })
         builder.create().show()
     }
+
+
 }
