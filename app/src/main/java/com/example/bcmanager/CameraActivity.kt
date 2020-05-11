@@ -48,6 +48,7 @@ class CameraActivity : AppCompatActivity(), CameraBridgeViewBase.CvCameraViewLis
     private var bitmapImage: Bitmap? = null
     private external fun ConvertRGBtoGray(matAddrInput: Long, matAddrResult: Long)
 
+
     private val writeLock: Semaphore = Semaphore(1);
 
     public fun getWriteLock() {
@@ -108,7 +109,6 @@ class CameraActivity : AppCompatActivity(), CameraBridgeViewBase.CvCameraViewLis
 //                WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         setContentView(R.layout.activity_camera)
 
-
         mOpenCvCameraView = findViewById(R.id.activity_surface_view);
         mOpenCvCameraView!!.visibility = SurfaceView.VISIBLE;
         mOpenCvCameraView?.setCvCameraViewListener(this);
@@ -132,6 +132,7 @@ class CameraActivity : AppCompatActivity(), CameraBridgeViewBase.CvCameraViewLis
 
         btnAccept!!.setOnClickListener {
             mOpenCvCameraView!!.disableView()
+            //바로 디비에 넣어버려
 //            val intent = Intent(applicationContext, ConfirmCapture::class.java)
 //            intent.putExtra("image", bitmapImage)
 //            setResult(Activity.RESULT_OK, intent)
