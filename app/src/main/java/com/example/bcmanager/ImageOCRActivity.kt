@@ -1,9 +1,12 @@
 package com.example.bcmanager
 
-import androidx.appcompat.app.AppCompatActivity
+import android.graphics.BitmapFactory
 import android.os.Bundle
+import android.util.Log
 import android.widget.EditText
 import android.widget.ImageView
+import androidx.appcompat.app.AppCompatActivity
+import com.bumptech.glide.Glide
 
 class ImageOCRActivity : AppCompatActivity() {
 
@@ -30,5 +33,11 @@ class ImageOCRActivity : AppCompatActivity() {
         info_address = findViewById(R.id.address)
 
 
+        val intent = intent
+        if( intent != null){
+            val bytes = intent.getByteArrayExtra("image");
+            val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes!!.size);
+            cardImage?.setImageBitmap(bitmap)
+        }
     }
 }

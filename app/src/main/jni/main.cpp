@@ -74,6 +74,11 @@ JNIEXPORT void JNICALL Java_com_example_bcmanager_MainActivity_BlurImage(JNIEnv 
                                                                          jlong output_image) {
 
     int area = 0, cnt = 0;
+    Point2f pts[4];
+    Point2f dst_pts[4];
+    float minWidth;
+    float minHeight;
+
     // TODO: implement BlurImage()
 
     Mat &input = *(Mat *) input_image;
@@ -110,10 +115,33 @@ JNIEXPORT void JNICALL Java_com_example_bcmanager_MainActivity_BlurImage(JNIEnv 
     {
         int size = approx.size();
         //Contour를 근사화한 직선을 그린다.
-        if (size % 2 == 0) {
-            line(output, approx[0], approx[approx.size() - 1], Scalar(0, 255, 0), 3);
-            for (int k = 0; k < size - 1; k++)
-                line(output, approx[k], approx[k + 1], Scalar(0, 255, 0), 3);
+        if (size == 4) {
+
+            for (int i = 0; i < 4; i++) {
+                pts[i] = approx[i];
+            }
+            Point2f topLeft = pts[0];
+            Point2f topRight = pts[3];
+            Point2f bottomLeft = pts[1];
+            Point2f bottomRight = pts[2];
+
+            float w1 = abs(bottomRight.x - bottomLeft.x);
+            float w2 = abs(topRight.x - topLeft.x);
+            float h1 = abs(topRight.y - bottomRight.y);
+            float h2 = abs(topLeft.y - bottomLeft.y);
+            minWidth = min(w1, w2);
+            minHeight = min(h1, h2);
+
+            dst_pts[0] = Point2f(0,0);  dst_pts[1] = Point2f(0, minHeight-1);
+            dst_pts[2] = Point2f(minWidth-1, minHeight-1);  dst_pts[3] = Point2f(minWidth-1,0);
+
+
+            Mat perspect_mat = getPerspectiveTransform(pts, dst_pts);
+            warpPerspective(output, output, perspect_mat, Size((int(minWidth)), (int(minHeight))), INTER_CUBIC);
+
+//            line(output, approx[0], approx[approx.size() - 1], Scalar(0, 255, 0), 3);
+//            for (int k = 0; k < size - 1; k++)
+//                line(output, approx[k], approx[k + 1], Scalar(0, 255, 0), 3);
 
         }
     }
