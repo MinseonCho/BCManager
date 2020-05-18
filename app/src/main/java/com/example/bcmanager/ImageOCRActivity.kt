@@ -6,7 +6,6 @@ import android.util.Log
 import android.widget.EditText
 import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
-import com.bumptech.glide.Glide
 
 class ImageOCRActivity : AppCompatActivity() {
 
@@ -38,6 +37,9 @@ class ImageOCRActivity : AppCompatActivity() {
             val bytes = intent.getByteArrayExtra("image");
             val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes!!.size);
             cardImage?.setImageBitmap(bitmap)
+            Log.d("image사이즈", bitmap.width.toString() + " " +bitmap.height.toString())
         }
+
+
     }
 }
