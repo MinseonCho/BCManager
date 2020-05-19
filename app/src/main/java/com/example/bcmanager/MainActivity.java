@@ -6,6 +6,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.database.Cursor;
@@ -94,6 +95,7 @@ public class MainActivity extends AppCompatActivity {
     static int cnt = 0;
     boolean threadIsDone = false;
 
+    public static Context mContext;
 
     public native void BlurImage(long inputImage, long outputImage);
 
@@ -124,6 +126,8 @@ public class MainActivity extends AppCompatActivity {
         recyclerView = findViewById(R.id.recyclerview);
         linearLayout = findViewById(R.id.layout_for_thread);
         cnt_text = findViewById(R.id.cnt_card);
+
+        mContext = this;
 
         //handler
         mHandler = new Handler();
@@ -198,17 +202,91 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
+        if(cnt > 0){
+            linearLayout.setVisibility(View.VISIBLE);
+            cnt_text.setText( cnt + " 개의 명함을 인식 중 입니다!");
+        }
+
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable final Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
         Log.d("test", "onActivityResult");
         if (requestCode == 100) {
             if (resultCode == RESULT_OK) {
                 if (data != null) {
+                    final Intent datas = data;
+
+                    final Thread thread_ = new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+
+                            Looper.prepare();
+                            MessageQueue messageQueue = Looper.myQueue();
+                            mHandler.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    //ui 작업 수행o
+                                    cnt++;
+                                    if(cnt > 0){
+                                        linearLayout.setVisibility(View.VISIBLE);
+                                        cnt_text.setText( cnt + " 개의 명함을 인식 중 입니다!");
+                                    }
+                                    else{
+                                        linearLayout.setVisibility(View.GONE);
+                                    }
+                                }
+                            });
+
+                            byte[] bytes = datas.getByteArrayExtra("image");
+                            Bitmap result = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                            Log.d("result", String.valueOf(result.getWidth()) + String.valueOf(result.getHeight()));
 //                    inputImage.setImageBitmap((Bitmap) data.getParcelableExtra("image"));
+
+                            Mat mat_img = new Mat();
+                            Utils.bitmapToMat(result, mat_img);
+                            Log.d("result_mat_img", String.valueOf(mat_img.rows()) + String.valueOf(mat_img.cols()));
+                            Mat output = new Mat();
+
+                            BlurImage(mat_img.getNativeObjAddr(), output.getNativeObjAddr());
+                            cnt--;
+                            if (output != null && mat_img != null) {
+
+                                Bitmap bitmapOutput = Bitmap.createBitmap(output.cols(), output.rows(), Bitmap.Config.RGB_565);
+                                Utils.matToBitmap(output, bitmapOutput);
+
+                                ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                                bitmapOutput.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+                                byte[] byteArray = stream.toByteArray();
+
+                                Intent intent = new Intent(getApplicationContext(), ImageOCRActivity.class);
+                                intent.putExtra("image", byteArray);
+                                startActivity(intent);
+                            } else {
+                                Toast.makeText(getApplicationContext(), "다시 시도해주세요.", Toast.LENGTH_SHORT).show();
+                            }
+
+                            mHandler.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    //ui 작업 수행o
+
+                                    if(cnt > 0){
+                                        linearLayout.setVisibility(View.VISIBLE);
+                                        cnt_text.setText( cnt + " 개의 명함을 인식 중 입니다!");
+                                    }
+                                    else{
+                                        linearLayout.setVisibility(View.GONE);
+                                    }
+
+                                }
+                            });
+                            Looper.loop();
+                        }
+                    });
+                    thread_.start();
                 }
             }
         }
@@ -238,12 +316,6 @@ public class MainActivity extends AppCompatActivity {
                                     else{
                                         linearLayout.setVisibility(View.GONE);
                                     }
-//                                    if (!threadIsDone) {
-//                                        linearLayout.setVisibility(View.VISIBLE);
-//
-//                                    }
-//
-//                                    else linearLayout.setVisibility(View.INVISIBLE);
                                 }
                             });
                             String filePath = getRealPathFromURI(dataUri);
@@ -304,8 +376,7 @@ public class MainActivity extends AppCompatActivity {
                                     else{
                                         linearLayout.setVisibility(View.GONE);
                                     }
-//                                    if (!threadIsDone) linearLayout.setVisibility(View.VISIBLE);
-//                                    else linearLayout.setVisibility(View.GONE);
+
                                 }
                             });
                             Looper.loop();
@@ -408,7 +479,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mHandler.getLooper().quit();
     }
 }
 

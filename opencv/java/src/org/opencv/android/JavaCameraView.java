@@ -184,6 +184,7 @@ public class JavaCameraView extends CameraBridgeViewBase implements PreviewCallb
                     else
                         mScale = 0;
 
+
                     if (mFpsMeter != null) {
                         mFpsMeter.setResolution(mFrameWidth, mFrameHeight);
                     }

@@ -7,6 +7,7 @@ import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.graphics.Matrix
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -16,11 +17,13 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import com.bumptech.glide.Glide
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import kotlinx.android.synthetic.main.activity_camera.*
 import org.opencv.android.*
 import org.opencv.core.CvType
 import org.opencv.core.Mat
+import java.io.ByteArrayOutputStream
+import java.nio.ByteBuffer
 import java.util.*
 import java.util.concurrent.Semaphore
 
@@ -40,6 +43,8 @@ class CameraActivity : AppCompatActivity(), CameraBridgeViewBase.CvCameraViewLis
     var llBottom: LinearLayout? = null
 
     private var mOpenCvCameraView: CameraBridgeViewBase? = null
+    var rotatedBitmap: Bitmap? = null;
+
 
     private var image: ImageView? = null
     private var button: FloatingActionButton? = null
@@ -48,6 +53,7 @@ class CameraActivity : AppCompatActivity(), CameraBridgeViewBase.CvCameraViewLis
     private var bitmapImage: Bitmap? = null
     private external fun ConvertRGBtoGray(matAddrInput: Long, matAddrResult: Long)
 
+    private var showPreviews = false
 
     private val writeLock: Semaphore = Semaphore(1);
 
@@ -68,9 +74,59 @@ class CameraActivity : AppCompatActivity(), CameraBridgeViewBase.CvCameraViewLis
         override fun onManagerConnected(status: Int) {
             when (status) {
                 LoaderCallbackInterface.SUCCESS -> {
+                    button!!.setOnClickListener {
 
+
+                        showPreviews = !showPreviews;
+                        val tmpImage = matResult;
+                        bitmapImage = Bitmap.createBitmap(tmpImage!!.cols(), tmpImage.rows(), Bitmap.Config.RGB_565)
+                        Utils.matToBitmap(tmpImage, bitmapImage)
+
+                        val matrix: Matrix = Matrix()
+                        matrix.postRotate(90F)
+
+                        rotatedBitmap = Bitmap.createBitmap(bitmapImage, 0, 0, bitmapImage!!.getWidth(), bitmapImage!!.getHeight(), matrix, true)
+                        Log.d("흐음2", rotatedBitmap!!.width.toString() + rotatedBitmap!!.height)
+                        Log.d("흐음23", bitmapImage!!.width.toString() + bitmapImage!!.height)
+                        image?.setImageBitmap(rotatedBitmap)
+                        llBottom!!.visibility = View.VISIBLE
+                        button!!.hide()
+                        mOpenCvCameraView!!.disableView()
+                    }
+                    btnAccept!!.setOnClickListener {
+//                        mOpenCvCameraView!!.disableView()
+                        //바로 디비에 넣어버려
+                        Log.d("1", "1");
+
+//                        val result = (mContext as MainActivity).getResizedBitmap(bitmapImage, 1500, 843);
+                        Log.d("12", "1");
+
+                        val stream = ByteArrayOutputStream()
+                        rotatedBitmap?.compress(Bitmap.CompressFormat.JPEG, 60, stream)
+                        Log.d("흐음3", rotatedBitmap!!.width.toString() + rotatedBitmap!!.height)
+                        val byteArray = stream.toByteArray()
+                        Log.d("13", "1");
+
+//                        val lnth: Int = rotatedBitmap!!.getByteCount()
+//                        val dst: ByteBuffer = ByteBuffer.allocate(lnth)
+//                        rotatedBitmap!!.copyPixelsToBuffer(dst)
+//                        val barray: ByteArray = dst.array()
+
+                        val intent = Intent(applicationContext, ConfirmCapture::class.java)
+                        intent.putExtra("image", byteArray)
+                        setResult(Activity.RESULT_OK, intent)
+                        finish()
+                    }
+                    btnReject!!.setOnClickListener {
+                        showAcceptedRejectedButton(false)
+                    }
+//
+//                    mOpenCvCameraView!!.enableView();
+//                    mOpenCvCameraView!!.setOnTouchListener(this@CameraActivity);
+//                    mOpenCvCameraView!!.setCvCameraViewListener(this@CameraActivity);
                     mOpenCvCameraView!!.enableView()
                 }
+//
                 else -> {
                     super.onManagerConnected(status)
                 }
@@ -120,28 +176,30 @@ class CameraActivity : AppCompatActivity(), CameraBridgeViewBase.CvCameraViewLis
         btnReject = findViewById(R.id.btnReject)
         btnAccept = findViewById(R.id.btnAccept)
 
-        button!!.setOnClickListener {
-            val tmpImage = matResult;
-            bitmapImage = Bitmap.createBitmap(tmpImage!!.cols(), tmpImage.rows(), Bitmap.Config.RGB_565)
-            Utils.matToBitmap(tmpImage, bitmapImage)
-            image?.setImageBitmap(bitmapImage)
-            llBottom!!.visibility = View.VISIBLE
-            button!!.hide()
-            mOpenCvCameraView!!.disableView()
-        }
+//        button!!.setOnClickListener {
+//            val tmpImage = matResult;
+//            bitmapImage = Bitmap.createBitmap(tmpImage!!.cols(), tmpImage.rows(), Bitmap.Config.RGB_565)
+//            Utils.matToBitmap(tmpImage, bitmapImage)
+//            image?.setImageBitmap(bitmapImage)
+//            llBottom!!.visibility = View.VISIBLE
+//            button!!.hide()
+//            mOpenCvCameraView!!.disableView()
+//        }
 
-        btnAccept!!.setOnClickListener {
-            mOpenCvCameraView!!.disableView()
-            //바로 디비에 넣어버려
-//            val intent = Intent(applicationContext, ConfirmCapture::class.java)
-//            intent.putExtra("image", bitmapImage)
-//            setResult(Activity.RESULT_OK, intent)
-//            finish()
-        }
-        btnReject!!.setOnClickListener {
-            showAcceptedRejectedButton(false)
+//        btnAccept!!.setOnClickListener {
+//            mOpenCvCameraView!!.disableView()
+//            //바로 디비에 넣어버려
+////            val intent = Intent(applicationContext, ConfirmCapture::class.java)
+////            intent.putExtra("image", bitmapImage)
+////            setResult(Activity.RESULT_OK, intent)
+////            finish()
+//        }
+//        btnReject!!.setOnClickListener {
+//            showAcceptedRejectedButton(false)
+//
+//        }
 
-        }
+
 //        val button1: Button = findViewById(R.id.button);
 //        button1.setOnClickListener {
 ////
@@ -195,19 +253,20 @@ class CameraActivity : AppCompatActivity(), CameraBridgeViewBase.CvCameraViewLis
         mRgba = Mat(height, width, CvType.CV_8UC4)
         mRgbaF = Mat(height, width, CvType.CV_8UC4)
         mRgbaT = Mat(width, width, CvType.CV_8UC4)
-        Log.d("카메라","onCameraViewStarted")
+        Log.d("카메라", "onCameraViewStarted")
     }
 
     override fun onCameraViewStopped() {
-        Log.d("카메라","onCameraViewStopped")
+        Log.d("카메라", "onCameraViewStopped")
 
     }
 
     override fun onCameraFrame(inputFrame: CameraBridgeViewBase.CvCameraViewFrame?): Mat {
-
-        matInput = inputFrame!!.rgba()
-        if (matResult == null) matResult = Mat(matInput!!.rows(), matInput!!.cols(), matInput!!.type())
-        ConvertRGBtoGray(matInput!!.getNativeObjAddr(), matResult!!.getNativeObjAddr())
+        if (!showPreviews) {
+            matInput = inputFrame!!.rgba()
+            if (matResult == null) matResult = Mat(matInput!!.rows(), matInput!!.cols(), matInput!!.type())
+            ConvertRGBtoGray(matInput!!.getNativeObjAddr(), matResult!!.getNativeObjAddr())
+        }
         return matResult as Mat
 
     }
@@ -221,9 +280,10 @@ class CameraActivity : AppCompatActivity(), CameraBridgeViewBase.CvCameraViewLis
         if (value) {
             finish()
         } else {
+            showPreviews = !showPreviews
             mOpenCvCameraView!!.enableView()
             button!!.show()
-            ivBitmap.visibility = View.GONE
+            image!!.visibility = View.GONE
             llBottom!!.visibility = View.GONE
             mOpenCvCameraView!!.setVisibility(SurfaceView.VISIBLE)
             mOpenCvCameraView?.setCameraIndex(0);
