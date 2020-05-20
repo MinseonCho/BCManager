@@ -101,12 +101,16 @@ JNIEXPORT void JNICALL Java_com_example_bcmanager_MainActivity_BlurImage(JNIEnv 
     cvtColor(grayInput, grayInput, COLOR_RGB2GRAY);
     LOGD("4 = %d, %d", output.cols, output.rows);
 
-    double sigmaColor = 20.0;
-    double sigmaSpace = 30.0;
+    double sigmaColor = 25.0;
+    double sigmaSpace = 35.0;
+
+    Mat blured_image;
+    GaussianBlur(grayInput, blured_image, Size(9, 9), 0);
 
     Mat bilateraledImage;
-    bilateralFilter(grayInput, bilateraledImage, -1, sigmaColor, sigmaSpace);
+    bilateralFilter(blured_image, bilateraledImage, -1, sigmaColor, sigmaSpace);
     LOGD("4.1 = %d, %d", bilateraledImage.cols, bilateraledImage.rows);
+
     Canny(bilateraledImage, tmp, 75, 200, 3, false); // tmp = canny 결과
     LOGD("5 = %d, %d", tmp.cols, tmp.rows);
 
@@ -126,14 +130,19 @@ JNIEXPORT void JNICALL Java_com_example_bcmanager_MainActivity_BlurImage(JNIEnv 
     vector<vector<Point>> bigvalues;
     sort(contours.begin(), contours.end(), compareContourAreas);
 
-    for (int i = contours.size() - 1; i > contours.size() - 6; i--) {
-        bigvalues.push_back(contours[i]);
+    int i = 0;
+    int j = contours.size() - 1;
+    while (i < 5) {
+        bigvalues.push_back(contours[j]);
+        if (i == contours.size() - 1) break;
+        j--;
+        i++;
     }
     LOGD("7", "1");
     vector<Point> approx, result_approx;
 
-    for (int j = 0; j < 5; j++) {
-        approxPolyDP(Mat(bigvalues[j]), approx, arcLength(Mat(bigvalues[j]), true) * 0.02, true);
+    for (int j = 0; j < i; j++) {
+        approxPolyDP(Mat(bigvalues[j]), approx, arcLength(Mat(bigvalues[j]), true) * 0.04, true);
         if (approx.size() == 4) {
             if (fabs(contourArea(Mat(approx))) > int(((grayInput.rows * grayInput.cols) * 0.1))) {
                 result_approx = approx;
@@ -147,8 +156,7 @@ JNIEXPORT void JNICALL Java_com_example_bcmanager_MainActivity_BlurImage(JNIEnv 
     LOGD("8", "1");
     LOGD(" %d", result_approx.size());
     if (result_approx.size() == 4) {
-
-
+        
         for (int i = 0; i < 4; i++) {
             pts[i] = result_approx[i];
 //        pts[i].x = result_approx[i].x;
@@ -161,7 +169,12 @@ JNIEXPORT void JNICALL Java_com_example_bcmanager_MainActivity_BlurImage(JNIEnv 
         Point2f topRight = result_pts[1];
         Point2f bottomRight = result_pts[2];
         Point2f bottomLeft = result_pts[3];
-        LOGD("8.3", "1");
+
+        LOGD("topleft = %f, %f", topLeft.x, topLeft.y);
+        LOGD("topRight = %f, %f", topRight.x, topRight.y);
+        LOGD("bottomRight = %f, %f", bottomRight.x, bottomRight.y);
+        LOGD("bottomLeft = %f, %f", bottomLeft.x, bottomLeft.y);
+
         float w1 = fabs(bottomRight.x - bottomLeft.x);
         float w2 = fabs(topRight.x - topLeft.x);
         float h1 = fabs(topRight.y - bottomRight.y);
@@ -182,7 +195,7 @@ JNIEXPORT void JNICALL Java_com_example_bcmanager_MainActivity_BlurImage(JNIEnv 
         LOGD("%d, %d , 끝", output.cols, output.rows);
     }
     else{
-
+       output = NULL;
     }
 }
 
