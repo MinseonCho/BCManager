@@ -89,7 +89,11 @@ JNIEXPORT void JNICALL Java_com_example_bcmanager_MainActivity_BlurImage(JNIEnv 
 
     Mat grayInput;
 
-    resize(input, grayInput, Size(1500, 843), 0, 0, INTER_LANCZOS4);
+    if(input.rows < input.cols){
+        resize(input, grayInput, Size(1500, 843), 0, 0, INTER_LANCZOS4);
+    }else{
+        resize(input, grayInput, Size(843, 1500), 0, 0, INTER_LANCZOS4);
+    }
 
     Mat tmp = Mat::zeros(grayInput.rows, grayInput.cols, CV_8UC3);
     grayInput.convertTo(output, CV_8UC3);

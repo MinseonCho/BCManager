@@ -40,6 +40,5 @@ class ImageOCRActivity : AppCompatActivity() {
             Log.d("image사이즈", bitmap.width.toString() + " " +bitmap.height.toString())
         }
 
-
     }
 }
