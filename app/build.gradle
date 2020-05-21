@@ -21,6 +21,11 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
+        buildTypes.each {
+            //google vision api
+//            it.buildConfigField 'String', 'API_KEY', ApiKey
+            it.buildConfigField ('String', 'API_KEY', '"[AIzaSyBack0yYSdaawly84Kazy6nsttfKulyY-c]"')
+        }
     }
 
     externalNativeBuild {
@@ -53,6 +58,12 @@ dependencies {
     implementation 'com.github.bumptech.glide:glide:4.11.0'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.11.0'
     def room_version = "2.2.3"
+
+    //google vision api
+    implementation 'com.google.api-client:google-api-client-android:1.23.0' exclude module: 'httpclient'
+    implementation 'com.google.http-client:google-http-client-gson:1.23.0' exclude module: 'httpclient'
+    implementation 'com.google.apis:google-api-services-vision:v1-rev369-1.23.0'
+    //
 
     implementation "androidx.room:room-runtime:$room_version"
     kapt "androidx.room:room-compiler:$room_version"

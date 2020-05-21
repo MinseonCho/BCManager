@@ -93,9 +93,9 @@ public class MainActivity extends AppCompatActivity {
 
     Handler mHandler = null;
     static int cnt = 0;
-    boolean threadIsDone = false;
 
     public static Context mContext;
+
 
     public native void BlurImage(long inputImage, long outputImage);
 
@@ -135,10 +135,10 @@ public class MainActivity extends AppCompatActivity {
         //recyclerview
         cardList = new ArrayList<>();
 
-        cardList.add(new CardRecyclerViewItem(R.drawable.test_11));
-        cardList.add(new CardRecyclerViewItem(R.drawable.test_11));
-        cardList.add(new CardRecyclerViewItem(R.drawable.test_11));
-        cardList.add(new CardRecyclerViewItem(R.drawable.test_11));
+        cardList.add(new CardRecyclerViewItem(R.drawable.green_card));
+        cardList.add(new CardRecyclerViewItem(R.drawable.gray_card));
+        cardList.add(new CardRecyclerViewItem(R.drawable.green_card));
+        cardList.add(new CardRecyclerViewItem(R.drawable.gray_card));
 
         adapter = new CardRecyclerViewAdapter(getApplicationContext(), cardList);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -347,7 +347,6 @@ public class MainActivity extends AppCompatActivity {
                             Mat output = new Mat();
 
                             BlurImage(mat_img.getNativeObjAddr(), output.getNativeObjAddr());
-                            threadIsDone = true;
                             if (output != null && mat_img != null) {
 
                                 Bitmap bitmapOutput = Bitmap.createBitmap(output.cols(), output.rows(), Bitmap.Config.RGB_565);

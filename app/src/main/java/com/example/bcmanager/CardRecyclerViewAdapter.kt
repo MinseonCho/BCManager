@@ -28,7 +28,7 @@ class CardRecyclerViewAdapter(val context: Context, val cardList: ArrayList<Card
         Log.d("onBindViewHolder","")
         val instance = cardList[position]
         if( holder is Holder){
-            holder.card?.setImageResource(R.drawable.test_11)
+            holder.card?.setImageResource(cardList[position].card!!)
         }
     }
 
