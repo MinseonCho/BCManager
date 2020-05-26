@@ -11,6 +11,7 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
+import android.graphics.Point;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -18,6 +19,7 @@ import android.os.Looper;
 import android.os.MessageQueue;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.view.Display;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -75,8 +77,10 @@ public class MainActivity extends AppCompatActivity {
 
     public static Context mContext;
 
+    int device_width = 0, device_height = 0;
 
-    public native void BlurImage(long inputImage, long outputImage);
+
+    public native void RecognitionCard(long inputImage, long outputImage);
 
 
     static {
@@ -123,6 +127,14 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adapter);
 
+        //Display
+        Display display = getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        device_width = size.x;
+        device_height = size.y;
+        Log.d("디바이스 가로 = ", String.valueOf(device_width));
+        Log.d("디바이스 세로 = ", String.valueOf(device_height));
 
         //btn event
         btn_click.setOnClickListener(new View.OnClickListener() {
@@ -181,9 +193,9 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
-        if(cnt > 0){
+        if (cnt > 0) {
             linearLayout.setVisibility(View.VISIBLE);
-            cnt_text.setText( cnt + " 개의 명함을 인식 중 입니다!");
+            cnt_text.setText(cnt + " 개의 명함을 인식 중 입니다!");
         }
 
     }
@@ -209,11 +221,10 @@ public class MainActivity extends AppCompatActivity {
                                 public void run() {
                                     //ui 작업 수행o
                                     cnt++;
-                                    if(cnt > 0){
+                                    if (cnt > 0) {
                                         linearLayout.setVisibility(View.VISIBLE);
-                                        cnt_text.setText( cnt + " 개의 명함을 인식 중 입니다!");
-                                    }
-                                    else{
+                                        cnt_text.setText(cnt + " 개의 명함을 인식 중 입니다!");
+                                    } else {
                                         linearLayout.setVisibility(View.GONE);
                                     }
                                 }
@@ -229,9 +240,10 @@ public class MainActivity extends AppCompatActivity {
                             Log.d("result_mat_img", String.valueOf(mat_img.rows()) + String.valueOf(mat_img.cols()));
                             Mat output = new Mat();
 
-                            BlurImage(mat_img.getNativeObjAddr(), output.getNativeObjAddr());
+                            RecognitionCard(mat_img.getNativeObjAddr(), output.getNativeObjAddr());
                             cnt--;
-                            if (output != null && mat_img != null) {
+
+                            if (!output.empty()) {
 
                                 Bitmap bitmapOutput = Bitmap.createBitmap(output.cols(), output.rows(), Bitmap.Config.RGB_565);
                                 Utils.matToBitmap(output, bitmapOutput);
@@ -252,11 +264,10 @@ public class MainActivity extends AppCompatActivity {
                                 public void run() {
                                     //ui 작업 수행o
 
-                                    if(cnt > 0){
+                                    if (cnt > 0) {
                                         linearLayout.setVisibility(View.VISIBLE);
-                                        cnt_text.setText( cnt + " 개의 명함을 인식 중 입니다!");
-                                    }
-                                    else{
+                                        cnt_text.setText(cnt + " 개의 명함을 인식 중 입니다!");
+                                    } else {
                                         linearLayout.setVisibility(View.GONE);
                                     }
 
@@ -288,11 +299,10 @@ public class MainActivity extends AppCompatActivity {
                                 public void run() {
                                     //ui 작업 수행o
                                     cnt++;
-                                    if(cnt > 0){
+                                    if (cnt > 0) {
                                         linearLayout.setVisibility(View.VISIBLE);
-                                        cnt_text.setText( cnt + " 개의 명함을 인식 중 입니다!");
-                                    }
-                                    else{
+                                        cnt_text.setText(cnt + " 개의 명함을 인식 중 입니다!");
+                                    } else {
                                         linearLayout.setVisibility(View.GONE);
                                     }
                                 }
@@ -320,13 +330,26 @@ public class MainActivity extends AppCompatActivity {
 //                    Bitmap test = getResizedBitmap(image, 1500,843);
 //                    Log.d("test사이즈", String.valueOf(test.getWidth()) + " "+ String.valueOf(test.getHeight()));
 
+                            double image_height = image.getHeight();
+                            double image_width = image.getWidth();
+                            double tmps = image_width / device_width;
+                            int dst_height = (int) (image_height / (image_width / device_width));
+                            Log.d("tmps", String.valueOf(tmps));
+                            Log.d("image_height", String.valueOf(image_height));
+                            Log.d("image_width", String.valueOf(image_width));
+                            Log.d("dst_height", String.valueOf(dst_height));
+                            image = Bitmap.createScaledBitmap(image, device_width, dst_height, true);
+
                             Mat mat_img = new Mat();
                             Utils.bitmapToMat(image, mat_img);
 
                             Mat output = new Mat();
 
-                            BlurImage(mat_img.getNativeObjAddr(), output.getNativeObjAddr());
-                            if (output != null && mat_img != null) {
+                            RecognitionCard(mat_img.getNativeObjAddr(), output.getNativeObjAddr());
+
+                            Log.d("눌", output.toString());
+                            Log.d("눌", String.valueOf(output.empty()));
+                            if (!output.empty()) {
 
                                 Bitmap bitmapOutput = Bitmap.createBitmap(output.cols(), output.rows(), Bitmap.Config.RGB_565);
                                 Utils.matToBitmap(output, bitmapOutput);
@@ -347,11 +370,10 @@ public class MainActivity extends AppCompatActivity {
                                 public void run() {
                                     //ui 작업 수행o
                                     cnt--;
-                                    if(cnt > 0){
+                                    if (cnt > 0) {
                                         linearLayout.setVisibility(View.VISIBLE);
-                                        cnt_text.setText( cnt + " 개의 명함을 인식 중 입니다!");
-                                    }
-                                    else{
+                                        cnt_text.setText(cnt + " 개의 명함을 인식 중 입니다!");
+                                    } else {
                                         linearLayout.setVisibility(View.GONE);
                                     }
 

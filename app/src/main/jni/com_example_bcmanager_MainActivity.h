@@ -27,8 +27,9 @@ extern "C" {
  */
 JNIEXPORT void JNICALL Java_com_example_bcmanager_CameraActivity_ConvertRGBtoGray
   (JNIEnv *, jobject, jlong, jlong);
-JNIEXPORT void JNICALL Java_com_example_bcmanager_MainActivity_BlurImage(JNIEnv *env, jobject thiz, jlong input_image,
+JNIEXPORT void JNICALL Java_com_example_bcmanager_MainActivity_RecognitionCard(JNIEnv *env, jobject thiz, jlong input_image,
                                                                          jlong output_image);
+
 #ifdef __cplusplus
 }
 #endif

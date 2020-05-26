@@ -9,6 +9,9 @@ using namespace std;
 
 Point2f pts[4];
 Point2f result_pts[4];
+Point2f dst_pts[4];
+float maxWidth;
+float maxHeight;
 
 void filter(Mat img, Mat &dst, Mat mask);
 
@@ -16,8 +19,12 @@ float resize(Mat img_src, Mat &img_resize, int resize_width);
 
 bool compareContourAreas(std::vector<cv::Point> contour1, std::vector<cv::Point> contour2);
 
-void calculate_points();
+void calculate_points(Mat &output);
 
+
+void recognition_card_first(Mat &input, Mat &output); //first step for card recognition
+void recognition_card_sec(Mat &input, Mat &output); //second step for card recognition
+void recognition_card_third(Mat &input, Mat &output);
 extern "C" {
 
 JNIEXPORT void JNICALL Java_com_example_bcmanager_CameraActivity_ConvertRGBtoGray(
@@ -48,7 +55,7 @@ JNIEXPORT void JNICALL Java_com_example_bcmanager_CameraActivity_ConvertRGBtoGra
     vector<Point> test;
     sort(contours.begin(), contours.end(), compareContourAreas);
     int size = contours.size();
-    test = contours[size-1];
+    test = contours[size - 1];
 
 
     vector<Point> approx;
@@ -58,14 +65,14 @@ JNIEXPORT void JNICALL Java_com_example_bcmanager_CameraActivity_ConvertRGBtoGra
 
     int tmp_area = int(((grayInput.rows * grayInput.cols) * 0.1));
 
-    if (fabs(contourArea(Mat(approx))) > tmp_area){
+    if (fabs(contourArea(Mat(approx))) > tmp_area) {
         int size = approx.size();
         //Contour를 근사화한 직선을 그린다.
         if (size == 4) {
 //            rectangle(output, approx[0], approx[2], Scalar(0, 255, 0),3);
-            line(output, approx[0] *2, approx[approx.size() - 1]*2, Scalar(255, 102, 165), 8);
+            line(output, approx[0] * 2, approx[approx.size() - 1] * 2, Scalar(255, 102, 165), 8);
             for (int k = 0; k < size - 1; k++)
-                line(output, approx[k]*2, approx[k + 1]*2, Scalar(255, 102, 165), 8);
+                line(output, approx[k] * 2, approx[k + 1] * 2, Scalar(255, 102, 165), 8);
 
         }
     }
@@ -75,43 +82,45 @@ JNIEXPORT void JNICALL Java_com_example_bcmanager_CameraActivity_ConvertRGBtoGra
 
 }
 
-JNIEXPORT void JNICALL Java_com_example_bcmanager_MainActivity_BlurImage(JNIEnv *env, jobject thiz,
-                                                                         jlong input_image,
-                                                                         jlong output_image) {
+JNIEXPORT void JNICALL
+Java_com_example_bcmanager_MainActivity_RecognitionCard(JNIEnv *env, jobject thiz,
+                                                        jlong input_image,
+                                                        jlong output_image) {
     LOGD("1", "1");
-    int area = 0, cnt = 0;
-
-    // TODO: implement BlurImage()
 
     Mat &input = *(Mat *) input_image;
     Mat &output = *(Mat *) output_image;
-    LOGD("2 = %d, %d", input.cols, input.rows);
+
+    recognition_card_first(input, output);
+
+}
+
+
+}
+
+void recognition_card_first(Mat &input, Mat &output) {
 
     Mat grayInput;
 
-    if(input.rows < input.cols){
-        resize(input, grayInput, Size(1500, 843), 0, 0, INTER_LANCZOS4);
-    }else{
-        resize(input, grayInput, Size(843, 1500), 0, 0, INTER_LANCZOS4);
-    }
-
-    Mat tmp = Mat::zeros(grayInput.rows, grayInput.cols, CV_8UC3);
-    grayInput.convertTo(output, CV_8UC3);
-    LOGD("3 = %d, %d", grayInput.cols, grayInput.rows);
-    cvtColor(grayInput, grayInput, COLOR_RGB2GRAY);
+    Mat tmp = Mat::zeros(input.rows, input.cols, CV_8UC3);
+    input.convertTo(output, CV_8UC3);
+    LOGD("3 = %d, %d", input.cols, input.rows);
+    cvtColor(input, grayInput, COLOR_RGB2GRAY);
     LOGD("4 = %d, %d", output.cols, output.rows);
 
-    double sigmaColor = 25.0;
-    double sigmaSpace = 35.0;
+    double sigmaColor = 10.0;
+    double sigmaSpace = 30.0;
 
+
+    //blur image
     Mat blured_image;
-    GaussianBlur(grayInput, blured_image, Size(9, 9), 0);
+    GaussianBlur(grayInput, blured_image, Size(5, 5), 0);
 
     Mat bilateraledImage;
     bilateralFilter(blured_image, bilateraledImage, -1, sigmaColor, sigmaSpace);
     LOGD("4.1 = %d, %d", bilateraledImage.cols, bilateraledImage.rows);
 
-    Canny(bilateraledImage, tmp, 75, 200, 3, false); // tmp = canny 결과
+    Canny(bilateraledImage, tmp, 50, 200, 3, false); // tmp = canny 결과
     LOGD("5 = %d, %d", tmp.cols, tmp.rows);
 
     Mat closed_img;
@@ -127,6 +136,8 @@ JNIEXPORT void JNICALL Java_com_example_bcmanager_MainActivity_BlurImage(JNIEnv 
     vector<Vec4i> hierarchy;
     findContours(closed_img, contours, hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE, Point());
     LOGD("6", "1");
+
+
     vector<vector<Point>> bigvalues;
     sort(contours.begin(), contours.end(), compareContourAreas);
 
@@ -138,69 +149,153 @@ JNIEXPORT void JNICALL Java_com_example_bcmanager_MainActivity_BlurImage(JNIEnv 
         j--;
         i++;
     }
-    LOGD("7", "1");
+
+
     vector<Point> approx, result_approx;
 
     for (int j = 0; j < i; j++) {
         approxPolyDP(Mat(bigvalues[j]), approx, arcLength(Mat(bigvalues[j]), true) * 0.04, true);
         if (approx.size() == 4) {
-            if (fabs(contourArea(Mat(approx))) > int(((grayInput.rows * grayInput.cols) * 0.1))) {
+            if (fabs(contourArea(Mat(approx))) > int(((input.rows * input.cols) * 0.1))) {
                 result_approx = approx;
-//                line(output, result_approx[0], result_approx[result_approx.size() - 1], Scalar(0, 255, 0), 3);
-//                for (int k = 0; k < result_approx.size() - 1; k++)
-//                    line(output, result_approx[k], result_approx[k + 1], Scalar(0, 255, 0), 3);
                 break;
             }
         }
     }
-    LOGD("8", "1");
-    LOGD(" %d", result_approx.size());
     if (result_approx.size() == 4) {
-        
+
         for (int i = 0; i < 4; i++) {
             pts[i] = result_approx[i];
-//        pts[i].x = result_approx[i].x;
-//        pts[i].y = result_approx[i].y ;
         }
-        LOGD("8.1", "1");
-        calculate_points();
-        LOGD("8.2", "1");
-        Point2f topLeft = result_pts[0];
-        Point2f topRight = result_pts[1];
-        Point2f bottomRight = result_pts[2];
-        Point2f bottomLeft = result_pts[3];
+        calculate_points(output);
 
-        LOGD("topleft = %f, %f", topLeft.x, topLeft.y);
-        LOGD("topRight = %f, %f", topRight.x, topRight.y);
-        LOGD("bottomRight = %f, %f", bottomRight.x, bottomRight.y);
-        LOGD("bottomLeft = %f, %f", bottomLeft.x, bottomLeft.y);
-
-        float w1 = fabs(bottomRight.x - bottomLeft.x);
-        float w2 = fabs(topRight.x - topLeft.x);
-        float h1 = fabs(topRight.y - bottomRight.y);
-        float h2 = fabs(topLeft.y - bottomLeft.y);
-        float maxWidth = max(w1, w2);
-        float maxHeight = max(h1, h2);
-
-        LOGD("9", "1");
-        Point2f dst_pts[4] = {
-                Point2f(0, 0), Point2f(maxWidth - 1, 0), Point2f(maxWidth - 1, maxHeight - 1),
-                Point2f(0, maxHeight - 1)
-        };
-
-        LOGD("10", "1");
-        Mat perspect_mat = getPerspectiveTransform(result_pts, dst_pts);
-        warpPerspective(output, output, perspect_mat, Size((int(maxWidth)), (int(maxHeight))),
-                        INTER_CUBIC);
-        LOGD("%d, %d , 끝", output.cols, output.rows);
-    }
-    else{
-       output = NULL;
+    } else {
+        recognition_card_sec(input, output);
     }
 }
 
+void recognition_card_sec(Mat &input, Mat &output) {
+
+    LOGD("recognition_card_sec");
+    Mat grayInput;
+
+    Mat tmp = Mat::zeros(input.rows, input.cols, CV_8UC3);
+    input.convertTo(output, CV_8UC3);
+    cvtColor(input, grayInput, COLOR_RGB2GRAY);
+
+    Canny(grayInput, tmp, 75, 200, 3, false); // tmp = canny 결과
+    Mat closed_img;
+    Matx<uchar, 3, 3> mask;
+    mask << 0, 1, 0,
+            1, 1, 1,
+            0, 1, 0;
+
+    morphologyEx(tmp, closed_img, MORPH_CLOSE, mask, Point(-1, -1), 3);
+
+    vector<vector<Point>> contours;
+    vector<Vec4i> hierarchy;
+    findContours(closed_img, contours, hierarchy, RETR_LIST, CHAIN_APPROX_SIMPLE, Point());
+
+    vector<vector<Point>> bigvalues;
+    sort(contours.begin(), contours.end(), compareContourAreas);
+    int i = 0;
+    int j = contours.size() - 1;
+    while (i < 5) {
+        bigvalues.push_back(contours[j]);
+        if (i == contours.size() - 1) break;
+        j--;
+        i++;
+    }
+
+    vector<Point> approx, result_approx;
+
+    for (int z = 0; z < i; z++) {
+        approxPolyDP(Mat(bigvalues[z]), approx, arcLength(Mat(bigvalues[z]), true) * 0.04, true);
+        if (approx.size() == 4) {
+            if (fabs(contourArea(Mat(approx))) > int(((input.rows * input.cols) * 0.1))) {
+                result_approx = approx;
+                break;
+            }
+        }
+    }
+
+    if (result_approx.size() == 4) {
+        for (int k = 0; k < 4; k++) {
+            pts[k] = result_approx[k];
+        }
+        calculate_points(output);
+
+    } else {
+        LOGD(" fail");
+        Mat nullOutput;
+        output = nullOutput;
+//        recognition_card_third(input, output);
+    }
+
 }
 
+void recognition_card_third(Mat &input, Mat &output) {
+
+    LOGD("recognition_card_third");
+    Mat grayInput;
+
+    Mat tmp = Mat::zeros(input.rows, input.cols, CV_8UC3);
+    input.convertTo(output, CV_8UC3);
+    cvtColor(input, grayInput, COLOR_RGB2GRAY);
+
+    double sigmaColor = 20.0;
+    double sigmaSpace = 40.0;
+
+    Mat bilateraledImage;
+    bilateralFilter(grayInput, bilateraledImage, -1, sigmaColor, sigmaSpace);
+    Canny(bilateraledImage, tmp, 75, 200, 3, false); // tmp = canny 결과
+    Mat closed_img;
+    Matx<uchar, 3, 3> mask;
+    mask << 0, 1, 0,
+            1, 1, 1,
+            0, 1, 0;
+
+    morphologyEx(tmp, closed_img, MORPH_CLOSE, mask, Point(-1, -1), 3);
+
+    vector<vector<Point>> contours;
+    vector<Vec4i> hierarchy;
+    findContours(closed_img, contours, hierarchy, RETR_LIST, CHAIN_APPROX_SIMPLE, Point());
+
+    vector<vector<Point>> bigvalues;
+    sort(contours.begin(), contours.end(), compareContourAreas);
+    int i = 0;
+    int j = contours.size() - 1;
+    while (i < 5) {
+        bigvalues.push_back(contours[j]);
+        if (i == contours.size() - 1) break;
+        j--;
+        i++;
+    }
+
+    vector<Point> approx, result_approx;
+
+    for (int z = 0; z < i; z++) {
+        approxPolyDP(Mat(bigvalues[z]), approx, arcLength(Mat(bigvalues[z]), true) * 0.04, true);
+        if (approx.size() == 4) {
+            if (fabs(contourArea(Mat(approx))) > int(((input.rows * input.cols) * 0.1))) {
+                result_approx = approx;
+                break;
+            }
+        }
+    }
+
+    if (result_approx.size() == 4) {
+        for (int k = 0; k < 4; k++) {
+            pts[k] = result_approx[k];
+        }
+        calculate_points(output);
+
+    } else {
+        LOGD(" fail");
+        Mat nullOutput;
+        output = nullOutput;
+    }
+}
 void filter(Mat img, Mat &dst, Mat mask) {
     dst = Mat(img.size(), CV_32F, Scalar(0));
     Point h_m = mask.size() / 2;
@@ -244,7 +339,7 @@ bool compareContourAreas(std::vector<cv::Point> contour1, std::vector<cv::Point>
     return (i < j);
 }
 
-void calculate_points() {
+void calculate_points(Mat &output) {
 
     int sum_min = 0, sum_max = 0, diff_min = 0, diff_max = 0, result;
     float sum[4], diff[4];
@@ -266,14 +361,29 @@ void calculate_points() {
         if (diff[diff_min] > diff[i]) diff_min = i;
     }
 
-    cout << "sum_max" << sum_max << endl;
-    cout << "sum_min" << sum_min << endl;
-    cout << "diff_max" << diff_max << endl;
-    cout << "diff_min" << diff_min << endl;
-
     result_pts[0] = pts[sum_min]; //top-left
     result_pts[2] = pts[sum_max]; //bottom-right
     result_pts[1] = pts[diff_min]; //top-right
     result_pts[3] = pts[diff_max]; //bottom-left
+
+    Point2f topLeft = result_pts[0];
+    Point2f topRight = result_pts[1];
+    Point2f bottomRight = result_pts[2];
+    Point2f bottomLeft = result_pts[3];
+
+    float w1 = fabs(bottomRight.x - bottomLeft.x);
+    float w2 = fabs(topRight.x - topLeft.x);
+    float h1 = fabs(topRight.y - bottomRight.y);
+    float h2 = fabs(topLeft.y - bottomLeft.y);
+    maxWidth = max(w1, w2);
+    maxHeight = max(h1, h2);
+
+    Point2f dst_pts[4] = {
+            Point2f(0, 0), Point2f(maxWidth - 1, 0), Point2f(maxWidth - 1, maxHeight - 1),
+            Point2f(0, maxHeight - 1)
+    };
+    Mat perspect_mat = getPerspectiveTransform(result_pts, dst_pts);
+    warpPerspective(output, output, perspect_mat, Size((int(maxWidth)), (int(maxHeight))),
+                    INTER_CUBIC);
 
 }

@@ -37,7 +37,7 @@ import java.util.List;
 
 public class ImageOCRActivity extends AppCompatActivity {
 
-    private static final String CLOUD_VISION_API_KEY = "AIzaSyCeOlodsd6G9lcYuAiF9QKA4rrc-XG9pAQ";
+    private static final String CLOUD_VISION_API_KEY = "";
     public static final String FILE_NAME = "temp.jpg";
     private static final String ANDROID_CERT_HEADER = "X-Android-Cert";
     private static final String ANDROID_PACKAGE_HEADER = "X-Android-Package";
