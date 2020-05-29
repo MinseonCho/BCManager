@@ -40,7 +40,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".ImageOCRActivity"></activity>
+        <activity android:name=".UserProfileActivity"></activity>
+        <activity android:name=".SignUpActivity" />
+        <activity android:name=".LoginActivity" />
+        <activity android:name=".ImageOCRActivity" />
         <activity android:name=".ImageOCRActivity2" />
         <activity android:name=".ConfirmCapture" />
         <activity android:name=".CameraActivity" />

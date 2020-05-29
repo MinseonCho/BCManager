@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "774748117006",
+    "firebase_url": "https://bcmanager-11b25.firebaseio.com",
+    "project_id": "bcmanager-11b25",
+    "storage_bucket": "bcmanager-11b25.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:774748117006:android:0b0d3f54fcb9a4dfb1045f",
+        "android_client_info": {
+          "package_name": "com.example.bcmanager"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "774748117006-r813q3prlfflp494vrdrsakhfc2pvu5j.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.bcmanager",
+            "certificate_hash": "88f6bd323db51726c0229de635d3b0bb12e04158"
+          }
+        },
+        {
+          "client_id": "774748117006-47csb2pp3ta4r36nhn1qcjvukdu61rds.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDr2rpJKLw5F9j6nojeuuA_FGgOa5AvLpw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "774748117006-47csb2pp3ta4r36nhn1qcjvukdu61rds.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

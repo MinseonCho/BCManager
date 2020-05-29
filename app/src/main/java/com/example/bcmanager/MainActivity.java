@@ -20,11 +20,16 @@ import android.os.MessageQueue;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Display;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.OpenCVLoader;
@@ -45,7 +50,7 @@ import java.util.Date;
 import static org.opencv.imgcodecs.Imgcodecs.imread;
 
 public class MainActivity extends AppCompatActivity {
-
+    private String TAG_ = "MainAcitivity";
     /**
      * url
      */
@@ -75,11 +80,11 @@ public class MainActivity extends AppCompatActivity {
     Handler mHandler = null;
     static int cnt = 0;
 
-    public static Context mContext;
-
     int device_width = 0, device_height = 0;
 
-
+    //user
+    FirebaseUser user;
+    public static boolean isLogined = false;
     public native void RecognitionCard(long inputImage, long outputImage);
 
 
@@ -104,13 +109,14 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        checkCurrentUser();
+
         btn_click = findViewById(R.id.clickToGallery);
         btn_clickToCamera = findViewById(R.id.clickToCamera);
         recyclerView = findViewById(R.id.recyclerview);
         linearLayout = findViewById(R.id.layout_for_thread);
         cnt_text = findViewById(R.id.cnt_card);
 
-        mContext = this;
 
         //handler
         mHandler = new Handler();
@@ -480,5 +486,56 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
     }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+
+        if(isLogined) getMenuInflater().inflate(R.menu.menu_login, menu);
+        else getMenuInflater().inflate(R.menu.menu, menu);
+
+        return true;
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle presses on the action bar items
+        switch (item.getItemId()) {
+            case R.id.menu_login:
+                startActivity(new Intent(this, LoginActivity.class));
+                return true;
+            case R.id.menu_logout:
+                FirebaseAuth.getInstance().signOut();
+                finish();
+                startActivity(getIntent());
+                isLogined = false;
+                return true;
+            case R.id.menu_userinfo:
+                startActivity(new Intent(this, UserProfileActivity.class));
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+
+    public void checkCurrentUser() {
+        // [START check_current_user]
+        user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user != null) {
+            if (user.getDisplayName() != null) {
+                // User is signed in
+                Log.d("INFOuserName", user.getDisplayName() +"");
+                Log.d("INFOemail", user.getEmail() +"");
+                Log.d("INFOuserphonenumber", user.getPhoneNumber() +"");
+                Log.d("INFOUID", user.getUid() +"");
+                Log.d("INFOphotourl", String.valueOf(user.getPhotoUrl()) +"");
+                isLogined = true;
+            } else {
+                // No user is signed in
+                Log.d(TAG_, "null");
+            }
+        }
+        // [END check_current_user]
+    }
+
 }
 
