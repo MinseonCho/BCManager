@@ -2,8 +2,8 @@ LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 
 #opencv library
-#OPENCVROOT:= C:\Users\user\Documents\GitHub\BCManager\opencv
-OPENCVROOT:= C:\Users\seoon\BCManager\opencv
+OPENCVROOT:= C:\Users\user\Documents\GitHub\BCManager\opencv
+#OPENCVROOT:= C:\Users\seoon\BCManager\opencv
 
 OPENCV_CAMERA_MODULES:=on
 OPENCV_INSTALL_MODULES:=on
