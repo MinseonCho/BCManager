@@ -2,10 +2,12 @@ package com.example.bcmanager;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.nfc.Tag;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -58,6 +60,9 @@ public class ImageOCRActivity extends AppCompatActivity {
     private TextView info_email;
     private TextView  info_number;
     private TextView   info_address;
+    private static ArrayList<String> textlist = new ArrayList<String>();
+    private static String ph;
+    private static String nm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,6 +79,10 @@ public class ImageOCRActivity extends AppCompatActivity {
         info_address = findViewById(R.id.address);
 
         Intent intent = getIntent();
+
+        textlist.clear();
+        ph = "";
+        nm = "";
 
         if( intent != null){
             byte[] bytes = intent.getByteArrayExtra("image");
@@ -197,15 +206,19 @@ public class ImageOCRActivity extends AppCompatActivity {
         protected void onPostExecute(String result) {
             ImageOCRActivity activity = mActivityWeakReference.get();
             if (activity != null && !activity.isFinishing()) {
-                TextView imageDetail = activity.findViewById(R.id.name);
+                TextView imageDetail = activity.findViewById(R.id.address);
+                TextView phone_number = activity.findViewById(R.id.phone);
+                TextView nameDetail = activity.findViewById(R.id.name);
                 imageDetail.setText(result);
+                phone_number.setText(ph);
+                nameDetail.setText(nm);
             }
         }
     }
 
     private void callCloudVision(final Bitmap bitmap) {
         // Switch text to loading
-        info_name.setText("loading");
+        info_address.setText("loading");
 
         // Do the real work in an async task, because we need to use the network anyway
         try {
@@ -239,7 +252,6 @@ public class ImageOCRActivity extends AppCompatActivity {
 
     private static String convertResponseToString(BatchAnnotateImagesResponse response) {
         String message = "I found these things:\n\n";
-
         List<EntityAnnotation> labels = response.getResponses().get(0).getTextAnnotations();
         if (labels != null) {
             message = labels.get(0).getDescription();
@@ -250,6 +262,37 @@ public class ImageOCRActivity extends AppCompatActivity {
         } else {
             message = "nothing";
         }
+        String text = "";
+        int plus=0;
+        for(int i=0;i<message.length();i++){
+            if(message.charAt(i) != '\n') {
+                for (int j = i; ; j++) {
+                    if(message.charAt(j) != 32 && message.charAt(j) != '\n')
+                        text += message.charAt(j);
+                    if(message.charAt(j) == '\n') {
+                        i=j;
+                        break;
+                    }
+                }
+            }
+            textlist.add(text);
+            Log.d(TAG,textlist.get(plus++));
+            text = "";
+        }
+
+        for(int i = 0; i<textlist.size();i++){
+            if(textlist.get(i).contains("010"))
+                for(int j = 0; j<textlist.get(i).length();j++){
+                    if(textlist.get(i).charAt(j) >= 48 && textlist.get(i).charAt(j) <= 57 ){
+                        ph += textlist.get(i).charAt(j);
+                    }
+                }
+            else if(textlist.get(i).length() == 3){
+                nm = textlist.get(i);
+            }
+        }
+        Log.d(TAG,ph);
+        Log.d(TAG,nm);
 
         return message.toString();
     }
