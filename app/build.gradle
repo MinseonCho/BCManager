@@ -24,8 +24,6 @@ android {
         }
         buildTypes.each {
             //google vision api
-//            it.buildConfigField 'String', 'API_KEY', ApiKey
-            it.buildConfigField('String', 'API_KEY', '"[AIzaSyBack0yYSdaawly84Kazy6nsttfKulyY-c]"')
         }
     }
 

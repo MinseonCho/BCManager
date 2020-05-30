@@ -43,6 +43,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -56,7 +58,8 @@ public class MainActivity extends AppCompatActivity {
      */
     public static String IMAGE_URL = "http://104.197.171.112/dbimages/";
     public static String GET_IMAGE_URL = "http://104.197.171.112/get_image.php";
-
+    public static String SIGNUP_URL = "http://104.197.171.112/signup.php";
+    public static String GET_CARD_INFO = "http://104.197.171.112/get_cards.php";
     /**
      * end
      */
@@ -75,7 +78,7 @@ public class MainActivity extends AppCompatActivity {
     private CameraBridgeViewBase mOpenCvCameraView;
     private boolean isOpenCvLoaded = false;
 
-    private HttpConnection httpConn;
+    public static HttpConnection httpConn;
 
     Handler mHandler = null;
     static int cnt = 0;
@@ -84,7 +87,9 @@ public class MainActivity extends AppCompatActivity {
 
     //user
     FirebaseUser user;
+    public static String uID;
     public static boolean isLogined = false;
+
     public native void RecognitionCard(long inputImage, long outputImage);
 
 
@@ -129,7 +134,7 @@ public class MainActivity extends AppCompatActivity {
         cardList.add(new CardRecyclerViewItem(R.drawable.green_card));
         cardList.add(new CardRecyclerViewItem(R.drawable.gray_card));
 
-        adapter = new CardRecyclerViewAdapter(getApplicationContext(), cardList);
+        adapter = new CardRecyclerViewAdapter(this, cardList);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adapter);
 
@@ -141,6 +146,11 @@ public class MainActivity extends AppCompatActivity {
         device_height = size.y;
         Log.d("디바이스 가로 = ", String.valueOf(device_width));
         Log.d("디바이스 세로 = ", String.valueOf(device_height));
+
+        if(isLogined){
+            Log.d("성공-이프문","");
+            getCardInfo();
+        }
 
         //btn event
         btn_click.setOnClickListener(new View.OnClickListener() {
@@ -490,11 +500,12 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
 
-        if(isLogined) getMenuInflater().inflate(R.menu.menu_login, menu);
+        if (isLogined) getMenuInflater().inflate(R.menu.menu_login, menu);
         else getMenuInflater().inflate(R.menu.menu, menu);
 
         return true;
     }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle presses on the action bar items
@@ -523,11 +534,12 @@ public class MainActivity extends AppCompatActivity {
         if (user != null) {
             if (user.getDisplayName() != null) {
                 // User is signed in
-                Log.d("INFOuserName", user.getDisplayName() +"");
-                Log.d("INFOemail", user.getEmail() +"");
-                Log.d("INFOuserphonenumber", user.getPhoneNumber() +"");
-                Log.d("INFOUID", user.getUid() +"");
-                Log.d("INFOphotourl", String.valueOf(user.getPhotoUrl()) +"");
+                Log.d("INFOuserName", user.getDisplayName() + "");
+                Log.d("INFOemail", user.getEmail() + "");
+                Log.d("INFOuserphonenumber", user.getPhoneNumber() + "");
+                Log.d("INFOUID", user.getUid() + "");
+                Log.d("INFOphotourl", String.valueOf(user.getPhotoUrl()) + "");
+                uID = user.getUid();
                 isLogined = true;
             } else {
                 // No user is signed in
@@ -535,6 +547,25 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         // [END check_current_user]
+    }
+
+    void getCardInfo() {
+        try {
+            httpConn = new HttpConnection(new URL(GET_CARD_INFO));
+            httpConn.requestGetCards(uID, new OnRequestCompleteListener() {
+                @Override
+                public void onSuccess(@org.jetbrains.annotations.Nullable String data) {
+                    Log.d("성공", data);
+                }
+
+                @Override
+                public void onError() {
+
+                }
+            });
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
     }
 
 }

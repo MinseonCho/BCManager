@@ -7,16 +7,23 @@
 
     <androidx.cardview.widget.CardView
         android:id="@+id/rcy_cardview"
-        android:background="@android:color/white"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:background="@android:color/white">
 
-        <ImageView
-            android:background="@android:color/white"
-            android:src="@drawable/gray_card"
-            android:id="@+id/rcy_card_image"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:id="@+id/rcy_card_image"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@android:color/white"
+                android:src="@drawable/gray_card" />
+
+
+        </LinearLayout>
 
     </androidx.cardview.widget.CardView>
 </LinearLayout>

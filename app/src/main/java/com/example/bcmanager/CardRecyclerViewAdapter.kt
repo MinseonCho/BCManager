@@ -29,6 +29,11 @@ class CardRecyclerViewAdapter(val context: Context, val cardList: ArrayList<Card
         val instance = cardList[position]
         if( holder is Holder){
             holder.card?.setImageResource(cardList[position].card!!)
+
+            holder.cv?.setOnClickListener {
+                val customDialog: CustomDialogForCard = CustomDialogForCard(context)
+                customDialog.callDialog()
+            }
         }
     }
 

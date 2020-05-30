@@ -21,6 +21,7 @@ import kotlinx.android.synthetic.main.activity_login.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import java.net.URL
 import kotlin.coroutines.CoroutineContext
 
 
@@ -29,6 +30,7 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener, CoroutineScope 
 
     private lateinit var auth: FirebaseAuth
     private lateinit var googleSignInClient: GoogleSignInClient
+    private lateinit var httpConnection: HttpConnection
     var GOOGLE_LOGIN_CODE = 9001
 
     private lateinit var mJob: Job
@@ -73,52 +75,6 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener, CoroutineScope 
         startActivityForResult(signInIntent, GOOGLE_LOGIN_CODE)
     }
 
-//    private fun createAccount(email: String, password: String) {
-//        Log.d(TAG, "createAccount:$email")
-//        if (!validateForm()) {
-//            Log.d(TAG, "!validateForm()")
-//            return
-//        }
-//
-////        showProgressDialog()
-//        auth.createUserWithEmailAndPassword(email, password)
-//                .addOnCompleteListener(this) { task ->
-//                    if (task.isSuccessful) {
-//                        // Sign in success, update UI with the signed-in user's information
-//
-//                        val user = FirebaseAuth.getInstance().currentUser
-//
-//                        Log.d(TAG, "createUserWithEmail:success = " + user.toString())
-//
-//                        (task.result!!.user)?.let { moveMainPage(it) }
-//
-//
-//                        val profileUpdates = UserProfileChangeRequest.Builder()
-//                                .setDisplayName("minseon").build()
-//
-//                        user!!.updateProfile(profileUpdates)
-//                                .addOnCompleteListener { task ->
-//                                    if (task.isSuccessful) {
-//                                        Log.d(LoginActivity.TAG, "User profile updated.")
-//                                    }
-//                                }
-////                        sendEmailVerification()
-//                    }
-////                    else if (!(task.exception?.message.isNullOrEmpty())) {
-////                        //Show the error message
-////                        Log.w(TAG, "createUserWithEmail:failure", task.exception)
-////                        Toast.makeText(baseContext, "Authentication failed.",
-////                                Toast.LENGTH_SHORT).show()
-////
-////                    }
-//                    else {
-//                        // If sign in fails, display a message to the user.
-//                        signinEmail()
-////                        updateUI(null)
-//                    }
-//
-//                }
-//    }
 
     private fun validateForm(): Boolean {
         var valid = true
@@ -254,6 +210,11 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener, CoroutineScope 
         auth.signInWithCredential(credential).addOnCompleteListener { task ->
             if (task.isSuccessful) {
                 //Login
+                val user = FirebaseAuth.getInstance().currentUser
+                httpConnection = HttpConnection(URL(MainActivity.SIGNUP_URL))
+                if (user != null) {
+                    httpConnection.signUp(user.uid.toString(), user.displayName.toString(), user.email.toString())
+                }
                 (task.result!!.user)?.let { moveMainPage(it) }
             } else {
                 //Show the error message
