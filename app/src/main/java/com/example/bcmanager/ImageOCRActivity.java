@@ -35,6 +35,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class ImageOCRActivity extends AppCompatActivity {
@@ -60,9 +61,19 @@ public class ImageOCRActivity extends AppCompatActivity {
     private TextView info_email;
     private TextView  info_number;
     private TextView   info_address;
+    private TextView   info_fax;
     private static ArrayList<String> textlist = new ArrayList<String>();
+    private static ArrayList<String> city_address = new ArrayList<String>();
+    private static ArrayList<String> city_number = new ArrayList<String>();
     private static String ph;
     private static String nm;
+    private static String ad;
+    private static String em;
+    private static String nb;
+    private static String fx;
+
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,12 +88,17 @@ public class ImageOCRActivity extends AppCompatActivity {
         info_email = findViewById(R.id.email);
         info_number = findViewById(R.id.number);
         info_address = findViewById(R.id.address);
+        info_fax = findViewById(R.id.fax);
 
         Intent intent = getIntent();
 
         textlist.clear();
         ph = "";
         nm = "";
+        ad = "";
+        em = "";
+        nb = "";
+        fx = "";
 
         if( intent != null){
             byte[] bytes = intent.getByteArrayExtra("image");
@@ -206,19 +222,27 @@ public class ImageOCRActivity extends AppCompatActivity {
         protected void onPostExecute(String result) {
             ImageOCRActivity activity = mActivityWeakReference.get();
             if (activity != null && !activity.isFinishing()) {
-                TextView imageDetail = activity.findViewById(R.id.address);
+                TextView imageDetail = activity.findViewById(R.id.company);
                 TextView phone_number = activity.findViewById(R.id.phone);
                 TextView nameDetail = activity.findViewById(R.id.name);
+                TextView addressDetail = activity.findViewById(R.id.address);
+                TextView emailDetail = activity.findViewById(R.id.email);
+                TextView numberDetail = activity.findViewById(R.id.number);
+                TextView faxDetail = activity.findViewById(R.id.fax);
                 imageDetail.setText(result);
                 phone_number.setText(ph);
                 nameDetail.setText(nm);
+                addressDetail.setText(ad);
+                emailDetail.setText(em);
+                numberDetail.setText(nb);
+                faxDetail.setText(fx);
             }
         }
     }
 
     private void callCloudVision(final Bitmap bitmap) {
         // Switch text to loading
-        info_address.setText("loading");
+        info_company.setText("loading");
 
         // Do the real work in an async task, because we need to use the network anyway
         try {
@@ -263,6 +287,19 @@ public class ImageOCRActivity extends AppCompatActivity {
             message = "nothing";
         }
         String text = "";
+        city_address.addAll(Arrays.asList("서울특별시", "인천광역시", "대구광역시", "울산광역시", "부산광역시", "광주광역시", "대전광역시",
+                "부천시", "시흥시", "고양시", "성남시", "파주시", "화성시", "수원시", "안성시", "평택시", "과천시", "안양시",
+                "광주시", "여주시", "이천시", "용인시", "오산시", "의왕시", "광명시", "군포시", "김포시", "구리시", "하남시",
+                "남양주시", "의정부시", "동두천시", "포천시", "안산시", "양주시", "강릉시", "동해시", "삼척시","속초시","원주시",
+                "춘천시","태백시","제천시","청주시","충주시","계릉시","공주시","논산시","당진시","보령시","서산시","아산시","천안시",
+                "경산시","경주시","구미시","김천시","문경시","삼주시","안동시","영주시","영천시","포항시","거제시","김해시","밀양시",
+                "사천시","양산시","진주시","창원시","통영시","군산시","김제시","남원시","익산시","전주시","정읍시","목포시",
+                "광양시","나주시","순천시","여수시","서귀포시","제주시"));
+
+        Log.d(TAG, String.valueOf(city_address));
+
+        city_number.addAll(Arrays.asList("02","051","053","032","062","042","052","044","031","033","043","041","063","061","054","055","064"));
+
         int plus=0;
         for(int i=0;i<message.length();i++){
             if(message.charAt(i) != '\n') {
@@ -280,19 +317,78 @@ public class ImageOCRActivity extends AppCompatActivity {
             text = "";
         }
 
-        for(int i = 0; i<textlist.size();i++){
-            if(textlist.get(i).contains("010"))
-                for(int j = 0; j<textlist.get(i).length();j++){
-                    if(textlist.get(i).charAt(j) >= 48 && textlist.get(i).charAt(j) <= 57 ){
+        for(int i = 0; i<textlist.size();i++) {
+
+            if (textlist.get(i).contains("010"))
+                for (int j = 0; j < textlist.get(i).length(); j++) {
+                    if (textlist.get(i).charAt(j) >= 48 && textlist.get(i).charAt(j) <= 57) {
                         ph += textlist.get(i).charAt(j);
                     }
                 }
-            else if(textlist.get(i).length() == 3){
+             else if (textlist.get(i).length() == 3)
                 nm = textlist.get(i);
+
+             else if (textlist.get(i).contains("@")) {
+                if(em.length() < 2) {
+                    em = textlist.get(i);
+                }
             }
+            else if (textlist.get(i).contains("F.")) {
+                for (int j = 0; j < textlist.get(i).length(); j++) {
+                    if (textlist.get(i).charAt(j) >= 48 && textlist.get(i).charAt(j) <= 57) {
+                        fx += textlist.get(i).charAt(j);
+                    }
+                }
+            }
+             else if (textlist.get(i).contains("FAX")) {
+                for (int j = 0; j < textlist.get(i).length(); j++) {
+                    if (textlist.get(i).charAt(j) >= 48 && textlist.get(i).charAt(j) <= 57) {
+                        fx += textlist.get(i).charAt(j);
+                    }
+                }
+            }
+              else if (textlist.get(i).contains("Fax")) {
+                        for (int j = 0; j < textlist.get(i).length(); j++) {
+                            if (textlist.get(i).charAt(j) >= 48 && textlist.get(i).charAt(j) <= 57) {
+                                fx += textlist.get(i).charAt(j);
+                            }
+                        }
+                    }
         }
+
         Log.d(TAG,ph);
         Log.d(TAG,nm);
+        Log.d(TAG,em);
+
+        for(int i = 0; i<textlist.size();i++){
+
+                for(int j = 0; j<city_address.size();j++){
+
+                    if(textlist.get(i).contains(city_address.get(j)))
+                        ad = textlist.get(i);
+            }
+        }
+        Log.d(TAG,ad);
+
+        loop:
+        for(int i = 0; i<textlist.size();i++){
+
+            for(int j = 0; j<city_number.size();j++){
+
+                if(textlist.get(i).contains(city_number.get(j))) {
+
+                    for (int k = 0; k < textlist.get(i).length(); k++) {
+                        if (textlist.get(i).charAt(k) >= 48 && textlist.get(i).charAt(k) <= 57) {
+                            nb += textlist.get(i).charAt(k);
+                        }
+                    }
+                    break loop;
+                }
+
+            }
+        }
+        Log.d(TAG,nb);
+        Log.d(TAG,fx);
 
         return message.toString();
     }
