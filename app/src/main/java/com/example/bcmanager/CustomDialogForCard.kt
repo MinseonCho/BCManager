@@ -8,6 +8,7 @@ import android.graphics.drawable.ColorDrawable
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.Window
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.Toast
 import java.util.*
@@ -23,10 +24,10 @@ public class CustomDialogForCard(private var context: Context) {
 
         dlg.show()
 
-        val goToDetail = dlg.findViewById<LinearLayout>(R.id.dialog_goToDetail_linear)
-        val goToContact = dlg.findViewById<LinearLayout>(R.id.dialog_goToContact_linear)
-        val goToDial = dlg.findViewById<LinearLayout>(R.id.dialog_goToDial_linear)
-        val goToText = dlg.findViewById<LinearLayout>(R.id.dialog_goToText_linear)
+        val goToDetail = dlg.findViewById<ImageView>(R.id.dialog_goToDetail)
+        val goToContact = dlg.findViewById<ImageView>(R.id.dialog_goToContact)
+        val goToDial = dlg.findViewById<ImageView>(R.id.dialog_goToDial)
+        val goToText = dlg.findViewById<ImageView>(R.id.dialog_goToText)
 
         goToDetail.setOnClickListener {
             Toast.makeText(context,"상세보기 클릭", Toast.LENGTH_LONG).show()
