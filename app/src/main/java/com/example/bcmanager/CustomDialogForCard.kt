@@ -6,14 +6,13 @@ import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.net.Uri
-import androidx.appcompat.app.AppCompatActivity
-import android.os.Bundle
 import android.util.Log
 import android.view.Window
 import android.widget.ImageView
-import android.widget.LinearLayout
 import android.widget.Toast
+import androidx.core.content.ContextCompat.startActivity
 import java.util.*
+
 
 public class CustomDialogForCard(private var context: Context,  var cardInfo: CardInfoItem.cardInfo) {
 
@@ -54,6 +53,14 @@ public class CustomDialogForCard(private var context: Context,  var cardInfo: Ca
         }
         goToText.setOnClickListener {
             Toast.makeText(context,"문자하기 클릭", Toast.LENGTH_LONG).show()
+            val telStr = "tel:" + cardInfo.CARD_PHONE
+            val intent = Intent(Intent.ACTION_SENDTO)
+            val uri = Uri.parse("sms:" + cardInfo.CARD_PHONE)
+
+            intent.data = uri
+//            intent.putExtra("sms_body", "hello")
+
+            context.startActivity(intent)
             dlg.dismiss()
         }
     }
