@@ -5,7 +5,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -30,6 +29,11 @@ import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.OpenCVLoader;
@@ -59,7 +63,8 @@ public class MainActivity extends AppCompatActivity {
     public static String IMAGE_URL = "http://104.197.171.112/dbimages/";
     public static String GET_IMAGE_URL = "http://104.197.171.112/get_image.php";
     public static String SIGNUP_URL = "http://104.197.171.112/signup.php";
-    public static String GET_CARD_INFO = "http://104.197.171.112/get_cards.php";
+    public static String GET_CARDS_INFO = "http://104.197.171.112/get_cards.php";
+    public static String GET_CARD_INFO = "http://104.197.171.112/get_card.php";
     /**
      * end
      */
@@ -70,7 +75,7 @@ public class MainActivity extends AppCompatActivity {
     private CardRecyclerViewAdapter adapter;
     private TextView cnt_text;
     private LinearLayout linearLayout;
-    private ArrayList<CardRecyclerViewItem> cardList;
+    private ArrayList<CardInfoItem.cardInfo> cardsList;
 
     private static final String TAG = "opencv";
     private static final int REQUEST_CODE_GALLERY = 200;
@@ -83,7 +88,7 @@ public class MainActivity extends AppCompatActivity {
     Handler mHandler = null;
     static int cnt = 0;
 
-    int device_width = 0, device_height = 0;
+    public static int device_width = 0, device_height = 0;
 
     //user
     FirebaseUser user;
@@ -127,16 +132,9 @@ public class MainActivity extends AppCompatActivity {
         mHandler = new Handler();
 
         //recyclerview
-        cardList = new ArrayList<>();
+        cardsList = new ArrayList<>();
 
-        cardList.add(new CardRecyclerViewItem(R.drawable.green_card));
-        cardList.add(new CardRecyclerViewItem(R.drawable.gray_card));
-        cardList.add(new CardRecyclerViewItem(R.drawable.green_card));
-        cardList.add(new CardRecyclerViewItem(R.drawable.gray_card));
 
-        adapter = new CardRecyclerViewAdapter(this, cardList);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setAdapter(adapter);
 
         //Display
         Display display = getWindowManager().getDefaultDisplay();
@@ -147,8 +145,8 @@ public class MainActivity extends AppCompatActivity {
         Log.d("디바이스 가로 = ", String.valueOf(device_width));
         Log.d("디바이스 세로 = ", String.valueOf(device_height));
 
-        if(isLogined){
-            Log.d("성공-이프문","");
+        if (isLogined) {
+            Log.d("성공-이프문", "");
             getCardInfo();
         }
 
@@ -550,12 +548,35 @@ public class MainActivity extends AppCompatActivity {
     }
 
     void getCardInfo() {
+
         try {
-            httpConn = new HttpConnection(new URL(GET_CARD_INFO));
+            httpConn = new HttpConnection(new URL(GET_CARDS_INFO));
             httpConn.requestGetCards(uID, new OnRequestCompleteListener() {
                 @Override
                 public void onSuccess(@org.jetbrains.annotations.Nullable String data) {
                     Log.d("성공", data);
+                    Gson gson = new GsonBuilder().create();
+                    JsonParser jsonParser = new JsonParser();
+                    JsonObject jsonObject = (JsonObject) jsonParser.parse(data);
+                    JsonArray jsonArray = (JsonArray) jsonObject.get("cardInfo");
+
+                    CardInfoItem.cardInfo result;
+                    for(int i=0; i<jsonArray.size(); i++){
+
+                        final JsonObject j = jsonArray.get(i).getAsJsonObject();
+                        result = gson.fromJson(j, CardInfoItem.cardInfo.class);
+
+                        cardsList.add(result);
+                    }
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            adapter = new CardRecyclerViewAdapter(MainActivity.this, cardsList);
+                            recyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
+                            recyclerView.setAdapter(adapter);
+                        }
+                    });
                 }
 
                 @Override

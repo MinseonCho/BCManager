@@ -83,7 +83,21 @@ class HttpConnection(url: URL): Callback  {
 
         } )
     }
+    fun requestGetCard(cardNumber: String, callback: OnRequestCompleteListener){
+        this.onRequestCompleteListener = callback
 
+        val body = FormBody.Builder()
+                .add("CARD_NUMBER", cardNumber)
+                .build()
+
+        val request = Request.Builder()
+                .url(url!!)
+                .post(body)
+                .build()
+
+        val client = OkHttpClient()
+        client.newCall(request).enqueue(this)
+    }
     override fun onFailure(call: Call, e: IOException) {
         onRequestCompleteListener?.onError()
         println("error on httpConnection")
@@ -92,7 +106,7 @@ class HttpConnection(url: URL): Callback  {
     override fun onResponse(call: Call, response: Response) {
         if (response.isSuccessful) {
             val body = response.body()?.string()
-            Log.d("TAG",body);
+//            Log.d("TAG",body);
             parse(body)
 
         }

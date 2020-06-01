@@ -5,15 +5,17 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
+import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.Window
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.Toast
 import java.util.*
 
-public class CustomDialogForCard(private var context: Context) {
+public class CustomDialogForCard(private var context: Context,  var cardInfo: CardInfoItem.cardInfo) {
 
     fun callDialog(){
         val dlg = Dialog(context)
@@ -31,7 +33,10 @@ public class CustomDialogForCard(private var context: Context) {
 
         goToDetail.setOnClickListener {
             Toast.makeText(context,"상세보기 클릭", Toast.LENGTH_LONG).show()
-            context.startActivity(Intent(context, DetailInfoActivity::class.java))
+            val intent = Intent(context, DetailInfoActivity::class.java)
+            Log.d("카드넘버", cardInfo.CARD_NUMBER.toString())
+            intent.putExtra("cardNumber", cardInfo.CARD_NUMBER)
+            context.startActivity(intent)
             dlg.dismiss()
         }
         goToContact.setOnClickListener {
@@ -39,7 +44,12 @@ public class CustomDialogForCard(private var context: Context) {
             dlg.dismiss()
         }
         goToDial.setOnClickListener {
+            //유선, 폰 구분해야함
             Toast.makeText(context,"전화하기 클릭", Toast.LENGTH_LONG).show()
+            val telStr = "tel:" + cardInfo.CARD_PHONE
+            val intent = Intent("android.intent.action.DIAL")
+            intent.data = Uri.parse(telStr)
+            context.startActivity(intent)
             dlg.dismiss()
         }
         goToText.setOnClickListener {

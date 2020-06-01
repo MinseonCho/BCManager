@@ -9,10 +9,13 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
-import java.util.zip.Inflater
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.RequestOptions
+import java.util.ArrayList
 
-class CardRecyclerViewAdapter(val context: Context, val cardList: ArrayList<CardRecyclerViewItem>)
+class CardRecyclerViewAdapter(val context: Context, val cardList: ArrayList<CardInfoItem.cardInfo>)
     : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         Log.d("onCreateViewHolder","")
@@ -27,11 +30,20 @@ class CardRecyclerViewAdapter(val context: Context, val cardList: ArrayList<Card
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         Log.d("onBindViewHolder","")
         val instance = cardList[position]
+        val cardNumber = cardList[position].CARD_NUMBER
         if( holder is Holder){
-            holder.card?.setImageResource(cardList[position].card!!)
+            val url =  MainActivity.IMAGE_URL + cardList[position].CARD_IMAGE
+
+            Glide.with(context).load(url)
+                    .apply(RequestOptions.fitCenterTransform())
+                    .override(MainActivity.device_width-50, 200)
+                    .into(holder.card!!)
+
+
+//            holder.card?.setImageResource(cardList[position].card!!)
 
             holder.cv?.setOnClickListener {
-                val customDialog: CustomDialogForCard = CustomDialogForCard(context)
+                val customDialog = CustomDialogForCard(context, instance )
                 customDialog.callDialog()
             }
         }
