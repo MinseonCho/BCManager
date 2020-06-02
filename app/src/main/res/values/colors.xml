@@ -8,5 +8,6 @@
     <color name="my_darkgray">#545C66</color>
     <color name="my_lightgray">#E6E9ED</color>
     <color name="my_lightgray_sec">#CCD1D9</color>
+    <color name="text_darkgray">#838487</color>
 
 </resources>

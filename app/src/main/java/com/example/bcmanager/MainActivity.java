@@ -74,14 +74,13 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private CardRecyclerViewAdapter adapter;
     private TextView cnt_text;
+    private TextView noCard_text;
+    private TextView card_text;
     private LinearLayout linearLayout;
     private ArrayList<CardInfoItem.cardInfo> cardsList;
 
     private static final String TAG = "opencv";
     private static final int REQUEST_CODE_GALLERY = 200;
-
-    private CameraBridgeViewBase mOpenCvCameraView;
-    private boolean isOpenCvLoaded = false;
 
     public static HttpConnection httpConn;
 
@@ -126,14 +125,14 @@ public class MainActivity extends AppCompatActivity {
         recyclerView = findViewById(R.id.recyclerview);
         linearLayout = findViewById(R.id.layout_for_thread);
         cnt_text = findViewById(R.id.cnt_card);
-
+        noCard_text = findViewById(R.id.textview_noCard);
+        card_text = findViewById(R.id.textview_registerdCard);
 
         //handler
         mHandler = new Handler();
 
         //recyclerview
         cardsList = new ArrayList<>();
-
 
 
         //Display
@@ -146,7 +145,6 @@ public class MainActivity extends AppCompatActivity {
         Log.d("디바이스 세로 = ", String.valueOf(device_height));
 
         if (isLogined) {
-            Log.d("성공-이프문", "");
             getCardInfo();
         }
 
@@ -157,10 +155,6 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Toast.makeText(getApplicationContext(), "갤러리로이동", Toast.LENGTH_SHORT).show();
 
-//                Intent intent = new Intent();
-//                intent.setType("image/*");
-//                intent.setAction(Intent.ACTION_GET_CONTENT);
-//                startActivityForResult(intent, REQUEST_CODE_GALLERY);
 
                 Intent intent = new Intent(Intent.ACTION_PICK);
                 intent.setType(MediaStore.Images.Media.CONTENT_TYPE);
@@ -554,29 +548,43 @@ public class MainActivity extends AppCompatActivity {
             httpConn.requestGetCards(uID, new OnRequestCompleteListener() {
                 @Override
                 public void onSuccess(@org.jetbrains.annotations.Nullable String data) {
-                    Log.d("성공", data);
-                    Gson gson = new GsonBuilder().create();
-                    JsonParser jsonParser = new JsonParser();
-                    JsonObject jsonObject = (JsonObject) jsonParser.parse(data);
-                    JsonArray jsonArray = (JsonArray) jsonObject.get("cardInfo");
 
-                    CardInfoItem.cardInfo result;
-                    for(int i=0; i<jsonArray.size(); i++){
+                    if (data != null && !data.isEmpty()) {
+                        Log.d("성공", data);
+                        Gson gson = new GsonBuilder().create();
+                        JsonParser jsonParser = new JsonParser();
+                        JsonObject jsonObject = (JsonObject) jsonParser.parse(data);
+                        JsonArray jsonArray = (JsonArray) jsonObject.get("cardInfo");
 
-                        final JsonObject j = jsonArray.get(i).getAsJsonObject();
-                        result = gson.fromJson(j, CardInfoItem.cardInfo.class);
+                        CardInfoItem.cardInfo result;
+                        for (int i = 0; i < jsonArray.size(); i++) {
 
-                        cardsList.add(result);
-                    }
+                            final JsonObject j = jsonArray.get(i).getAsJsonObject();
+                            result = gson.fromJson(j, CardInfoItem.cardInfo.class);
 
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            adapter = new CardRecyclerViewAdapter(MainActivity.this, cardsList);
-                            recyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
-                            recyclerView.setAdapter(adapter);
+                            cardsList.add(result);
                         }
-                    });
+
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                card_text.setVisibility(View.VISIBLE);
+                                noCard_text.setVisibility(View.GONE);
+                                adapter = new CardRecyclerViewAdapter(MainActivity.this, cardsList);
+                                recyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
+                                recyclerView.setNestedScrollingEnabled(false);
+                                recyclerView.setAdapter(adapter);
+                            }
+                        });
+                    } else {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                card_text.setVisibility(View.GONE);
+                                noCard_text.setVisibility(View.VISIBLE);
+                            }
+                        });
+                    }
                 }
 
                 @Override

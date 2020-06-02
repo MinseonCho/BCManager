@@ -52,24 +52,41 @@
                 android:inputType="textPassword" />
         </LinearLayout>
 
-        <Button
-            android:id="@+id/login_btn"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="20dp"
             android:layout_marginTop="50dp"
             android:layout_marginEnd="20dp"
-            android:text="SIGN IN BY EMAIL" />
+            android:orientation="horizontal"
+            android:weightSum="2">
 
-        <Button
-            android:id="@+id/login_btn_signup"
+            <Button
+                android:id="@+id/login_btn"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+
+                android:layout_weight="1"
+                android:text="SIGN IN BY EMAIL" />
+
+            <Button
+                android:id="@+id/login_btn_signup"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+
+                android:layout_weight="1"
+                android:text="SIGN UP BY EMAIL" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/login_forgotpw"
+            android:layout_marginTop="5dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="20dp"
-            android:layout_marginTop="10dp"
-            android:layout_marginEnd="20dp"
-            android:text="SIGN UP BY EMAIL" />
-
+            android:gravity="center_horizontal"
+            android:text="Forgot your password?"
+            android:textColor="@color/text_darkgray"
+            android:textStyle="bold" />
 
     </LinearLayout>
 

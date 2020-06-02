@@ -78,7 +78,7 @@ class HttpConnection(url: URL): Callback  {
             }
 
             override fun onError() {
-                TODO("Not yet implemented")
+               Log.d("Sign Up Failed","")
             }
 
         } )

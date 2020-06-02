@@ -1,17 +1,24 @@
 package com.example.bcmanager
 
+import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
 import android.text.TextUtils
+import android.text.method.PasswordTransformationMethod
 import android.util.Log
 import android.view.View
+import android.view.ViewGroup
+import android.widget.EditText
+import android.widget.FrameLayout
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.gms.auth.api.Auth
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
@@ -31,6 +38,7 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener, CoroutineScope 
     private lateinit var auth: FirebaseAuth
     private lateinit var googleSignInClient: GoogleSignInClient
     private lateinit var httpConnection: HttpConnection
+    private lateinit var email: String
     var GOOGLE_LOGIN_CODE = 9001
 
     private lateinit var mJob: Job
@@ -53,12 +61,14 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener, CoroutineScope 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
+        setTitle("로그인")
 
         mJob = Job()
 
         login_btn.setOnClickListener(this)
         login_btn_google.setOnClickListener(this)
         login_btn_signup.setOnClickListener(this)
+        login_forgotpw.setOnClickListener(this)
 
 
         auth = FirebaseAuth.getInstance()
@@ -190,6 +200,34 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener, CoroutineScope 
                 val intent = Intent(this@LoginActivity, SignUpActivity::class.java)
                 startActivity(intent)
             }
+            R.id.login_forgotpw -> {
+                val etPW = EditText(this@LoginActivity)
+                val dialog: AlertDialog.Builder = AlertDialog.Builder(this,R.style.MyAlertDialogStyle)
+
+                val container = FrameLayout(this@LoginActivity)
+                val params: FrameLayout.LayoutParams = FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+                params.leftMargin = resources.getDimensionPixelSize(R.dimen.dialog_margin)
+                params.rightMargin = resources.getDimensionPixelSize(R.dimen.dialog_margin)
+                etPW.setLayoutParams(params)
+                container.addView(etPW)
+
+                dialog.setTitle("비밀번호 찾기")
+                        .setMessage("등록된 이메일을 입력하세요.")
+                        .setCancelable(false)
+                        .setView(container)
+                        .setPositiveButton("확인", DialogInterface.OnClickListener {
+                            dialog, which ->
+                            email = etPW.text.toString()
+                            sendEmailForChangingPW(email)
+                        })
+                        .setNegativeButton("취소", DialogInterface.OnClickListener { dialog, which ->
+                            dialog.dismiss()
+                        })
+
+                val alert = dialog.create()
+                alert.show()
+            }
+
         }
     }
 
@@ -228,4 +266,18 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener, CoroutineScope 
         super.onDestroy()
         mJob.cancel()
     }
+
+    fun sendEmailForChangingPW(email: String) {
+        auth.sendPasswordResetEmail(email)
+                .addOnCompleteListener(this, OnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        Toast.makeText(this, "Reset link sent to your email", Toast.LENGTH_LONG)
+                                .show()
+                    } else {
+                        Toast.makeText(this, "Unable to send reset mail", Toast.LENGTH_LONG)
+                                .show()
+                    }
+                })
+    }
+
 }
