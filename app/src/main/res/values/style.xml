@@ -5,7 +5,7 @@
     <style name="MyAlertDialogStyle" parent="@style/Theme.AppCompat.Dialog.Alert">
         <item name="android:textColor">@color/text_darkgray</item>
         <item name="android:typeface">monospace</item>
-        <item name="android:background">#FFFFFF</item>
+        <item name="android:background">@drawable/alert_white_border</item>
         <item name="android:colorAccent">@color/text_darkgray</item>
         <item name="android:textColorPrimary">@color/text_darkgray</item>
     </style>

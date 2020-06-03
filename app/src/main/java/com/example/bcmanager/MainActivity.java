@@ -1,28 +1,40 @@
 package com.example.bcmanager;
 
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.PopupMenu;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.Signature;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Point;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.MessageQueue;
 import android.provider.MediaStore;
+import android.util.Base64;
 import android.util.Log;
 import android.view.Display;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -35,7 +47,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
 import org.opencv.core.Mat;
@@ -49,13 +60,15 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.security.MessageDigest;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Objects;
 
 import static org.opencv.imgcodecs.Imgcodecs.imread;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuItemClickListener {
     private String TAG_ = "MainAcitivity";
     /**
      * url
@@ -76,13 +89,16 @@ public class MainActivity extends AppCompatActivity {
     private TextView cnt_text;
     private TextView noCard_text;
     private TextView card_text;
+    private TextView welcome;
     private LinearLayout linearLayout;
+    private ImageView actionbar_btn;
     private ArrayList<CardInfoItem.cardInfo> cardsList;
 
     private static final String TAG = "opencv";
     private static final int REQUEST_CODE_GALLERY = 200;
 
     public static HttpConnection httpConn;
+    public static Context mContext;
 
     Handler mHandler = null;
     static int cnt = 0;
@@ -117,8 +133,22 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+//        getWindow().requestFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
+//        android.app.ActionBar actionBar = getActionBar();
+//        if (actionBar != null) {
+//            actionBar.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#330000ff")));
+//            actionBar.setStackedBackgroundDrawable(new ColorDrawable(Color.parseColor("#550000ff")));
+//        }
 
-        checkCurrentUser();
+        mContext = this;
+
+
+        //actionbar title 가운데
+        Objects.requireNonNull(getSupportActionBar()).setDisplayShowTitleEnabled(false);
+        getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM); // 커스텀 사용
+        getSupportActionBar().setCustomView(R.layout.actionbar_title); // 커스텀 사용할 파일 위치
+        getSupportActionBar().setTitle("BCManager");
+
 
         btn_click = findViewById(R.id.clickToGallery);
         btn_clickToCamera = findViewById(R.id.clickToCamera);
@@ -127,13 +157,21 @@ public class MainActivity extends AppCompatActivity {
         cnt_text = findViewById(R.id.cnt_card);
         noCard_text = findViewById(R.id.textview_noCard);
         card_text = findViewById(R.id.textview_registerdCard);
+        actionbar_btn = findViewById(R.id.actionbar_btn);
+        welcome = findViewById(R.id.welcome_text);
+
+
+        checkCurrentUser();
+        getAppKeyHash();
+
 
         //handler
         mHandler = new Handler();
 
         //recyclerview
         cardsList = new ArrayList<>();
-
+        recyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
+        recyclerView.setNestedScrollingEnabled(false);
 
         //Display
         Display display = getWindowManager().getDefaultDisplay();
@@ -146,6 +184,11 @@ public class MainActivity extends AppCompatActivity {
 
         if (isLogined) {
             getCardInfo();
+        }
+
+        if (cardsList.isEmpty()) {
+            card_text.setVisibility(View.GONE);
+            noCard_text.setVisibility(View.VISIBLE);
         }
 
         //btn event
@@ -200,6 +243,12 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        actionbar_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showPopup(v);
+            }
+        });
 
         if (cnt > 0) {
             linearLayout.setVisibility(View.VISIBLE);
@@ -489,18 +538,26 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+//    @Override
+//    public boolean onCreateOptionsMenu(Menu menu) {
+//
+//        if (isLogined) getMenuInflater().inflate(R.menu.menu_login, menu);
+//        else getMenuInflater().inflate(R.menu.menu, menu);
+//
+//        return true;
+//    }
 
-        if (isLogined) getMenuInflater().inflate(R.menu.menu_login, menu);
-        else getMenuInflater().inflate(R.menu.menu, menu);
-
-        return true;
+    public void showPopup(View v) {
+        PopupMenu popup = new PopupMenu(this, v);
+        popup.setOnMenuItemClickListener(this);
+        MenuInflater inflater = popup.getMenuInflater();
+        if (isLogined) inflater.inflate(R.menu.menu_login, popup.getMenu());
+        else inflater.inflate(R.menu.menu, popup.getMenu());
+        popup.show();
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle presses on the action bar items
+    public boolean onMenuItemClick(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_login:
                 startActivity(new Intent(this, LoginActivity.class));
@@ -519,6 +576,28 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+//    @Override
+//    public boolean onOptionsItemSelected(MenuItem item) {
+//        Log.d("쇼팝업","onOptionsItemSelected");
+//        // Handle presses on the action bar items
+//        switch (item.getItemId()) {
+//            case R.id.menu_login:
+//                startActivity(new Intent(this, LoginActivity.class));
+//                return true;
+//            case R.id.menu_logout:
+//                FirebaseAuth.getInstance().signOut();
+//                finish();
+//                startActivity(getIntent());
+//                isLogined = false;
+//                return true;
+//            case R.id.menu_userinfo:
+//                startActivity(new Intent(this, UserProfileActivity.class));
+//                return true;
+//            default:
+//                return super.onOptionsItemSelected(item);
+//        }
+//    }
+
 
     public void checkCurrentUser() {
         // [START check_current_user]
@@ -533,7 +612,10 @@ public class MainActivity extends AppCompatActivity {
                 Log.d("INFOphotourl", String.valueOf(user.getPhotoUrl()) + "");
                 uID = user.getUid();
                 isLogined = true;
+                welcome.setVisibility(View.VISIBLE);
+                welcome.setText(user.getDisplayName() +" 님 \n명함을 등록해보세요!");
             } else {
+                welcome.setVisibility(View.GONE);
                 // No user is signed in
                 Log.d(TAG_, "null");
             }
@@ -571,8 +653,7 @@ public class MainActivity extends AppCompatActivity {
                                 card_text.setVisibility(View.VISIBLE);
                                 noCard_text.setVisibility(View.GONE);
                                 adapter = new CardRecyclerViewAdapter(MainActivity.this, cardsList);
-                                recyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
-                                recyclerView.setNestedScrollingEnabled(false);
+
                                 recyclerView.setAdapter(adapter);
                             }
                         });
@@ -597,5 +678,20 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void getAppKeyHash() {
+        try {
+            PackageInfo info = getPackageManager().getPackageInfo(getPackageName(), PackageManager.GET_SIGNATURES);
+            for (Signature signature : info.signatures) {
+                MessageDigest md;
+                md = MessageDigest.getInstance("SHA");
+                md.update(signature.toByteArray());
+                String something = new String(Base64.encode(md.digest(), 0));
+                Log.e("Hash key", something);
+            }
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            Log.e("name not found", e.toString());
+        }
+    }
 }
 

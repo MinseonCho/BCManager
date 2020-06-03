@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@android:color/white"
     android:orientation="vertical"
     android:weightSum="3"
     tools:context=".LoginActivity">
@@ -80,9 +81,9 @@
 
         <TextView
             android:id="@+id/login_forgotpw"
-            android:layout_marginTop="5dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
             android:gravity="center_horizontal"
             android:text="Forgot your password?"
             android:textColor="@color/text_darkgray"
@@ -111,12 +112,19 @@
             android:layout_marginEnd="20dp"
             android:text="SIGN IN WITH GOOGLE" />
 
-        <Button
+        <com.kakao.usermgmt.LoginButton
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="20dp"
-            android:layout_marginTop="10dp"
-            android:layout_marginEnd="20dp"
-            android:text="SIGN IN WITH KAKAO" />
+            android:layout_marginTop="20dp"
+            android:layout_marginEnd="20dp" />
+
+<!--        <Button-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_marginStart="20dp"-->
+<!--            android:layout_marginTop="10dp"-->
+<!--            android:layout_marginEnd="20dp"-->
+<!--            android:text="SIGN IN WITH KAKAO" />-->
     </LinearLayout>
 </LinearLayout>

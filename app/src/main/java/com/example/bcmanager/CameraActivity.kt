@@ -15,6 +15,7 @@ import android.view.SurfaceView
 import android.view.View
 import android.widget.ImageView
 import android.widget.LinearLayout
+import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
@@ -164,6 +165,10 @@ class CameraActivity : AppCompatActivity(), CameraBridgeViewBase.CvCameraViewLis
 //        getWindow().setFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
 //                WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         setContentView(R.layout.activity_camera)
+        Objects.requireNonNull(supportActionBar)!!.setDisplayShowTitleEnabled(false)
+        supportActionBar!!.displayOptions = ActionBar.DISPLAY_SHOW_CUSTOM // 커스텀 사용
+        supportActionBar!!.setCustomView(R.layout.actionbar_title) // 커스텀 사용할 파일 위치
+        supportActionBar!!.title = "카메라"
 
         mOpenCvCameraView = findViewById(R.id.activity_surface_view);
         mOpenCvCameraView!!.visibility = SurfaceView.VISIBLE;

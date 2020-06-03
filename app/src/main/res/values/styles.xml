@@ -1,12 +1,19 @@
 <resources>
 
     <!-- Base application theme. -->
+<!--    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">-->
+<!--        &lt;!&ndash; Customize your theme here. &ndash;&gt;-->
+<!--        <item name="colorPrimary">@color/my_green</item>-->
+<!--        <item name="colorPrimaryDark">@color/my_green</item>-->
+<!--        <item name="colorAccent">@color/colorAccent</item>-->
+
+<!--    </style>-->
+
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
         <!-- Customize your theme here. -->
-        <item name="colorPrimary">@color/my_green</item>
-        <item name="colorPrimaryDark">@color/my_green</item>
-        <item name="colorAccent">@color/colorAccent</item>
-
+        <item name="colorPrimary">#FFFFFF</item>
+        <item name="colorPrimaryDark">@color/my_darkgray</item>
+        <item name="colorAccent">@color/my_darkgray</item>
     </style>
 
     <style name="ProgressDialogStyle" parent="Theme.AppCompat.Light.Dialog.Alert">
@@ -15,5 +22,28 @@
         <item name="colorAccent">@color/colorPrimary</item>
     </style>
 
+    <style name="AppTheme.MainTheme">
+        <item name="android:actionBarStyle">@style/MyActionBar</item>
+    </style>
+    <style name="MyActionBar" parent="@android:style/Widget.Holo.Light.ActionBar.Solid">
+        <item name="android:background">#00479b</item>
+        <item name="android:titleTextStyle">@style/ActionBarTextColor</item>
+    </style>
+    <style name="ActionBarTextColor" parent="android:TextAppearance.Holo.Widget.ActionBar.Title">
+        <item name="android:textColor">#000000</item>
+    </style>
+
+
+    <style name="MyTheme" parent="@android:style/Theme.Holo.Light">
+        <item name="android:actionBarStyle">@style/MyTheme.ActionBarStyle</item>
+    </style>
+
+    <style name="MyTheme.ActionBarStyle" parent="@android:style/Widget.Holo.Light.ActionBar">
+        <item name="android:titleTextStyle">@style/MyTheme.ActionBar.TitleTextStyle</item>
+    </style>
+
+    <style name="MyTheme.ActionBar.TitleTextStyle" parent="@android:style/TextAppearance.Holo.Widget.ActionBar.Title">
+        <item name="android:textColor">#000000</item>
+    </style>
 
 </resources>

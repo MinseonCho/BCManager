@@ -98,4 +98,7 @@ dependencies {
 
     implementation 'de.hdodenhof:circleimageview:3.0.0'
     implementation 'com.zoonref:simple-view-behavior:1.0'
+
+    //kakao
+    implementation 'com.kakao.sdk:usermgmt:1.16.0'
 }

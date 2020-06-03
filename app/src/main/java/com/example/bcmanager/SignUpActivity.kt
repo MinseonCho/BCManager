@@ -7,6 +7,7 @@ import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
+import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.auth.FirebaseAuth
@@ -14,6 +15,7 @@ import com.google.firebase.auth.UserProfileChangeRequest
 import kotlinx.android.synthetic.main.activity_login.*
 import kotlinx.android.synthetic.main.activity_sign_up.*
 import java.net.URL
+import java.util.*
 
 
 class SignUpActivity : AppCompatActivity(), View.OnClickListener {
@@ -24,6 +26,10 @@ class SignUpActivity : AppCompatActivity(), View.OnClickListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_sign_up)
+        Objects.requireNonNull(supportActionBar)!!.setDisplayShowTitleEnabled(false)
+        supportActionBar!!.displayOptions = ActionBar.DISPLAY_SHOW_CUSTOM // 커스텀 사용
+        supportActionBar!!.setCustomView(R.layout.actionbar_title_nobtn) // 커스텀 사용할 파일 위치
+        supportActionBar!!.title = "회원가입"
 
         signup.setOnClickListener(this)
         firebaseAuth = FirebaseAuth.getInstance();
@@ -47,7 +53,7 @@ class SignUpActivity : AppCompatActivity(), View.OnClickListener {
 
                         val profileUpdates = UserProfileChangeRequest.Builder()
                                 .setDisplayName(name).build()
-
+                        sendEmailVerification()
                         user!!.updateProfile(profileUpdates)
                                 .addOnCompleteListener { task ->
                                     if (task.isSuccessful) {
@@ -72,5 +78,16 @@ class SignUpActivity : AppCompatActivity(), View.OnClickListener {
                 })
     }
 
-
+    fun sendEmailVerification() {
+        // [START send_email_verification]
+        val auth = FirebaseAuth.getInstance()
+        val user = auth.currentUser
+        user!!.sendEmailVerification()
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        Log.d("sendEmailVerification", "Email sent.")
+                    }
+                }
+        // [END send_email_verification]
+    }
 }

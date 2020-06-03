@@ -8,7 +8,6 @@ buildscript {
     repositories {
         google()
         jcenter()
-        
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:3.6.3'
@@ -26,7 +25,12 @@ allprojects {
         
     }
 }
-
+subprojects {
+    repositories {
+        mavenCentral()
+        maven { url 'http://devrepo.kakao.com:8088/nexus/content/groups/public/' }
+    }
+}
 task clean(type: Delete) {
     delete rootProject.buildDir
 }

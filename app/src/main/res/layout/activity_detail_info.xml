@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@android:color/white"
     tools:context=".DetailInfoActivity">
 
     <androidx.core.widget.NestedScrollView
@@ -36,6 +37,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="2"
+                    android:textStyle="bold"
                     android:text="이름" />
 
                 <TextView
@@ -53,7 +55,7 @@
                 android:layout_marginTop="8dp"
                 android:layout_marginEnd="20dp"
                 android:layout_marginBottom="15dp"
-                android:background="#BCBFC5" />
+                android:background="@color/my_lightgray_sec" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -67,6 +69,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="2"
+                    android:textStyle="bold"
                     android:text="회사" />
 
                 <TextView
@@ -84,7 +87,7 @@
                 android:layout_marginTop="8dp"
                 android:layout_marginEnd="20dp"
                 android:layout_marginBottom="15dp"
-                android:background="#BCBFC5" />
+                android:background="@color/my_lightgray_sec" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -99,6 +102,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="2"
+                    android:textStyle="bold"
                     android:text="직급" />
 
                 <TextView
@@ -116,7 +120,7 @@
                 android:layout_marginTop="8dp"
                 android:layout_marginEnd="20dp"
                 android:layout_marginBottom="10dp"
-                android:background="#BCBFC5" />
+                android:background="@color/my_lightgray_sec" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -131,6 +135,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="2"
+                    android:textStyle="bold"
                     android:text="이메일" />
 
                 <TextView
@@ -148,7 +153,7 @@
                 android:layout_marginTop="8dp"
                 android:layout_marginEnd="20dp"
                 android:layout_marginBottom="10dp"
-                android:background="#BCBFC5" />
+                android:background="@color/my_lightgray_sec" />
 
 
             <LinearLayout
@@ -164,6 +169,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="2"
+                    android:textStyle="bold"
                     android:text="핸드폰" />
 
                 <TextView
@@ -181,7 +187,7 @@
                 android:layout_marginTop="8dp"
                 android:layout_marginEnd="20dp"
                 android:layout_marginBottom="10dp"
-                android:background="#BCBFC5" />
+                android:background="@color/my_lightgray_sec" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -196,6 +202,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="2"
+                    android:textStyle="bold"
                     android:text="유선전화" />
 
                 <TextView
@@ -213,7 +220,7 @@
                 android:layout_marginTop="8dp"
                 android:layout_marginEnd="20dp"
                 android:layout_marginBottom="10dp"
-                android:background="#BCBFC5" />
+                android:background="@color/my_lightgray_sec" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -228,6 +235,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="2"
+                    android:textStyle="bold"
                     android:text="주소" />
 
                 <TextView
@@ -245,7 +253,7 @@
                 android:layout_marginTop="8dp"
                 android:layout_marginEnd="20dp"
                 android:layout_marginBottom="10dp"
-                android:background="#BCBFC5" />
+                android:background="@color/my_lightgray_sec" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -260,6 +268,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="2"
+                    android:textStyle="bold"
                     android:text="팩스" />
 
                 <TextView
