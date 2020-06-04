@@ -47,6 +47,21 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
+        <meta-data
+            android:name="com.kakao.sdk.AppKey"
+            android:value="@string/kakao_app_key" />
+        <!-- 카카오 로그인 시 웹 뷰를 띄우기 위한 코드 -->
+        <activity
+            android:name="com.kakao.auth.authorization.authcode.KakaoWebViewActivity"
+            android:launchMode="singleTop"
+            android:windowSoftInputMode="adjustResize">
+
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+        </activity>
         <activity android:name=".DetailInfoActivity"></activity>
         <activity android:name=".CustomDialogForCard" />
         <activity android:name=".UserProfileActivity" />
@@ -64,9 +79,7 @@
             </intent-filter>
         </activity>
 
-        <meta-data
-            android:name="com.kakao.sdk.AppKey"
-            android:value="@string/kakao_app_key" />
+
     </application>
 
 </manifest>

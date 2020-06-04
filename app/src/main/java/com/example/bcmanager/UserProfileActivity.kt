@@ -44,14 +44,17 @@ class UserProfileActivity : AppCompatActivity(), View.OnClickListener {
         user = FirebaseAuth.getInstance().currentUser
         auth = FirebaseAuth.getInstance()
 
-        profile_name.text = Editable.Factory.getInstance().newEditable(user?.displayName.toString())
-        profile_email.text = Editable.Factory.getInstance().newEditable(user?.email.toString())
-        if (user?.photoUrl != null) {
-            Glide.with(this).load(user?.photoUrl).apply(RequestOptions.centerCropTransform()).into(profile_image)
+        profile_name.text = Editable.Factory.getInstance().newEditable(myApp.userName)
+        profile_email.text = Editable.Factory.getInstance().newEditable(myApp.userEmail)
+        if (myApp.userImage!= null) {
+            Glide.with(this).load(myApp.userImage).apply(RequestOptions.centerCropTransform()).into(profile_image)
         } else {
             profile_image.setImageResource(R.drawable.rabbit)
         }
 
+        if(myApp.loginType.equals("k")){
+            textview_pw.visibility = View.GONE
+        }
 
         profile_btn.setOnClickListener(this)
         textview_pw.setOnClickListener(this)

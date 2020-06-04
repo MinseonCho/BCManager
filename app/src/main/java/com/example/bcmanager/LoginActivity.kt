@@ -20,10 +20,13 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import com.kakao.auth.ISessionCallback
 import com.kakao.auth.Session
+import com.kakao.network.ErrorResult
+import com.kakao.usermgmt.UserManagement
+import com.kakao.usermgmt.callback.MeV2ResponseCallback
+import com.kakao.usermgmt.response.MeV2Response
 import com.kakao.util.exception.KakaoException
 import kotlinx.android.synthetic.main.activity_login.*
 import kotlinx.coroutines.CoroutineScope
@@ -50,13 +53,62 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener, CoroutineScope 
 
     //kakao
     // 세션 콜백 구현
+
+
     private val sessionCallback: ISessionCallback = object : ISessionCallback {
         override fun onSessionOpened() {
             Log.i("KAKAO_SESSION", "로그인 성공")
+
+            UserManagement.getInstance().me(object : MeV2ResponseCallback() {
+
+                override fun onFailure(errorResult: ErrorResult?) {
+                    Log.d("Session Call back", " :: on failed ")
+                }
+
+                override fun onSessionClosed(errorResult: ErrorResult?) {
+                    Log.e("Session Call back", " :: onSessionClosed")
+
+                }
+
+                override fun onSuccess(result: MeV2Response?) {
+                    checkNotNull(result) { "session response null" }
+                    Log.d("KAKAOID", result.id.toString())
+                    Log.d("KAKAOnickname", result.nickname.toString())
+                    Log.d("KAKAOimagepath", result.profileImagePath)
+                    Log.d("KAKAOkakaoAccount", result.kakaoAccount.toString())
+
+                    httpConnection = HttpConnection(URL(MainActivity.SIGNUP_URL))
+                    if (result.id.toString() != null) {
+                        httpConnection.signUp(result.id.toString(), result.nickname, "kakao")
+                    }
+
+                    myApp.userID = result.id.toString()
+                    myApp.userEmail = "kakao"
+                    myApp.userImage = result.profileImagePath
+                    myApp.userName = result.nickname
+                    myApp.isLogined = true;
+                    myApp.loginType ="k"
+                    MainActivity.isLogined = true;
+
+                    val intent = Intent(this@LoginActivity, MainActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+//                    intent.putExtra("kUserID", result.id.toString())
+//                    intent.putExtra("KUserName", result.nickname)
+//                    intent.putExtra("KUserImage",result.profileImagePath)
+                    startActivity(intent)
+
+                    // register or login
+                }
+
+            })
+
+
         }
 
         override fun onSessionOpenFailed(exception: KakaoException?) {
             Log.e("KAKAO_SESSION", "로그인 실패", exception)
+//            Log.e("Session Call back :: onSessionOpenFailed: ${exception?.message}")
+
         }
     }
     //kakao end
@@ -92,7 +144,6 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener, CoroutineScope 
         login_btn_signup.setOnClickListener(this)
         login_forgotpw.setOnClickListener(this)
 
-
         auth = FirebaseAuth.getInstance()
 
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -102,10 +153,7 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener, CoroutineScope 
         googleSignInClient = GoogleSignIn.getClient(this, gso)
 
         //kakao
-        // 세션 콜백 등록
-//        Session.getCurrentSession().addCallback(sessionCallback);
-        //kakao end
-
+        Session.getCurrentSession().addCallback(sessionCallback);
 
     }
 
@@ -148,8 +196,15 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener, CoroutineScope 
                 login_pw.text.toString()).addOnCompleteListener { task ->
             if (task.isSuccessful) {
                 //Login
-                (task.result!!.user)?.let { moveMainPage(it) }
+                (task.result!!.user!!.uid).let { moveMainPage(it) }
+
                 val user = auth.currentUser
+                myApp.userID = user?.uid.toString()
+                myApp.userEmail = user?.email.toString()
+                myApp.userImage = user?.photoUrl.toString()
+                myApp.userName =  user?.displayName.toString()
+                myApp.isLogined = true;
+                myApp.loginType ="k"
             } else {
                 //Show the error message
                 Toast.makeText(this, task.exception?.message, Toast.LENGTH_LONG).show()
@@ -193,15 +248,12 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener, CoroutineScope 
 //    }
 
 
-
-
-    fun moveMainPage(user: FirebaseUser) {
+    fun moveMainPage(user: String) {
         MainActivity.isLogined = true;
+        myApp.isLogined = true;
         val intent = Intent(this, MainActivity::class.java)
-        if (user != null) {
-            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
-            startActivity(intent)
-        }
+        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+        startActivity(intent)
     }
 
     companion object {
@@ -245,15 +297,15 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener, CoroutineScope 
                 alert.show()
             }
 
+
         }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         // 카카오톡|스토리 간편로그인 실행 결과를 받아서 SDK로 전달
-//        if (Session.getCurrentSession().handleActivityResult(requestCode, resultCode, data)) {
-//            return;
-//        }
-        super.onActivityResult(requestCode, resultCode, data)
+        if (Session.getCurrentSession().handleActivityResult(requestCode, resultCode, data)) {
+            return;
+        }
         if (requestCode == GOOGLE_LOGIN_CODE) {
             val result = Auth.GoogleSignInApi.getSignInResultFromIntent(data)
             if (result!!.isSuccess) {
@@ -261,6 +313,8 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener, CoroutineScope 
                 firebaseAuthWithGoogle(account)
             }
         }
+        super.onActivityResult(requestCode, resultCode, data)
+
     }
 
 
@@ -274,7 +328,14 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener, CoroutineScope 
                 if (user != null) {
                     httpConnection.signUp(user.uid.toString(), user.displayName.toString(), user.email.toString())
                 }
-                (task.result!!.user)?.let { moveMainPage(it) }
+                myApp.userID = user?.uid.toString()
+                myApp.userEmail = user?.email.toString()
+                myApp.userImage = user?.photoUrl.toString()
+                myApp.userName =  user?.displayName.toString()
+                myApp.isLogined = true;
+                myApp.loginType ="g"
+                (task.result!!.user!!.uid).let { moveMainPage(it) }
+
             } else {
                 //Show the error message
                 Toast.makeText(this, task.exception?.message, Toast.LENGTH_LONG).show()
@@ -287,7 +348,7 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener, CoroutineScope 
         super.onDestroy()
         mJob.cancel()
         // 세션 콜백 삭제
-//        Session.getCurrentSession().removeCallback(sessionCallback); //kakao
+        Session.getCurrentSession().removeCallback(sessionCallback); //kakao
     }
 
     fun sendEmailForChangingPW(email: String) {

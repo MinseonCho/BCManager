@@ -1,5 +1,4 @@
 package com.example.bcmanager
-
 import android.util.Log
 import okhttp3.*
 import java.io.File

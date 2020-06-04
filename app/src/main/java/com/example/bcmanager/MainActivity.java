@@ -46,6 +46,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.kakao.auth.Session;
 
 import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
@@ -109,6 +110,8 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
     FirebaseUser user;
     public static String uID;
     public static boolean isLogined = false;
+    public Intent kUserIntent;
+    private BCMApplication myApp;
 
     public native void RecognitionCard(long inputImage, long outputImage);
 
@@ -133,6 +136,8 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        Log.d("메인액티비티","");
 //        getWindow().requestFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
 //        android.app.ActionBar actionBar = getActionBar();
 //        if (actionBar != null) {
@@ -141,6 +146,22 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 //        }
 
         mContext = this;
+        myApp = (BCMApplication) getApplication();
+
+        //kakao login token check
+
+        //kakao intent
+
+//
+//        kUserIntent = getIntent();
+//        if(kUserIntent.hasExtra("kUserID")){
+//            uID = kUserIntent.getStringExtra("kUserID");
+//            Log.d("카카오 로긘?", uID);
+//        }
+//        if (kUserIntent != null) {
+//            uID = kUserIntent.getStringExtra("kUserID");
+//            Log.d("카카오 로긘?", uID);
+//        }
 
 
         //actionbar title 가운데
@@ -162,7 +183,8 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 
 
         checkCurrentUser();
-        getAppKeyHash();
+        Session.getCurrentSession().checkAndImplicitOpen();
+//        getAppKeyHash();
 
 
         //handler
@@ -182,9 +204,18 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         Log.d("디바이스 가로 = ", String.valueOf(device_width));
         Log.d("디바이스 세로 = ", String.valueOf(device_height));
 
-        if (isLogined) {
+        if (myApp.isLogined) {
+            Log.d("ID", myApp.userID);
+            Log.d("ID", myApp.loginType);
+            Log.d("ID", myApp.userEmail);
+            Log.d("ID", myApp.userName);
             getCardInfo();
+            welcome.setVisibility(View.VISIBLE);
+            welcome.setText(myApp.userName + " 님 \n명함을 등록해보세요!");
+        }else{
+            welcome.setVisibility(View.GONE);
         }
+
 
         if (cardsList.isEmpty()) {
             card_text.setVisibility(View.GONE);
@@ -551,7 +582,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         PopupMenu popup = new PopupMenu(this, v);
         popup.setOnMenuItemClickListener(this);
         MenuInflater inflater = popup.getMenuInflater();
-        if (isLogined) inflater.inflate(R.menu.menu_login, popup.getMenu());
+        if (myApp.isLogined) inflater.inflate(R.menu.menu_login, popup.getMenu());
         else inflater.inflate(R.menu.menu, popup.getMenu());
         popup.show();
     }
@@ -567,6 +598,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                 finish();
                 startActivity(getIntent());
                 isLogined = false;
+                myApp.isLogined = false;
                 return true;
             case R.id.menu_userinfo:
                 startActivity(new Intent(this, UserProfileActivity.class));
@@ -601,33 +633,39 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 
     public void checkCurrentUser() {
         // [START check_current_user]
+        Log.d("체크커런트유저", "");
         user = FirebaseAuth.getInstance().getCurrentUser();
         if (user != null) {
-            if (user.getDisplayName() != null) {
-                // User is signed in
-                Log.d("INFOuserName", user.getDisplayName() + "");
-                Log.d("INFOemail", user.getEmail() + "");
-                Log.d("INFOuserphonenumber", user.getPhoneNumber() + "");
-                Log.d("INFOUID", user.getUid() + "");
-                Log.d("INFOphotourl", String.valueOf(user.getPhotoUrl()) + "");
-                uID = user.getUid();
-                isLogined = true;
-                welcome.setVisibility(View.VISIBLE);
-                welcome.setText(user.getDisplayName() +" 님 \n명함을 등록해보세요!");
-            } else {
-                welcome.setVisibility(View.GONE);
-                // No user is signed in
-                Log.d(TAG_, "null");
-            }
+            Log.d("파이어베이스 로그인", "");
+            // User is signed in
+            Log.d("INFOuserName", user.getDisplayName() + "");
+            Log.d("INFOemail", user.getEmail() + "");
+            Log.d("INFOuserphonenumber", user.getPhoneNumber() + "");
+            Log.d("INFOUID", user.getUid() + "");
+            Log.d("INFOphotourl", String.valueOf(user.getPhotoUrl()) + "");
+            myApp.userID = user.getUid().toString();
+            myApp.loginType ="g";
+            myApp.userEmail = user.getEmail();
+            myApp.userImage = user.getPhotoUrl().toString();
+            myApp.userName = user.getDisplayName();
+            myApp.isLogined = true;
+            welcome.setVisibility(View.VISIBLE);
+            welcome.setText(user.getDisplayName() + " 님 \n명함을 등록해보세요!");
+        }else {
+            welcome.setVisibility(View.GONE);
+            // No user is signed in
+            Log.d(TAG_, "null");
         }
+
+
         // [END check_current_user]
     }
 
     void getCardInfo() {
-
+        Log.d("카드가져오기","");
         try {
             httpConn = new HttpConnection(new URL(GET_CARDS_INFO));
-            httpConn.requestGetCards(uID, new OnRequestCompleteListener() {
+            httpConn.requestGetCards(myApp.userID, new OnRequestCompleteListener() {
                 @Override
                 public void onSuccess(@org.jetbrains.annotations.Nullable String data) {
 
