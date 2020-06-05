@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@android:color/white"
@@ -33,12 +34,12 @@
                 android:layout_marginEnd="10dp"
                 android:layout_marginBottom="10dp"
                 android:gravity="center"
-                android:visibility="gone"
                 android:orientation="horizontal"
-                android:weightSum="4">
+                android:visibility="visible"
+                android:weightSum="5">
 
                 <LinearLayout
-                    android:id="@+id/linear_detail"
+                    android:id="@+id/linear_detail_info"
                     android:layout_width="0dp"
                     android:layout_height="100dp"
                     android:layout_marginEnd="5dp"
@@ -48,79 +49,87 @@
                     android:orientation="vertical">
 
                     <ImageView
-                        android:layout_width="30dp"
-                        android:layout_height="30dp"
-                        android:src="@drawable/question" />
+                        android:layout_width="23dp"
+                        android:layout_height="23dp"
+                        android:src="@drawable/click" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="20dp"
-                        android:text="상세보기" />
+                        android:text="상세정보"
+                        android:textSize="10sp"
+                        tools:ignore="SmallSp" />
 
                 </LinearLayout>
 
                 <LinearLayout
-                    android:orientation="vertical"
                     android:id="@+id/linear_contact"
                     android:layout_width="0dp"
                     android:layout_height="100dp"
                     android:layout_marginEnd="5dp"
                     android:layout_weight="1"
                     android:background="@drawable/alert_white_border"
-                    android:gravity="center">
+                    android:gravity="center"
+                    android:orientation="vertical">
 
                     <ImageView
-                        android:layout_width="30dp"
-                        android:layout_height="30dp"
-                        android:src="@drawable/contacts" />
+                        android:layout_width="23dp"
+                        android:layout_height="23dp"
+                        android:src="@drawable/download" />
 
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="20dp"
-                        android:text="상세보기" />
+                        android:text="연락처 저장"
+
+                        android:textSize="10sp"
+                        tools:ignore="SmallSp" />
 
                 </LinearLayout>
 
                 <LinearLayout
-                    android:orientation="vertical"
                     android:id="@+id/linear_dial"
                     android:layout_width="0dp"
                     android:layout_height="100dp"
                     android:layout_marginEnd="5dp"
                     android:layout_weight="1"
                     android:background="@drawable/alert_white_border"
-                    android:gravity="center">
+                    android:gravity="center"
+                    android:orientation="vertical">
 
                     <ImageView
-                        android:layout_width="30dp"
-                        android:layout_height="30dp"
-                        android:src="@drawable/phone" />
+                        android:layout_width="23dp"
+                        android:layout_height="23dp"
+                        android:src="@drawable/dial" />
 
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="20dp"
-                        android:text="상세보기" />
+                        android:text="바로전화"
+                        android:textSize="10sp"
+
+                        tools:ignore="SmallSp" />
 
                 </LinearLayout>
 
                 <LinearLayout
-                    android:orientation="vertical"
                     android:id="@+id/linear_message"
                     android:layout_width="0dp"
                     android:layout_height="100dp"
                     android:layout_marginEnd="5dp"
                     android:layout_weight="1"
                     android:background="@drawable/alert_white_border"
-                    android:gravity="center">
+                    android:gravity="center"
+                    android:orientation="vertical">
 
                     <ImageView
-                        android:layout_width="30dp"
-                        android:layout_height="30dp"
+                        android:layout_width="23dp"
+                        android:layout_height="23dp"
                         android:src="@drawable/message" />
 
 
@@ -128,7 +137,34 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="20dp"
-                        android:text="상세보기" />
+                        android:text="바로문자"
+                        android:textSize="10sp"
+                        tools:ignore="SmallSp" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/linear_share"
+                    android:layout_width="0dp"
+                    android:layout_height="100dp"
+                    android:layout_marginEnd="5dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/alert_white_border"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <ImageView
+                        android:layout_width="23dp"
+                        android:layout_height="23dp"
+                        android:src="@drawable/share" />
+
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="20dp"
+                        android:text="공유"
+                        android:textSize="10sp" />
 
                 </LinearLayout>
 

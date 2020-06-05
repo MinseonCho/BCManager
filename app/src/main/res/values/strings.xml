@@ -10,4 +10,6 @@
                 "광양시","나주시","순천시","여수시","서귀포시","제주시"</string>
 
     <string name="kakao_app_key">016287f74b486a67fe9d9c19da199950</string>
+    <string name="kakao_scheme">kakao016287f74b486a67fe9d9c19da199950</string>
+    <string name="kakaolink_host">kakaolink</string>
 </resources>

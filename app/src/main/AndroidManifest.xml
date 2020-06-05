@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.example.bcmanager">
 
     <uses-permission android:name="android.permission.CAMERA" />
@@ -8,12 +9,9 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.CALL_PHONE"/>
-    <!-- 주소록 권한 -->
+    <uses-permission android:name="android.permission.CALL_PHONE" /> <!-- 주소록 권한 -->
     <uses-permission android:name="android.permission.READ_CONTACTS" />
     <uses-permission android:name="android.permission.WRITE_CONTACTS" />
-
-
 
     <uses-feature
         android:name="android.hardware.camera"
@@ -38,7 +36,7 @@
         android:smallScreens="true" />
 
     <application
-        android:name =".BCMApplication"
+        android:name=".BCMApplication"
         android:allowBackup="true"
         android:hardwareAccelerated="false"
         android:icon="@mipmap/ic_launcher"
@@ -47,28 +45,27 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <activity android:name=".SearchActivity"></activity>
 
         <meta-data
             android:name="com.kakao.sdk.AppKey"
-            android:value="@string/kakao_app_key" />
-        <!-- 카카오 로그인 시 웹 뷰를 띄우기 위한 코드 -->
+            android:value="@string/kakao_app_key" /> <!-- 카카오 로그인 시 웹 뷰를 띄우기 위한 코드 -->
         <activity
             android:name="com.kakao.auth.authorization.authcode.KakaoWebViewActivity"
             android:launchMode="singleTop"
             android:windowSoftInputMode="adjustResize">
-
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.DEFAULT"/>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-        <activity android:name=".DetailInfoActivity"></activity>
+        <activity android:name=".DetailInfoActivity" />
         <activity android:name=".CustomDialogForCard" />
         <activity android:name=".UserProfileActivity" />
         <activity android:name=".SignUpActivity" />
         <activity android:name=".LoginActivity" />
         <activity android:name=".ImageOCRActivity" />
-
         <activity android:name=".ConfirmCapture" />
         <activity android:name=".CameraActivity" />
         <activity android:name=".MainActivity">
@@ -77,9 +74,17 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+
+                <data
+                    android:scheme="@string/kakao_scheme"
+                    android:host="@string/kakaolink_host"
+                    tools:ignore="AppLinkUrlError" />
+            </intent-filter>
         </activity>
-
-
     </application>
 
 </manifest>

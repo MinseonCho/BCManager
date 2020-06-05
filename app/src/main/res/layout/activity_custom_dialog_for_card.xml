@@ -2,122 +2,231 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
+    android:layout_width="270dp"
     android:layout_height="wrap_content"
+    android:layout_marginStart="20dp"
+    android:layout_marginEnd="20dp"
     android:background="@drawable/alert_white_border"
     android:gravity="center_horizontal"
-    android:layout_marginStart="30dp"
-    android:layout_marginEnd="30dp"
-    android:paddingTop="30dp"
     android:paddingStart="20dp"
+    android:paddingTop="30dp"
     android:paddingEnd="20dp"
     android:paddingBottom="40dp">
 
     <LinearLayout
-        android:id="@+id/dialog_goToDetail_linear"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:gravity="center_horizontal"
-        android:orientation="vertical">
-
-        <ImageButton
-            android:id="@+id/dialog_goToDetail"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:background="@android:color/transparent"
-            android:scaleType="centerCrop"
-            android:src="@drawable/question" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/dialog_goToDetail"
-            android:layout_marginTop="10dp"
-            android:textStyle="bold"
-            android:textSize="10dp"
-            android:text="상세보기" />
-    </LinearLayout>
-
-
-    <LinearLayout
-        android:id="@+id/dialog_goToDial_linear"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="25dp"
-        android:layout_marginEnd="25dp"
-        android:layout_toRightOf="@+id/dialog_goToDetail_linear"
-        android:gravity="center_horizontal"
-        android:orientation="vertical">
-
-        <ImageButton
-            android:id="@+id/dialog_goToContact"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:background="@android:color/transparent"
-            android:scaleType="centerCrop"
-            android:src="@drawable/contacts" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/dialog_goToDetail"
-            android:layout_marginTop="10dp"
-            android:gravity="center"
-            android:textStyle="bold"
-            android:textSize="10dp"
-            android:text="연락처에\n추가하기" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/dialog_goToText_linear"
+        android:id="@+id/dialog_goToLink_linear"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="25dp"
-        android:layout_toRightOf="@+id/dialog_goToDial_linear"
         android:gravity="center_horizontal"
         android:orientation="vertical">
 
         <ImageButton
-            android:id="@+id/dialog_goToDial"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
+            android:id="@+id/dialog_goToLink"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
             android:background="@android:color/transparent"
             android:scaleType="centerCrop"
-            android:src="@drawable/phone" />
+            android:src="@drawable/link" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/dialog_goToDetail"
             android:layout_marginTop="10dp"
-            android:textStyle="bold"
+            android:text="링크복사"
             android:textSize="10dp"
-            android:text="전화하기" />
+            android:textStyle="bold" />
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/dialog_goToContact_linear"
+        android:layout_toRightOf="@+id/dialog_goToLink_linear"
+        android:id="@+id/dialog_goToKakao_linear"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toRightOf="@+id/dialog_goToText_linear"
+        android:gravity="center_horizontal"
+        android:layout_marginEnd="25dp"
+        android:orientation="vertical">
+
+        <ImageButton
+            android:id="@+id/dialog_goToKakao"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:background="@android:color/transparent"
+            android:scaleType="centerCrop"
+            android:src="@drawable/kakao_talk" />
+
+        <TextView
+            android:layout_gravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/dialog_goToDetail"
+            android:layout_marginTop="10dp"
+            android:text="카카오톡\n    공유"
+            android:textSize="10dp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_toRightOf="@+id/dialog_goToKakao_linear"
+        android:id="@+id/dialog_goToShare_linear"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:gravity="center_horizontal"
         android:orientation="vertical">
 
         <ImageButton
-            android:id="@+id/dialog_goToText"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
+            android:id="@+id/dialog_goToShare"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
             android:background="@android:color/transparent"
             android:scaleType="centerCrop"
-            android:src="@drawable/message" />
+            android:src="@drawable/more" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/dialog_goToDetail"
             android:layout_marginTop="10dp"
-            android:textStyle="bold"
+            android:text="더보기"
             android:textSize="10dp"
-            android:text="문자하기" />
+            android:textStyle="bold" />
     </LinearLayout>
+
+
+
+    <!--    <LinearLayout-->
+    <!--        android:id="@+id/dialog_goToDetail_linear"-->
+    <!--        android:layout_width="wrap_content"-->
+    <!--        android:layout_height="wrap_content"-->
+    <!--        android:gravity="center_horizontal"-->
+    <!--        android:orientation="vertical">-->
+
+    <!--        <ImageButton-->
+    <!--            android:id="@+id/dialog_goToDetail"-->
+    <!--            android:layout_width="30dp"-->
+    <!--            android:layout_height="30dp"-->
+    <!--            android:background="@android:color/transparent"-->
+    <!--            android:scaleType="centerCrop"-->
+    <!--            android:src="@drawable/question" />-->
+
+    <!--        <TextView-->
+    <!--            android:layout_width="wrap_content"-->
+    <!--            android:layout_height="wrap_content"-->
+    <!--            android:layout_below="@+id/dialog_goToDetail"-->
+    <!--            android:layout_marginTop="10dp"-->
+    <!--            android:textStyle="bold"-->
+    <!--            android:textSize="10dp"-->
+    <!--            android:text="상세보기" />-->
+    <!--    </LinearLayout>-->
+
+
+    <!--    <LinearLayout-->
+    <!--        android:id="@+id/dialog_goToDial_linear"-->
+    <!--        android:layout_width="wrap_content"-->
+    <!--        android:layout_height="wrap_content"-->
+    <!--        android:layout_marginStart="25dp"-->
+    <!--        android:layout_marginEnd="25dp"-->
+    <!--        android:layout_toRightOf="@+id/dialog_goToDetail_linear"-->
+    <!--        android:gravity="center_horizontal"-->
+    <!--        android:orientation="vertical">-->
+
+    <!--        <ImageButton-->
+    <!--            android:id="@+id/dialog_goToContact"-->
+    <!--            android:layout_width="30dp"-->
+    <!--            android:layout_height="30dp"-->
+    <!--            android:background="@android:color/transparent"-->
+    <!--            android:scaleType="centerCrop"-->
+    <!--            android:src="@drawable/contacts" />-->
+
+    <!--        <TextView-->
+    <!--            android:layout_width="wrap_content"-->
+    <!--            android:layout_height="wrap_content"-->
+    <!--            android:layout_below="@+id/dialog_goToDetail"-->
+    <!--            android:layout_marginTop="10dp"-->
+    <!--            android:gravity="center"-->
+    <!--            android:textStyle="bold"-->
+    <!--            android:textSize="10dp"-->
+    <!--            android:text="연락처에\n추가하기" />-->
+    <!--    </LinearLayout>-->
+
+    <!--    <LinearLayout-->
+    <!--        android:id="@+id/dialog_goToText_linear"-->
+    <!--        android:layout_width="wrap_content"-->
+    <!--        android:layout_height="wrap_content"-->
+    <!--        android:layout_marginEnd="25dp"-->
+    <!--        android:layout_toRightOf="@+id/dialog_goToDial_linear"-->
+    <!--        android:gravity="center_horizontal"-->
+    <!--        android:orientation="vertical">-->
+
+    <!--        <ImageButton-->
+    <!--            android:id="@+id/dialog_goToDial"-->
+    <!--            android:layout_width="30dp"-->
+    <!--            android:layout_height="30dp"-->
+    <!--            android:background="@android:color/transparent"-->
+    <!--            android:scaleType="centerCrop"-->
+    <!--            android:src="@drawable/phone" />-->
+
+    <!--        <TextView-->
+    <!--            android:layout_width="wrap_content"-->
+    <!--            android:layout_height="wrap_content"-->
+    <!--            android:layout_below="@+id/dialog_goToDetail"-->
+    <!--            android:layout_marginTop="10dp"-->
+    <!--            android:textStyle="bold"-->
+    <!--            android:textSize="10dp"-->
+    <!--            android:text="전화하기" />-->
+    <!--    </LinearLayout>-->
+
+    <!--    <LinearLayout-->
+    <!--        android:id="@+id/dialog_goToContact_linear"-->
+    <!--        android:layout_width="wrap_content"-->
+    <!--        android:layout_height="wrap_content"-->
+    <!--        android:layout_marginEnd="25dp"-->
+    <!--        android:layout_toRightOf="@+id/dialog_goToText_linear"-->
+    <!--        android:gravity="center_horizontal"-->
+    <!--        android:orientation="vertical">-->
+
+    <!--        <ImageButton-->
+    <!--            android:id="@+id/dialog_goToText"-->
+    <!--            android:layout_width="30dp"-->
+    <!--            android:layout_height="30dp"-->
+    <!--            android:background="@android:color/transparent"-->
+    <!--            android:scaleType="centerCrop"-->
+    <!--            android:src="@drawable/message" />-->
+
+    <!--        <TextView-->
+    <!--            android:layout_width="wrap_content"-->
+    <!--            android:layout_height="wrap_content"-->
+    <!--            android:layout_below="@+id/dialog_goToDetail"-->
+    <!--            android:layout_marginTop="10dp"-->
+    <!--            android:textStyle="bold"-->
+    <!--            android:textSize="10dp"-->
+    <!--            android:text="문자하기" />-->
+    <!--    </LinearLayout>-->
+
+    <!--    <LinearLayout-->
+    <!--        android:id="@+id/dialog_goToShare_linear"-->
+    <!--        android:layout_width="wrap_content"-->
+    <!--        android:layout_height="wrap_content"-->
+    <!--        android:layout_toRightOf="@+id/dialog_goToContact_linear"-->
+    <!--        android:gravity="center_horizontal"-->
+    <!--        android:orientation="vertical">-->
+
+    <!--        <ImageButton-->
+    <!--            android:id="@+id/dialog_goToShare"-->
+    <!--            android:layout_width="30dp"-->
+    <!--            android:layout_height="30dp"-->
+    <!--            android:background="@android:color/transparent"-->
+    <!--            android:scaleType="centerCrop"-->
+    <!--            android:src="@drawable/message" />-->
+
+    <!--        <TextView-->
+    <!--            android:layout_width="wrap_content"-->
+    <!--            android:layout_height="wrap_content"-->
+    <!--            android:layout_below="@+id/dialog_goToDetail"-->
+    <!--            android:layout_marginTop="10dp"-->
+    <!--            android:textStyle="bold"-->
+    <!--            android:textSize="10dp"-->
+    <!--            android:text="공유하기" />-->
+    <!--    </LinearLayout>-->
 </RelativeLayout>

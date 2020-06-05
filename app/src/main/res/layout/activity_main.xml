@@ -26,16 +26,16 @@
                 android:orientation="horizontal">
 
                 <TextView
-                    android:layout_marginTop="20dp"
                     android:id="@+id/welcome_text"
-                    android:textColor="@color/my_lightgray_sec"
-                    android:textStyle="bold"
-                    android:textSize="25dp"
-                    android:visibility="gone"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
                     android:lines="2"
                     android:paddingBottom="5dp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
+                    android:textColor="@color/my_lightgray_sec"
+                    android:textSize="25dp"
+                    android:textStyle="bold"
+                    android:visibility="gone" />
 
                 <!--                <ImageView-->
                 <!--                    android:layout_width="wrap_content"-->
@@ -60,27 +60,29 @@
                 android:layout_marginEnd="20dp"
                 android:layout_marginBottom="40dp"
                 android:gravity="center_horizontal"
-                android:weightSum="2">
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
+                android:weightSum="3">
 
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:gravity="center_horizontal"
-                    android:orientation="vertical">
+                    android:orientation="vertical"
+                    android:paddingEnd="2dp">
 
                     <ImageButton
                         android:id="@+id/clickToGallery"
-                        android:layout_width="100dp"
-                        android:layout_height="100dp"
-                        android:layout_marginStart="10dp"
+                        android:layout_width="80dp"
+                        android:layout_height="80dp"
                         android:background="@android:color/transparent"
+                        android:scaleType="centerCrop"
                         android:src="@drawable/menu_1" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="10dp"
                         android:layout_marginTop="5dp"
                         android:text="갤러리"
                         android:textColor="@android:color/darker_gray"
@@ -92,27 +94,52 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:gravity="center_horizontal"
-                    android:orientation="vertical">
+                    android:orientation="vertical"
+                    android:paddingEnd="2dp">
 
                     <ImageButton
                         android:id="@+id/clickToCamera"
-                        android:layout_width="100dp"
-                        android:layout_height="100dp"
-                        android:layout_marginEnd="10dp"
+                        android:layout_width="80dp"
+                        android:layout_height="80dp"
+                        android:layout_gravity="center_horizontal"
                         android:background="@android:color/transparent"
+                        android:scaleType="centerCrop"
                         android:src="@drawable/menu_2" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="5dp"
-                        android:layout_marginEnd="10dp"
                         android:text="카메라"
                         android:textColor="@android:color/darker_gray"
                         android:textStyle="bold" />
                 </LinearLayout>
-            </LinearLayout>
 
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center_horizontal"
+                    android:orientation="vertical"
+                    android:paddingEnd="2dp">
+
+                    <ImageButton
+                        android:id="@+id/clickToSearch"
+                        android:layout_width="80dp"
+                        android:layout_height="80dp"
+                        android:background="@android:color/transparent"
+                        android:scaleType="centerCrop"
+                        android:src="@drawable/menu_1" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="5dp"
+                        android:text="검색"
+                        android:textColor="@android:color/darker_gray"
+                        android:textStyle="bold" />
+                </LinearLayout>
+            </LinearLayout>
 
 
             <LinearLayout

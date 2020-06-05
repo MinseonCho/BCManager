@@ -47,6 +47,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.kakao.auth.Session;
+import com.kakao.usermgmt.UserManagement;
+import com.kakao.usermgmt.callback.LogoutResponseCallback;
 
 import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
@@ -85,6 +87,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 
     private ImageButton btn_click;
     private ImageButton btn_clickToCamera;
+    private ImageButton btn_clickToShare;
     private RecyclerView recyclerView;
     private CardRecyclerViewAdapter adapter;
     private TextView cnt_text;
@@ -173,6 +176,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 
         btn_click = findViewById(R.id.clickToGallery);
         btn_clickToCamera = findViewById(R.id.clickToCamera);
+        btn_clickToShare = findViewById(R.id.clickToSearch);
         recyclerView = findViewById(R.id.recyclerview);
         linearLayout = findViewById(R.id.layout_for_thread);
         cnt_text = findViewById(R.id.cnt_card);
@@ -281,10 +285,37 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
             }
         });
 
+        btn_clickToShare.setOnClickListener(new View.OnClickListener(){
+
+            @Override
+            public void onClick(View v) {
+                
+            }
+        });
+
         if (cnt > 0) {
             linearLayout.setVisibility(View.VISIBLE);
             cnt_text.setText(cnt + " 개의 명함을 인식 중 입니다!");
         }
+
+        //Receive a value from KakaoLink
+        try {
+            Intent intent = getIntent();
+            if (Intent.ACTION_VIEW.equals(intent.getAction())) {
+                Uri uri = intent.getData();
+                if (uri != null) {
+                    int card_number = Integer.parseInt(Objects.requireNonNull(uri.getQueryParameter("CARD_NUMBER")));
+                    Log.d("카카오카드넘버", String.valueOf(card_number));
+                }
+
+            }
+        } catch (NumberFormatException e) {
+            Log.d("카카오톡 ", "NumberFormatException " + e.getMessage());
+        } catch (RuntimeException e) {
+            Log.d("카카오톡 ", "RuntimeException " + e.getMessage());
+        }
+
+        //End of kakaolink
 
     }
 
@@ -594,11 +625,22 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                 startActivity(new Intent(this, LoginActivity.class));
                 return true;
             case R.id.menu_logout:
-                FirebaseAuth.getInstance().signOut();
+                if(myApp.loginType.equals("g")) {
+                    FirebaseAuth.getInstance().signOut();
+                }else{
+                    UserManagement.getInstance().requestLogout(new LogoutResponseCallback() {
+                        @Override
+                        public void onCompleteLogout() {
+                            Intent intent = new Intent(MainActivity.this, MainActivity.class);
+                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                            startActivity(intent);
+                        }
+                    });
+                }
                 finish();
-                startActivity(getIntent());
                 isLogined = false;
                 myApp.isLogined = false;
+                startActivity(getIntent());
                 return true;
             case R.id.menu_userinfo:
                 startActivity(new Intent(this, UserProfileActivity.class));
