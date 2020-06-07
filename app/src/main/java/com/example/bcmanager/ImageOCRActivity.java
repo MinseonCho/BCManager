@@ -67,13 +67,15 @@ public class ImageOCRActivity extends AppCompatActivity {
     private static ArrayList<String> textlist = new ArrayList<String>();
     private static ArrayList<String> city_address = new ArrayList<String>();
     private static ArrayList<String> city_number = new ArrayList<String>();
+    private static ArrayList<String> job_position = new ArrayList<String>();
     private static String ph;
     private static String nm;
     private static String ad;
     private static String em;
     private static String nb;
     private static String fx;
-
+    private static String po;
+    private static String temp;
 
 
 
@@ -106,6 +108,8 @@ public class ImageOCRActivity extends AppCompatActivity {
         em = "";
         nb = "";
         fx = "";
+        po = "";
+        temp = "";
 
         if( intent != null){
             byte[] bytes = intent.getByteArrayExtra("image");
@@ -236,6 +240,7 @@ public class ImageOCRActivity extends AppCompatActivity {
                 TextView emailDetail = activity.findViewById(R.id.email);
                 TextView numberDetail = activity.findViewById(R.id.number);
                 TextView faxDetail = activity.findViewById(R.id.fax);
+                TextView positionDetail = activity.findViewById(R.id.position);
                 imageDetail.setText(result);
                 phone_number.setText(ph);
                 nameDetail.setText(nm);
@@ -243,6 +248,7 @@ public class ImageOCRActivity extends AppCompatActivity {
                 emailDetail.setText(em);
                 numberDetail.setText(nb);
                 faxDetail.setText(fx);
+                positionDetail.setText(po);
             }
         }
     }
@@ -306,6 +312,7 @@ public class ImageOCRActivity extends AppCompatActivity {
         Log.d(TAG, String.valueOf(city_address));
 
         city_number.addAll(Arrays.asList("02","051","053","032","062","042","052","044","031","033","043","041","063","061","054","055","064"));
+        job_position.addAll(Arrays.asList("회장","부회장","사장","부사장","전무","상무","부장","차장","대리","과장","사원","팀장","이사","교수","대표","대표이사","점장","지점장"));
 
         int plus=0;
         for(int i=0;i<message.length();i++){
@@ -332,14 +339,33 @@ public class ImageOCRActivity extends AppCompatActivity {
                         ph += textlist.get(i).charAt(j);
                     }
                 }
-             else if (textlist.get(i).length() == 3)
-                nm = textlist.get(i);
 
              else if (textlist.get(i).contains("@")) {
                 if(em.length() < 2) {
                     em = textlist.get(i);
+
+                    if(textlist.get(i).contains("."))
+                        em = em.replace(".", "");
+
+                    if(textlist.get(i).contains("email"))
+                    em = em.replace("email", "");
+                    else if(textlist.get(i).contains("Email"))
+                    em = em.replace("Email", "");
+                    else if(textlist.get(i).contains("E-Mail"))
+                        em = em.replace("E-Mail", "");
+                    else if(textlist.get(i).contains("E-mail"))
+                        em = em.replace("E-mail", "");
+                    else if(textlist.get(i).contains("이메일:"))
+                        em = em.replace("이메일:", "");
                 }
             }
+
+            else if (textlist.get(i).contains(".com")){
+               if(em.length() < 2) {
+                   em = textlist.get(i);
+               }
+            }
+
             else if (textlist.get(i).contains("F.")) {
                 for (int j = 0; j < textlist.get(i).length(); j++) {
                     if (textlist.get(i).charAt(j) >= 48 && textlist.get(i).charAt(j) <= 57) {
@@ -367,12 +393,51 @@ public class ImageOCRActivity extends AppCompatActivity {
         Log.d(TAG,nm);
         Log.d(TAG,em);
 
-        for(int i = 0; i<textlist.size();i++){
+        loop:
+        for(int i = 0; i<textlist.size();i++) {
 
-                for(int j = 0; j<city_address.size();j++){
+            if (textlist.get(i).length() == 3)
+                nm = textlist.get(i);
 
-                    if(textlist.get(i).contains(city_address.get(j)))
-                        ad = textlist.get(i);
+            else if (textlist.get(i).length() == 5) {
+                if(nm.length() < 2) {
+                    for (int j = 0; j < job_position.size(); j++) {
+                        if (textlist.get(i).contains(job_position.get(j))) {
+                            temp = textlist.get(i);
+                            temp = temp.replace(job_position.get(j), "");
+                            nm = temp;
+                            break loop;
+                        }
+                    }
+                }
+            }
+            else if (textlist.get(i).length() == 7) {
+                if(nm.length() < 2) {
+                    for (int j = 0; j < job_position.size(); j++) {
+                        if (textlist.get(i).contains(job_position.get(j))) {
+                            temp = textlist.get(i);
+                            temp = temp.replace(job_position.get(j), "");
+                            nm = temp;
+                            break loop;
+                        }
+                    }
+                }
+            }
+        }
+
+        for(int i = 0; i<textlist.size();i++) {
+
+            for (int j = 0; j < city_address.size(); j++) {
+
+                if (textlist.get(i).contains(city_address.get(j)))
+                    ad = textlist.get(i);
+            }
+
+            for (int j = 0; j < job_position.size(); j++) {
+                if(po.length() < 2) {
+                    if (textlist.get(i).contains(job_position.get(j)))
+                        po = job_position.get(j);
+                }
             }
         }
         Log.d(TAG,ad);
