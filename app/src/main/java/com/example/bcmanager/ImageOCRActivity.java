@@ -64,6 +64,7 @@ public class ImageOCRActivity extends AppCompatActivity {
     private TextView  info_number;
     private TextView   info_address;
     private TextView   info_fax;
+    private TextView   info_memo;
     private static ArrayList<String> textlist = new ArrayList<String>();
     private static ArrayList<String> city_address = new ArrayList<String>();
     private static ArrayList<String> city_number = new ArrayList<String>();
@@ -98,6 +99,7 @@ public class ImageOCRActivity extends AppCompatActivity {
         info_number = findViewById(R.id.number);
         info_address = findViewById(R.id.address);
         info_fax = findViewById(R.id.fax);
+        info_memo = findViewById(R.id.memo);
 
         Intent intent = getIntent();
 
@@ -233,7 +235,7 @@ public class ImageOCRActivity extends AppCompatActivity {
         protected void onPostExecute(String result) {
             ImageOCRActivity activity = mActivityWeakReference.get();
             if (activity != null && !activity.isFinishing()) {
-                TextView imageDetail = activity.findViewById(R.id.company);
+                TextView imageDetail = activity.findViewById(R.id.memo);
                 TextView phone_number = activity.findViewById(R.id.phone);
                 TextView nameDetail = activity.findViewById(R.id.name);
                 TextView addressDetail = activity.findViewById(R.id.address);
@@ -255,7 +257,7 @@ public class ImageOCRActivity extends AppCompatActivity {
 
     private void callCloudVision(final Bitmap bitmap) {
         // Switch text to loading
-        info_company.setText("loading");
+        info_memo.setText("loading");
 
         // Do the real work in an async task, because we need to use the network anyway
         try {
@@ -363,6 +365,7 @@ public class ImageOCRActivity extends AppCompatActivity {
             else if (textlist.get(i).contains(".com")){
                if(em.length() < 2) {
                    em = textlist.get(i);
+//                   textlist = textlist.replaceAll(em.);
                }
             }
 
