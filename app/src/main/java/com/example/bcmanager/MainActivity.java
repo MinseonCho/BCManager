@@ -100,6 +100,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 
     private static final String TAG = "opencv";
     private static final int REQUEST_CODE_GALLERY = 200;
+    private static final int REQUEST_CODE = 300;
 
     public static HttpConnection httpConn;
     public static Context mContext;
@@ -117,7 +118,6 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
     private BCMApplication myApp;
 
     public native void RecognitionCard(long inputImage, long outputImage);
-
 
     static {
         System.loadLibrary("opencv_java4");
@@ -140,32 +140,9 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Log.d("메인액티비티","");
-//        getWindow().requestFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
-//        android.app.ActionBar actionBar = getActionBar();
-//        if (actionBar != null) {
-//            actionBar.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#330000ff")));
-//            actionBar.setStackedBackgroundDrawable(new ColorDrawable(Color.parseColor("#550000ff")));
-//        }
 
         mContext = this;
         myApp = (BCMApplication) getApplication();
-
-        //kakao login token check
-
-        //kakao intent
-
-//
-//        kUserIntent = getIntent();
-//        if(kUserIntent.hasExtra("kUserID")){
-//            uID = kUserIntent.getStringExtra("kUserID");
-//            Log.d("카카오 로긘?", uID);
-//        }
-//        if (kUserIntent != null) {
-//            uID = kUserIntent.getStringExtra("kUserID");
-//            Log.d("카카오 로긘?", uID);
-//        }
-
 
         //actionbar title 가운데
         Objects.requireNonNull(getSupportActionBar()).setDisplayShowTitleEnabled(false);
@@ -216,7 +193,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
             getCardInfo();
             welcome.setVisibility(View.VISIBLE);
             welcome.setText(myApp.userName + " 님 \n명함을 등록해보세요!");
-        }else{
+        } else {
             welcome.setVisibility(View.GONE);
         }
 
@@ -231,41 +208,8 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 
             @Override
             public void onClick(View v) {
-                Toast.makeText(getApplicationContext(), "갤러리로이동", Toast.LENGTH_SHORT).show();
-
-
-                Intent intent = new Intent(Intent.ACTION_PICK);
-                intent.setType(MediaStore.Images.Media.CONTENT_TYPE);
-                startActivityForResult(intent, REQUEST_CODE_GALLERY);
-                //갤러리로
-                //메소드를 불러서 결과를 outputImage에 저장.
-//                try {
-//                    InputStream is = getAssets().open("card2.jpg");
-//                    Bitmap bitmap = BitmapFactory.decodeStream(is);
-//
-//                    Mat image = new Mat();
-//                    Utils.bitmapToMat(bitmap, image);
-//                    Log.d("채널", String.valueOf(image.channels()));
-//                    Log.d("타입", String.valueOf(image.depth()));
-//
-//                    Mat output = new Mat();
-//
-//                    BlurImage(image.getNativeObjAddr(), output.getNativeObjAddr());
-//
-//                    if(output != null && image != null) {
-//                        Bitmap bitmapOutput = Bitmap.createBitmap(output.cols(), output.rows(), Bitmap.Config.RGB_565);
-//                        Utils.matToBitmap(output, bitmapOutput);
-//                        Bitmap bitmapInput = Bitmap.createBitmap(image.cols(), image.rows(), Bitmap.Config.ARGB_8888);
-//                        Utils.matToBitmap(image, bitmapInput);
-//                        outputImage.setImageBitmap(bitmapOutput);
-//                        inputImage.setImageBitmap(bitmapInput);
-//                    }
-//                    Log.d("output채널", String.valueOf(output.channels()));
-//                    Log.d("output타입", String.valueOf(output.depth()));
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-
+                Intent intent1 = new Intent(getApplicationContext(), ConfirmCapture.class);
+                startActivityForResult(intent1, REQUEST_CODE);
             }
         });
 
@@ -285,11 +229,11 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
             }
         });
 
-        btn_clickToShare.setOnClickListener(new View.OnClickListener(){
+        btn_clickToShare.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
-                
+
             }
         });
 
@@ -307,7 +251,6 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                     int card_number = Integer.parseInt(Objects.requireNonNull(uri.getQueryParameter("CARD_NUMBER")));
                     Log.d("카카오카드넘버", String.valueOf(card_number));
                 }
-
             }
         } catch (NumberFormatException e) {
             Log.d("카카오톡 ", "NumberFormatException " + e.getMessage());
@@ -399,19 +342,19 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                 }
             }
         }
-        if (requestCode == REQUEST_CODE_GALLERY) {
+        if (requestCode == REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
+                //        val intent = intent
+                if (data != null) {
+                    byte[] bytes = data.getByteArrayExtra("image");
+                    final Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
 
-                assert data != null;
-                final Uri dataUri = data.getData();
-
-                final Thread thread = new Thread((new Runnable() {
-                    @Override
-                    public void run() {
-                        //ui 작업 수행x
-                        Looper.prepare();
-                        MessageQueue messageQueue = Looper.myQueue();
-                        try {
+                    final Thread thread = new Thread((new Runnable() {
+                        @Override
+                        public void run() {
+                            //ui 작업 수행x
+                            Looper.prepare();
+                            MessageQueue messageQueue = Looper.myQueue();
 
                             mHandler.post(new Runnable() {
                                 @Override
@@ -426,38 +369,31 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                                     }
                                 }
                             });
-                            String filePath = getRealPathFromURI(dataUri);
-                            String file_extn = filePath.substring(filePath.lastIndexOf(".") + 1);
-                            InputStream in = null;
-                            if (dataUri != null)
-                                in = getContentResolver().openInputStream(dataUri);
 
-                            Bitmap img = BitmapFactory.decodeStream(in);
-                            in.close();
 
-                            Log.d("사이즈", String.valueOf(img.getWidth()) + " " + String.valueOf(img.getHeight()));
+                            Log.d("사이즈", String.valueOf(bitmap.getWidth()) + " " + String.valueOf(bitmap.getHeight()));
 
-                            String date = new SimpleDateFormat("yyyy_MM_dd_hh_mm_ss").format(new Date());
-                            File tempSelectFile = new File(getFilesDir().getPath(), date + "." + file_extn);
-                            OutputStream out = new FileOutputStream(tempSelectFile);
-                            img.compress(Bitmap.CompressFormat.JPEG, 40, out);
+//                                String date = new SimpleDateFormat("yyyy_MM_dd_hh_mm_ss").format(new Date());
+//                                File tempSelectFile = new File(getFilesDir().getPath(), date + "." + file_extn);
+//                                OutputStream out = new FileOutputStream(tempSelectFile);
+//                                bitmap.compress(Bitmap.CompressFormat.JPEG, 40, out);
+//
+//                                Bitmap image = BitmapFactory.decodeFile(tempSelectFile.getPath());
+//                                out.close();
 
-                            Bitmap image = BitmapFactory.decodeFile(tempSelectFile.getPath());
-                            out.close();
-
-                            Log.d("image사이즈", String.valueOf(image.getWidth()) + " " + String.valueOf(image.getHeight()));
+                            Log.d("image사이즈", String.valueOf(bitmap.getWidth()) + " " + String.valueOf(bitmap.getHeight()));
 //                    Bitmap test = getResizedBitmap(image, 1500,843);
 //                    Log.d("test사이즈", String.valueOf(test.getWidth()) + " "+ String.valueOf(test.getHeight()));
 
-                            double image_height = image.getHeight();
-                            double image_width = image.getWidth();
+                            double image_height = bitmap.getHeight();
+                            double image_width = bitmap.getWidth();
                             double tmps = image_width / device_width;
                             int dst_height = (int) (image_height / (image_width / device_width));
                             Log.d("tmps", String.valueOf(tmps));
                             Log.d("image_height", String.valueOf(image_height));
                             Log.d("image_width", String.valueOf(image_width));
                             Log.d("dst_height", String.valueOf(dst_height));
-                            image = Bitmap.createScaledBitmap(image, device_width, dst_height, true);
+                            Bitmap image = Bitmap.createScaledBitmap(bitmap, device_width, dst_height, true);
 
                             Mat mat_img = new Mat();
                             Utils.bitmapToMat(image, mat_img);
@@ -466,8 +402,6 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 
                             RecognitionCard(mat_img.getNativeObjAddr(), output.getNativeObjAddr());
 
-                            Log.d("눌", output.toString());
-                            Log.d("눌", String.valueOf(output.empty()));
                             if (!output.empty()) {
 
                                 Bitmap bitmapOutput = Bitmap.createBitmap(output.cols(), output.rows(), Bitmap.Config.RGB_565);
@@ -499,18 +433,164 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                                 }
                             });
                             Looper.loop();
-                        }
-                        //image resize
-                        catch (FileNotFoundException e) {
-                            e.printStackTrace();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
 
 
-                    }
-                }));
-                thread.start();
+                        }
+                    }));
+                    thread.start();
+
+                }
+            }
+        }
+//        if (requestCode == REQUEST_CODE_GALLERY) {
+//            if (resultCode == RESULT_OK) {
+//                assert data != null;
+//                Uri dataUri = data.getData();
+//
+//
+//                String filePath = getRealPathFromURI(dataUri);
+//                String file_extn = filePath.substring(filePath.lastIndexOf(".") + 1);
+//                InputStream in = null;
+//                try {
+//                    in = getContentResolver().openInputStream(dataUri);
+//                    Bitmap img = BitmapFactory.decodeStream(in);
+//                    in.close();
+//                    Log.d("사이즈", String.valueOf(img.getWidth()) + " " + String.valueOf(img.getHeight()));
+//
+//                    String date = new SimpleDateFormat("yyyy_MM_dd_hh_mm_ss").format(new Date());
+//                    File tempSelectFile = new File(getFilesDir().getPath(), date + "." + file_extn);
+//                    OutputStream out = new FileOutputStream(tempSelectFile);
+//                    img.compress(Bitmap.CompressFormat.JPEG, 40, out);
+//
+//                    Bitmap image = BitmapFactory.decodeFile(tempSelectFile.getPath());
+//                    out.close();
+//
+//                    ByteArrayOutputStream stream = new ByteArrayOutputStream();
+//                    image.compress(Bitmap.CompressFormat.JPEG, 60, stream);
+//                    byte[] byteArray = stream.toByteArray();
+//
+//                    Intent intent = new Intent(getApplicationContext(), ConfirmCapture.class);
+//                    intent.putExtra("image", byteArray);
+//                    startActivityForResult(intent, 300);
+//
+//                } catch (FileNotFoundException e) {
+//                    e.printStackTrace();
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+
+
+        // ///////////////////
+//                assert data != null;
+//                final Uri dataUri = data.getData();
+//
+//                               final Thread thread = new Thread((new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        //ui 작업 수행x
+//                        Looper.prepare();
+//                        MessageQueue messageQueue = Looper.myQueue();
+//                        try {
+//
+//                            mHandler.post(new Runnable() {
+//                                @Override
+//                                public void run() {
+//                                    //ui 작업 수행o
+//                                    cnt++;
+//                                    if (cnt > 0) {
+//                                        linearLayout.setVisibility(View.VISIBLE);
+//                                        cnt_text.setText(cnt + " 개의 명함을 인식 중 입니다!");
+//                                    } else {
+//                                        linearLayout.setVisibility(View.GONE);
+//                                    }
+//                                }
+//                            });
+//                            String filePath = getRealPathFromURI(dataUri);
+//                            String file_extn = filePath.substring(filePath.lastIndexOf(".") + 1);
+//                            InputStream in = null;
+//                            if (dataUri != null)
+//                                in = getContentResolver().openInputStream(dataUri);
+//
+//                            Bitmap img = BitmapFactory.decodeStream(in);
+//                            in.close();
+//
+//                            Log.d("사이즈", String.valueOf(img.getWidth()) + " " + String.valueOf(img.getHeight()));
+//
+//                            String date = new SimpleDateFormat("yyyy_MM_dd_hh_mm_ss").format(new Date());
+//                            File tempSelectFile = new File(getFilesDir().getPath(), date + "." + file_extn);
+//                            OutputStream out = new FileOutputStream(tempSelectFile);
+//                            img.compress(Bitmap.CompressFormat.JPEG, 40, out);
+//
+//                            Bitmap image = BitmapFactory.decodeFile(tempSelectFile.getPath());
+//                            out.close();
+//
+//                            Log.d("image사이즈", String.valueOf(image.getWidth()) + " " + String.valueOf(image.getHeight()));
+////                    Bitmap test = getResizedBitmap(image, 1500,843);
+////                    Log.d("test사이즈", String.valueOf(test.getWidth()) + " "+ String.valueOf(test.getHeight()));
+//
+//                            double image_height = image.getHeight();
+//                            double image_width = image.getWidth();
+//                            double tmps = image_width / device_width;
+//                            int dst_height = (int) (image_height / (image_width / device_width));
+//                            Log.d("tmps", String.valueOf(tmps));
+//                            Log.d("image_height", String.valueOf(image_height));
+//                            Log.d("image_width", String.valueOf(image_width));
+//                            Log.d("dst_height", String.valueOf(dst_height));
+//                            image = Bitmap.createScaledBitmap(image, device_width, dst_height, true);
+//
+//                            Mat mat_img = new Mat();
+//                            Utils.bitmapToMat(image, mat_img);
+//
+//                            Mat output = new Mat();
+//
+//                            RecognitionCard(mat_img.getNativeObjAddr(), output.getNativeObjAddr());
+//
+//                            if (!output.empty()) {
+//
+//                                Bitmap bitmapOutput = Bitmap.createBitmap(output.cols(), output.rows(), Bitmap.Config.RGB_565);
+//                                Utils.matToBitmap(output, bitmapOutput);
+//
+//                                ByteArrayOutputStream stream = new ByteArrayOutputStream();
+//                                bitmapOutput.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+//                                byte[] byteArray = stream.toByteArray();
+//
+//                                Intent intent = new Intent(getApplicationContext(), ImageOCRActivity.class);
+//                                intent.putExtra("image", byteArray);
+//                                startActivity(intent);
+//                            } else {
+//                                Toast.makeText(getApplicationContext(), "다시 시도해주세요.", Toast.LENGTH_SHORT).show();
+//                            }
+//
+//                            mHandler.post(new Runnable() {
+//                                @Override
+//                                public void run() {
+//                                    //ui 작업 수행o
+//                                    cnt--;
+//                                    if (cnt > 0) {
+//                                        linearLayout.setVisibility(View.VISIBLE);
+//                                        cnt_text.setText(cnt + " 개의 명함을 인식 중 입니다!");
+//                                    } else {
+//                                        linearLayout.setVisibility(View.GONE);
+//                                    }
+//
+//                                }
+//                            });
+//                            Looper.loop();
+//                        }
+//                        //image resize
+//                        catch (FileNotFoundException e) {
+//                            e.printStackTrace();
+//                        } catch (IOException e) {
+//                            e.printStackTrace();
+//                        }
+//
+//
+//                    }
+//                }));
+//                thread.start();
+
+
+        // /////////////////////
 
 //                    ByteArrayOutputStream stream = new ByteArrayOutputStream();
 //                    test.compress(Bitmap.CompressFormat.JPEG, 60, stream);
@@ -563,12 +643,12 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 //                    });
 
 
-            }
-        }
+//            }
+//        }
     }
 
 
-    private String getRealPathFromURI(Uri contentUri) {
+    public String getRealPathFromURI(Uri contentUri) {
 
         String[] proj = {MediaStore.Images.Media.DATA};
         Cursor cursor = getContentResolver().query(contentUri, proj, null, null, null);
@@ -625,9 +705,9 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                 startActivity(new Intent(this, LoginActivity.class));
                 return true;
             case R.id.menu_logout:
-                if(myApp.loginType.equals("g")) {
+                if (myApp.loginType.equals("g")) {
                     FirebaseAuth.getInstance().signOut();
-                }else{
+                } else {
                     UserManagement.getInstance().requestLogout(new LogoutResponseCallback() {
                         @Override
                         public void onCompleteLogout() {
@@ -686,14 +766,14 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
             Log.d("INFOUID", user.getUid() + "");
             Log.d("INFOphotourl", String.valueOf(user.getPhotoUrl()) + "");
             myApp.userID = user.getUid().toString();
-            myApp.loginType ="g";
+            myApp.loginType = "g";
             myApp.userEmail = user.getEmail();
-            myApp.userImage = user.getPhotoUrl().toString();
+            if(user.getPhotoUrl() != null) myApp.userImage = user.getPhotoUrl().toString();
             myApp.userName = user.getDisplayName();
             myApp.isLogined = true;
             welcome.setVisibility(View.VISIBLE);
             welcome.setText(user.getDisplayName() + " 님 \n명함을 등록해보세요!");
-        }else {
+        } else {
             welcome.setVisibility(View.GONE);
             // No user is signed in
             Log.d(TAG_, "null");
@@ -704,7 +784,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
     }
 
     void getCardInfo() {
-        Log.d("카드가져오기","");
+        Log.d("카드가져오기", "");
         try {
             httpConn = new HttpConnection(new URL(GET_CARDS_INFO));
             httpConn.requestGetCards(myApp.userID, new OnRequestCompleteListener() {

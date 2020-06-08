@@ -23,6 +23,18 @@
                 android:layout_height="200dp"
                 android:layout_marginBottom="10dp"/>
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text=" 추출 정보가 잘못된 경우 아래 MEMO에서 복사하여 수정해 주세요.\n" />
+            </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -168,7 +180,27 @@
                     android:layout_height="wrap_content" />
             </LinearLayout>
 
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="MEMO" />
+
+                <EditText
+                    android:id="@+id/memo"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+
             <Button
+                android:id="@+id/ocrbtn"
                 android:text="완료"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"/>

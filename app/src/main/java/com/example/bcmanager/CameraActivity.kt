@@ -8,6 +8,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Matrix
+import android.graphics.Point
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -18,15 +19,14 @@ import android.widget.LinearLayout
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import com.bumptech.glide.Glide
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import org.opencv.android.*
 import org.opencv.core.CvType
 import org.opencv.core.Mat
 import java.io.ByteArrayOutputStream
-import java.nio.ByteBuffer
 import java.util.*
 import java.util.concurrent.Semaphore
+import kotlin.collections.ArrayList
 
 
 class CameraActivity : AppCompatActivity(), CameraBridgeViewBase.CvCameraViewListener2 {
@@ -34,7 +34,8 @@ class CameraActivity : AppCompatActivity(), CameraBridgeViewBase.CvCameraViewLis
     private val TAG = "opencv"
     private var matInput: Mat? = null
     private var matResult: Mat? = null
-
+    var approxList: ArrayList<Point>? = null
+    var resultt: FloatArray? = null
 
     // These variables are used (at the moment) to fix camera orientation from 270degree to 0degree
     var mRgba: Mat? = null
@@ -52,7 +53,8 @@ class CameraActivity : AppCompatActivity(), CameraBridgeViewBase.CvCameraViewLis
     private var btnReject: FloatingActionButton? = null
     private var btnAccept: FloatingActionButton? = null
     private var bitmapImage: Bitmap? = null
-    private external fun ConvertRGBtoGray(matAddrInput: Long, matAddrResult: Long)
+    private external fun ConvertRGBtoGray(matAddrInput: Long, matAddrResult: Long): FloatArray
+    private external fun ImageProcessing(output: Long)
 
     private var showPreviews = false
 
@@ -76,31 +78,46 @@ class CameraActivity : AppCompatActivity(), CameraBridgeViewBase.CvCameraViewLis
             when (status) {
                 LoaderCallbackInterface.SUCCESS -> {
                     button!!.setOnClickListener {
-
-
                         showPreviews = !showPreviews;
                         val tmpImage = matResult;
-                        bitmapImage = Bitmap.createBitmap(tmpImage!!.cols(), tmpImage.rows(), Bitmap.Config.RGB_565)
-                        Utils.matToBitmap(tmpImage, bitmapImage)
+//                        bitmapImage = Bitmap.createBitmap(tmpImage!!.cols(), tmpImage.rows(), Bitmap.Config.RGB_565)
+                        Log.d("단계", "1")
+//                        val my: Vector<PointF> = Vector()
+//                        my.add(PointF(resultt!!.get(0), resultt!!.get(1)))
+//                        my.add(PointF(resultt!!.get(2), resultt!!.get(3)))
+//                        my.add(PointF(resultt!!.get(4), resultt!!.get(5)))
+//                        my.add(PointF(resultt!!.get(6), resultt!!.get(7)))
 
-                        val matrix: Matrix = Matrix()
-                        matrix.postRotate(90F)
 
-                        rotatedBitmap = Bitmap.createBitmap(bitmapImage, 0, 0, bitmapImage!!.getWidth(), bitmapImage!!.getHeight(), matrix, true)
-                        Log.d("흐음2", rotatedBitmap!!.width.toString() + rotatedBitmap!!.height)
-                        Log.d("흐음23", bitmapImage!!.width.toString() + bitmapImage!!.height)
-                        image?.setImageBitmap(rotatedBitmap)
-                        llBottom!!.visibility = View.VISIBLE
-                        button!!.hide()
-                        mOpenCvCameraView!!.disableView()
+//                        val mat_img = Mat()
+//                        Utils.bitmapToMat(bitmapImage, mat_img)
+//
+//
+                        ImageProcessing(tmpImage!!.nativeObjAddr)
+                        Log.d("단계", "1.1")
+                        val resultBitmap =
+                                Bitmap.createBitmap(tmpImage.cols(), tmpImage.rows(), Bitmap.Config.RGB_565)
+
+                        if (tmpImage != null) {
+                            Log.d("단계", "2")
+                            Utils.matToBitmap(tmpImage, resultBitmap)
+
+                            val matrix: Matrix = Matrix()
+                            matrix.postRotate(90F)
+
+                            rotatedBitmap = Bitmap.createBitmap(resultBitmap, 0, 0, resultBitmap!!.getWidth(), resultBitmap!!.height, matrix, true)
+
+
+                            image?.setImageBitmap(resultBitmap)
+
+                            llBottom!!.visibility = View.VISIBLE
+                            button!!.hide()
+                            mOpenCvCameraView!!.disableView()
+                        }
+
+
                     }
                     btnAccept!!.setOnClickListener {
-//                        mOpenCvCameraView!!.disableView()
-                        //바로 디비에 넣어버려
-                        Log.d("1", "1");
-
-//                        val result = (mContext as MainActivity).getResizedBitmap(bitmapImage, 1500, 843);
-                        Log.d("12", "1");
 
                         val stream = ByteArrayOutputStream()
                         rotatedBitmap?.compress(Bitmap.CompressFormat.JPEG, 60, stream)
@@ -169,6 +186,9 @@ class CameraActivity : AppCompatActivity(), CameraBridgeViewBase.CvCameraViewLis
         supportActionBar!!.displayOptions = ActionBar.DISPLAY_SHOW_CUSTOM // 커스텀 사용
         supportActionBar!!.setCustomView(R.layout.actionbar_title) // 커스텀 사용할 파일 위치
         supportActionBar!!.title = "카메라"
+
+        approxList = ArrayList()
+        resultt = FloatArray(8)
 
         mOpenCvCameraView = findViewById(R.id.activity_surface_view);
         mOpenCvCameraView!!.visibility = SurfaceView.VISIBLE;
@@ -270,8 +290,10 @@ class CameraActivity : AppCompatActivity(), CameraBridgeViewBase.CvCameraViewLis
         if (!showPreviews) {
             matInput = inputFrame!!.rgba()
             if (matResult == null) matResult = Mat(matInput!!.rows(), matInput!!.cols(), matInput!!.type())
-            ConvertRGBtoGray(matInput!!.getNativeObjAddr(), matResult!!.getNativeObjAddr())
+            resultt = ConvertRGBtoGray(matInput!!.getNativeObjAddr(), matResult!!.getNativeObjAddr())
+
         }
+
         return matResult as Mat
 
     }
