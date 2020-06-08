@@ -141,7 +141,6 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
         mContext = this;
         myApp = (BCMApplication) getApplication();
 
@@ -166,7 +165,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 
         checkCurrentUser();
         Session.getCurrentSession().checkAndImplicitOpen();
-//        getAppKeyHash();
+        getAppKeyHash();
 
 
         //handler
