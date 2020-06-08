@@ -36,6 +36,7 @@
         android:smallScreens="true" />
 
     <application
+        android:usesCleartextTraffic="true"
         android:name=".BCMApplication"
         android:allowBackup="true"
         android:hardwareAccelerated="false"
