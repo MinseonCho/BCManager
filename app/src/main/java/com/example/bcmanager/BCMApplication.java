@@ -3,6 +3,9 @@ package com.example.bcmanager;
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
+import android.provider.MediaStore;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -114,6 +117,16 @@ public class BCMApplication extends Application {
         KakaoSDK.init(new KakaoSDKAdapter());
 
 
+    }
+
+    public String getRealPathFromURI(Context context, Uri contentUri) {
+
+        String[] proj = {MediaStore.Images.Media.DATA};
+        Cursor cursor = context.getContentResolver().query(contentUri, proj, null, null, null);
+        assert cursor != null;
+        cursor.moveToFirst();
+        int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+        return cursor.getString(column_index);
     }
 
     @Override

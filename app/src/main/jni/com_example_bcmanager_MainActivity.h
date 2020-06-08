@@ -16,6 +16,7 @@
 #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR , LOG_TAG, __VA_ARGS__)
 
 
+
 extern "C" {
 #endif
 #undef com_example_bcmanager_MainActivity_CAMERA_PERMISSION_REQUEST_CODE
@@ -25,10 +26,12 @@ extern "C" {
  * Method:    ConvertRGBtoGray
  * Signature: (JJ)V
  */
-JNIEXPORT void JNICALL Java_com_example_bcmanager_CameraActivity_ConvertRGBtoGray
+JNIEXPORT jfloatArray JNICALL Java_com_example_bcmanager_CameraActivity_ConvertRGBtoGray
   (JNIEnv *, jobject, jlong, jlong);
 JNIEXPORT void JNICALL Java_com_example_bcmanager_MainActivity_RecognitionCard(JNIEnv *env, jobject thiz, jlong input_image,
                                                                          jlong output_image);
+JNIEXPORT void JNICALL
+Java_com_example_bcmanager_CameraActivity_ImageProcessing(JNIEnv *env, jobject thiz, jlong output);
 
 #ifdef __cplusplus
 }
