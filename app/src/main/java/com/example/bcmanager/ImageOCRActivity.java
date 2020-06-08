@@ -3,6 +3,7 @@ package com.example.bcmanager;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -13,6 +14,8 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -32,17 +35,25 @@ import com.google.api.services.vision.v1.model.EntityAnnotation;
 import com.google.api.services.vision.v1.model.Feature;
 import com.google.api.services.vision.v1.model.Image;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.lang.ref.WeakReference;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
+
 public class ImageOCRActivity extends AppCompatActivity {
 
     private static final String CLOUD_VISION_API_KEY = "";
+    public static String CARD_INPUT = "http://104.197.171.112/card_input.php";
     public static final String FILE_NAME = "temp.jpg";
     private static final String ANDROID_CERT_HEADER = "X-Android-Cert";
     private static final String ANDROID_PACKAGE_HEADER = "X-Android-Package";
@@ -88,6 +99,7 @@ public class ImageOCRActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM); // 커스텀 사용
         getSupportActionBar().setCustomView(R.layout.actionbar_title_nobtn); // 커스텀 사용할 파일 위치
         getSupportActionBar().setTitle("BCManager");
+        findViewById(R.id.ocrbtn).setOnClickListener((mClickListener));
 
 
         cardImage = findViewById(R.id.card_image);
@@ -102,6 +114,7 @@ public class ImageOCRActivity extends AppCompatActivity {
         info_memo = findViewById(R.id.memo);
 
         Intent intent = getIntent();
+
 
         textlist.clear();
         ph = "";
@@ -122,6 +135,19 @@ public class ImageOCRActivity extends AppCompatActivity {
         }
 
     }
+
+    Button.OnClickListener mClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+
+            nm = info_name.getText().toString();
+            ph = info_phone.getText().toString();
+
+
+            InsertData task = new InsertData();
+            task.execute(CARD_INPUT,nm,ph);
+        }
+    };
 
     public void uploadImage(Bitmap bitmap) {
         if (bitmap != null) {
@@ -467,4 +493,97 @@ public class ImageOCRActivity extends AppCompatActivity {
 
         return message.toString();
     }
+
+    class InsertData extends AsyncTask<String, Void, String>{
+        ProgressDialog progressDialog;
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+
+            progressDialog = ProgressDialog.show(ImageOCRActivity.this,
+                    "Please Wait", null, true, true);
+        }
+
+
+        @Override
+        protected void onPostExecute(String result) {
+            super.onPostExecute(result);
+
+            progressDialog.dismiss();
+          //  mTextViewResult.setText("입력되었습니다.");
+            Log.d(TAG, "POST response  - " + result);
+        }
+
+
+        @Override
+        protected String doInBackground(String... params) {
+
+            String nm = (String)params[1];
+            String ph = (String)params[2];
+
+            String serverURL = (String)params[0];
+            String postParameters = "nm=" + nm + "&ph=" + ph;
+
+            Log.d(TAG,"ddongmmong" + serverURL);
+            Log.d(TAG,"ddongmmong"+postParameters);
+
+
+            try {
+
+                URL url = new URL(serverURL);
+                HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
+
+
+                httpURLConnection.setReadTimeout(5000);
+                httpURLConnection.setConnectTimeout(5000);
+                httpURLConnection.setRequestMethod("POST");
+                httpURLConnection.connect();
+
+
+                OutputStream outputStream = httpURLConnection.getOutputStream();
+                outputStream.write(postParameters.getBytes("UTF-8"));
+                outputStream.flush();
+                outputStream.close();
+
+
+                int responseStatusCode = httpURLConnection.getResponseCode();
+                Log.d(TAG, "POST response code - " + responseStatusCode);
+
+                InputStream inputStream;
+                if(responseStatusCode == HttpURLConnection.HTTP_OK) {
+                    inputStream = httpURLConnection.getInputStream();
+                }
+                else{
+                    inputStream = httpURLConnection.getErrorStream();
+                }
+
+
+                InputStreamReader inputStreamReader = new InputStreamReader(inputStream, "UTF-8");
+                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+
+                StringBuilder sb = new StringBuilder();
+                String line = null;
+
+                while((line = bufferedReader.readLine()) != null){
+                    sb.append(line);
+                }
+
+
+                bufferedReader.close();
+
+
+                return sb.toString();
+
+
+            } catch (Exception e) {
+
+                Log.d(TAG, "InsertData: Error ", e);
+
+                return new String("Error: " + e.getMessage());
+            }
+
+        }
+    }
+
 }
