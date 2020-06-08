@@ -81,6 +81,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
     public static String SIGNUP_URL = "http://104.197.171.112/signup.php";
     public static String GET_CARDS_INFO = "http://104.197.171.112/get_cards.php";
     public static String GET_CARD_INFO = "http://104.197.171.112/get_card.php";
+    public static String CARD_INPUT = "http://104.197.171.112/card_input.php";
     /**
      * end
      */
