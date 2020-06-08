@@ -54,6 +54,8 @@ class ConfirmCapture : AppCompatActivity(), View.OnClickListener {
                 `in`.close()
 
                 test_image.setImageBitmap(bitImage)
+            }else{
+                finish()
             }
         }
     }

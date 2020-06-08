@@ -6,7 +6,9 @@ import android.app.Activity
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.res.ColorStateList
 import android.graphics.Bitmap
+import android.graphics.Color
 import android.graphics.Matrix
 import android.graphics.Point
 import android.os.Build
@@ -20,6 +22,8 @@ import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import kotlinx.android.synthetic.main.activity_camera.*
+import kotlinx.android.synthetic.main.activity_confirm_capture.*
 import org.opencv.android.*
 import org.opencv.core.CvType
 import org.opencv.core.Mat
@@ -35,7 +39,7 @@ class CameraActivity : AppCompatActivity(), CameraBridgeViewBase.CvCameraViewLis
     private var matInput: Mat? = null
     private var matResult: Mat? = null
     var approxList: ArrayList<Point>? = null
-    var resultt: FloatArray? = null
+    var flag: Int? = null
 
     // These variables are used (at the moment) to fix camera orientation from 270degree to 0degree
     var mRgba: Mat? = null
@@ -53,7 +57,7 @@ class CameraActivity : AppCompatActivity(), CameraBridgeViewBase.CvCameraViewLis
     private var btnReject: FloatingActionButton? = null
     private var btnAccept: FloatingActionButton? = null
     private var bitmapImage: Bitmap? = null
-    private external fun ConvertRGBtoGray(matAddrInput: Long, matAddrResult: Long): FloatArray
+    private external fun ConvertRGBtoGray(matAddrInput: Long, matAddrResult: Long): Int
     private external fun ImageProcessing(output: Long)
 
     private var showPreviews = false
@@ -78,10 +82,10 @@ class CameraActivity : AppCompatActivity(), CameraBridgeViewBase.CvCameraViewLis
             when (status) {
                 LoaderCallbackInterface.SUCCESS -> {
                     button!!.setOnClickListener {
+                        image_linear!!.visibility = View.VISIBLE
                         showPreviews = !showPreviews;
                         val tmpImage = matResult;
 //                        bitmapImage = Bitmap.createBitmap(tmpImage!!.cols(), tmpImage.rows(), Bitmap.Config.RGB_565)
-                        Log.d("단계", "1")
 //                        val my: Vector<PointF> = Vector()
 //                        my.add(PointF(resultt!!.get(0), resultt!!.get(1)))
 //                        my.add(PointF(resultt!!.get(2), resultt!!.get(3)))
@@ -94,12 +98,10 @@ class CameraActivity : AppCompatActivity(), CameraBridgeViewBase.CvCameraViewLis
 //
 //
                         ImageProcessing(tmpImage!!.nativeObjAddr)
-                        Log.d("단계", "1.1")
                         val resultBitmap =
                                 Bitmap.createBitmap(tmpImage.cols(), tmpImage.rows(), Bitmap.Config.RGB_565)
 
                         if (tmpImage != null) {
-                            Log.d("단계", "2")
                             Utils.matToBitmap(tmpImage, resultBitmap)
 
                             val matrix: Matrix = Matrix()
@@ -107,8 +109,7 @@ class CameraActivity : AppCompatActivity(), CameraBridgeViewBase.CvCameraViewLis
 
                             rotatedBitmap = Bitmap.createBitmap(resultBitmap, 0, 0, resultBitmap!!.getWidth(), resultBitmap!!.height, matrix, true)
 
-
-                            image?.setImageBitmap(resultBitmap)
+                            image?.setImageBitmap(rotatedBitmap)
 
                             llBottom!!.visibility = View.VISIBLE
                             button!!.hide()
@@ -120,7 +121,7 @@ class CameraActivity : AppCompatActivity(), CameraBridgeViewBase.CvCameraViewLis
                     btnAccept!!.setOnClickListener {
 
                         val stream = ByteArrayOutputStream()
-                        rotatedBitmap?.compress(Bitmap.CompressFormat.JPEG, 60, stream)
+                        rotatedBitmap?.compress(Bitmap.CompressFormat.JPEG, 100, stream)
                         Log.d("흐음3", rotatedBitmap!!.width.toString() + rotatedBitmap!!.height)
                         val byteArray = stream.toByteArray()
                         Log.d("13", "1");
@@ -137,6 +138,15 @@ class CameraActivity : AppCompatActivity(), CameraBridgeViewBase.CvCameraViewLis
                     }
                     btnReject!!.setOnClickListener {
                         showAcceptedRejectedButton(false)
+                    }
+                    btnRotate.setOnClickListener {
+                        val matrix = Matrix()
+                        matrix.postRotate(90F)
+                        val scaledBitmap = Bitmap.createScaledBitmap(rotatedBitmap, rotatedBitmap!!.width, rotatedBitmap!!.height, true)
+                        rotatedBitmap = Bitmap.createBitmap (scaledBitmap, 0, 0, scaledBitmap.getWidth(), scaledBitmap.getHeight(), matrix, true)
+                        image!!.setImageBitmap(rotatedBitmap)
+//                bitImage?.recycle()
+                        scaledBitmap.recycle()
                     }
 //
 //                    mOpenCvCameraView!!.enableView();
@@ -188,7 +198,6 @@ class CameraActivity : AppCompatActivity(), CameraBridgeViewBase.CvCameraViewLis
         supportActionBar!!.title = "카메라"
 
         approxList = ArrayList()
-        resultt = FloatArray(8)
 
         mOpenCvCameraView = findViewById(R.id.activity_surface_view);
         mOpenCvCameraView!!.visibility = SurfaceView.VISIBLE;
@@ -290,9 +299,19 @@ class CameraActivity : AppCompatActivity(), CameraBridgeViewBase.CvCameraViewLis
         if (!showPreviews) {
             matInput = inputFrame!!.rgba()
             if (matResult == null) matResult = Mat(matInput!!.rows(), matInput!!.cols(), matInput!!.type())
-            resultt = ConvertRGBtoGray(matInput!!.getNativeObjAddr(), matResult!!.getNativeObjAddr())
+            flag = ConvertRGBtoGray(matInput!!.getNativeObjAddr(), matResult!!.getNativeObjAddr())
 
         }
+        runOnUiThread {
+            if (flag == 100) {
+                button?.backgroundTintList = ColorStateList.valueOf(Color.GREEN)
+                button?.isEnabled = true
+            } else {
+                button?.backgroundTintList = ColorStateList.valueOf(Color.BLACK)
+                button?.isEnabled = false
+            }
+        }
+
 
         return matResult as Mat
 
@@ -310,10 +329,11 @@ class CameraActivity : AppCompatActivity(), CameraBridgeViewBase.CvCameraViewLis
             showPreviews = !showPreviews
             mOpenCvCameraView!!.enableView()
             button!!.show()
-            image!!.visibility = View.GONE
+            image_linear.visibility = View.GONE
+//            image!!.visibility = View.GONE
             llBottom!!.visibility = View.GONE
             mOpenCvCameraView!!.setVisibility(SurfaceView.VISIBLE)
-            mOpenCvCameraView?.setCameraIndex(0);
+            mOpenCvCameraView!!.setCameraIndex(0);
         }
     }
 

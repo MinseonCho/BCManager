@@ -10,5 +10,8 @@
     <color name="my_lightgray">#E6E9ED</color>
     <color name="my_lightgray_sec">#CCD1D9</color>
     <color name="text_darkgray">#838487</color>
+    <color name="my_purple">#D287FD</color>
+    <color name="my_green_sec">#84E05B</color>
+    <color name="my_orange">#FF563F</color>
 
 </resources>

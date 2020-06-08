@@ -19,8 +19,7 @@ float resize(Mat img_src, Mat &img_resize, int resize_width);
 
 bool compareContourAreas(std::vector<cv::Point> contour1, std::vector<cv::Point> contour2);
 
-void calculate_points(Mat &output);
-
+void calculate_points(Mat &output, int flag);
 
 void recognition_card_first(Mat &input, Mat &output); //first step for card recognition
 void recognition_card_sec(Mat &input, Mat &output); //second step for card recognition
@@ -28,7 +27,7 @@ void recognition_card_third(Mat &input, Mat &output);
 
 extern "C" {
 
-JNIEXPORT jfloatArray JNICALL Java_com_example_bcmanager_CameraActivity_ConvertRGBtoGray(
+JNIEXPORT jint JNICALL Java_com_example_bcmanager_CameraActivity_ConvertRGBtoGray(
         JNIEnv *env, jobject instance, jlong matAddrInput, jlong matAddrResult) {
     int area = 0, cnt = 0;
     // TODO: implement BlurImage()
@@ -73,9 +72,11 @@ JNIEXPORT jfloatArray JNICALL Java_com_example_bcmanager_CameraActivity_ConvertR
         int size = approx.size();
         //Contour를 근사화한 직선을 그린다.
         if (size == 4) {
-            for(int i =0; i<4; i++){
-                pts[i] = approx[i];
+            for (int i = 0; i < 4; i++) {
+                pts[i].x = approx[i].x * 2;
+                pts[i].y = approx[i].y * 2;
             }
+
 //            int i = 0;
 //            int j = 0;
 //            while (i < 8) {
@@ -89,12 +90,13 @@ JNIEXPORT jfloatArray JNICALL Java_com_example_bcmanager_CameraActivity_ConvertR
 
 //            (*env).SetFloatArrayRegion(result, 0, 8, fill);
 
-//            rectangle(output, approx[0], approx[2], Scalar(0, 255, 0),3);
-            line(output, approx[0] * 2, approx[approx.size() - 1] * 2, Scalar(255, 102, 165), 8);
-            for (int k = 0; k < size - 1; k++)
-                line(output, approx[k] * 2, approx[k + 1] * 2, Scalar(255, 102, 165), 8);
+            rectangle(output, approx[0]*2, approx[2]*2,Scalar(104, 212, 160),6);
 
-            return result;
+//            line(output, approx[0] * 2, approx[approx.size() - 1] * 2, Scalar(104, 212, 160), 8);
+//            for (int k = 0; k < size - 1; k++)
+//                line(output, approx[k] * 2, approx[k + 1] * 2, Scalar(104, 212, 160), 8);
+
+            return 100;
         }
     }
 //    (*env).SetFloatArrayRegion(result, 0, 4, fill);
@@ -102,7 +104,7 @@ JNIEXPORT jfloatArray JNICALL Java_com_example_bcmanager_CameraActivity_ConvertR
     LOGD("%d : output.cols", output.cols);
     LOGD("%d : output.rows", output.rows);
 
-    return result;
+    return 101;
 
 
 }
@@ -121,12 +123,18 @@ Java_com_example_bcmanager_MainActivity_RecognitionCard(JNIEnv *env, jobject thi
 }
 
 JNIEXPORT void JNICALL
-Java_com_example_bcmanager_CameraActivity_ImageProcessing(JNIEnv *env, jobject thiz, jlong output){
+Java_com_example_bcmanager_CameraActivity_ImageProcessing(JNIEnv *env, jobject thiz, jlong output) {
     vector<Point2f> tmp;
     Mat &output_ = *(Mat *) output;
 
     LOGD("값값 = %f, %f", pts[0].x, pts[0].y);
-    calculate_points(output_);
+
+    pts[0].x += 5; pts[0].y +=5;
+    pts[1].x += 5; pts[1].y +=5;
+    pts[2].x += 5; pts[2].y +=5;
+    pts[3].x += 5; pts[3].y +=5;
+
+    calculate_points(output_, 2);
 }
 }
 
@@ -199,7 +207,7 @@ void recognition_card_first(Mat &input, Mat &output) {
         for (int i = 0; i < 4; i++) {
             pts[i] = result_approx[i];
         }
-        calculate_points(output);
+        calculate_points(output, 1);
 
     } else {
         recognition_card_sec(input, output);
@@ -255,7 +263,7 @@ void recognition_card_sec(Mat &input, Mat &output) {
         for (int k = 0; k < 4; k++) {
             pts[k] = result_approx[k];
         }
-        calculate_points(output);
+        calculate_points(output, 1);
 
     } else {
         LOGD(" fail");
@@ -320,7 +328,7 @@ void recognition_card_third(Mat &input, Mat &output) {
         for (int k = 0; k < 4; k++) {
             pts[k] = result_approx[k];
         }
-        calculate_points(output);
+        calculate_points(output, 1);
 
     } else {
         LOGD(" fail");
@@ -372,9 +380,8 @@ bool compareContourAreas(std::vector<cv::Point> contour1, std::vector<cv::Point>
     return (i < j);
 }
 
-void calculate_points(Mat &output) {
-    LOGD("단계 칼큘레이트");
-    LOGD("단계 칼큘레이트 %f, %f, %f, %f", pts[0].x, pts[0].y, pts[1].x, pts[1].y);
+void calculate_points(Mat &output, int flag) {
+
     int sum_min = 0, sum_max = 0, diff_min = 0, diff_max = 0, result;
     float sum[4], diff[4];
 
@@ -393,12 +400,19 @@ void calculate_points(Mat &output) {
         if (diff[diff_min] > diff[i]) diff_min = i;
     }
 
+
     result_pts[0] = pts[sum_min]; //top-left
     result_pts[2] = pts[sum_max]; //bottom-right
     result_pts[1] = pts[diff_min]; //top-right
     result_pts[3] = pts[diff_max]; //bottom-left
-    LOGD("단계 칼큘레이트 %f, %f, %f, %f", result_pts[0].x, result_pts[0].y, result_pts[1].x, result_pts[1].y);
-    LOGD("단계 칼큘레이트 %f, %f, %f, %f", result_pts[2].x, result_pts[2].y, result_pts[3].x, result_pts[3].y);
+
+    if(flag == 2){
+        result_pts[0].x += 5; result_pts[0].y += 5;
+        result_pts[1].x -= 5; result_pts[1].y += 5;
+        result_pts[2].x -= 5; result_pts[2].y -= 5;
+        result_pts[3].x += 5; result_pts[3].y -= 5;
+    }
+
     Point2f topLeft = result_pts[0];
     Point2f topRight = result_pts[1];
     Point2f bottomRight = result_pts[2];
@@ -410,7 +424,7 @@ void calculate_points(Mat &output) {
     float h2 = fabs(topLeft.y - bottomLeft.y);
     maxWidth = max(w1, w2);
     maxHeight = max(h1, h2);
-    LOGD("단계 칼큘레이트 %f, %f", maxWidth,maxHeight );
+    LOGD("단계 칼큘레이트 %f, %f", maxWidth, maxHeight);
 
     Point2f dst_pts[4] = {
             Point2f(0, 0), Point2f(maxWidth - 1, 0), Point2f(maxWidth - 1, maxHeight - 1),

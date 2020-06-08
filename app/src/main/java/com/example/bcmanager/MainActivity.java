@@ -166,7 +166,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 
         checkCurrentUser();
         Session.getCurrentSession().checkAndImplicitOpen();
-//        getAppKeyHash();
+        getAppKeyHash();
 
 
         //handler
@@ -298,29 +298,38 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                             Log.d("result", String.valueOf(result.getWidth()) + String.valueOf(result.getHeight()));
 //                    inputImage.setImageBitmap((Bitmap) data.getParcelableExtra("image"));
 
-                            Mat mat_img = new Mat();
-                            Utils.bitmapToMat(result, mat_img);
-                            Log.d("result_mat_img", String.valueOf(mat_img.rows()) + String.valueOf(mat_img.cols()));
-                            Mat output = new Mat();
+                            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                            result.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+                            byte[] byteArray = stream.toByteArray();
 
-                            RecognitionCard(mat_img.getNativeObjAddr(), output.getNativeObjAddr());
                             cnt--;
+                            Intent intent = new Intent(getApplicationContext(), ImageOCRActivity.class);
+                            intent.putExtra("image", byteArray);
+                            startActivity(intent);
 
-                            if (!output.empty()) {
-
-                                Bitmap bitmapOutput = Bitmap.createBitmap(output.cols(), output.rows(), Bitmap.Config.RGB_565);
-                                Utils.matToBitmap(output, bitmapOutput);
-
-                                ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                                bitmapOutput.compress(Bitmap.CompressFormat.JPEG, 100, stream);
-                                byte[] byteArray = stream.toByteArray();
-
-                                Intent intent = new Intent(getApplicationContext(), ImageOCRActivity.class);
-                                intent.putExtra("image", byteArray);
-                                startActivity(intent);
-                            } else {
-                                Toast.makeText(getApplicationContext(), "다시 시도해주세요.", Toast.LENGTH_SHORT).show();
-                            }
+//                            Mat mat_img = new Mat();
+//                            Utils.bitmapToMat(result, mat_img);
+//                            Log.d("result_mat_img", String.valueOf(mat_img.rows()) + String.valueOf(mat_img.cols()));
+//                            Mat output = new Mat();
+//
+//                            RecognitionCard(mat_img.getNativeObjAddr(), output.getNativeObjAddr());
+//                            cnt--;
+//
+//                            if (!output.empty()) {
+//
+//                                Bitmap bitmapOutput = Bitmap.createBitmap(output.cols(), output.rows(), Bitmap.Config.RGB_565);
+//                                Utils.matToBitmap(output, bitmapOutput);
+//
+//                                ByteArrayOutputStream stream = new ByteArrayOutputStream();
+//                                bitmapOutput.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+//                                byte[] byteArray = stream.toByteArray();
+//
+//                                Intent intent = new Intent(getApplicationContext(), ImageOCRActivity.class);
+//                                intent.putExtra("image", byteArray);
+//                                startActivity(intent);
+//                            } else {
+//                                Toast.makeText(getApplicationContext(), "다시 시도해주세요.", Toast.LENGTH_SHORT).show();
+//                            }
 
                             mHandler.post(new Runnable() {
                                 @Override
