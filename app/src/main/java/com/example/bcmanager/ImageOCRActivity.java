@@ -20,6 +20,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.client.http.HttpTransport;
@@ -59,6 +60,7 @@ public class ImageOCRActivity extends AppCompatActivity {
     private static final String ANDROID_PACKAGE_HEADER = "X-Android-Package";
     private static final int MAX_LABEL_RESULTS = 10;
     private static final int MAX_DIMENSION = 1200;
+    private BCMApplication myApp;
 
     private static final String TAG = ImageOCRActivity.class.getSimpleName();
     private static final int GALLERY_PERMISSIONS_REQUEST = 0;
@@ -87,8 +89,9 @@ public class ImageOCRActivity extends AppCompatActivity {
     private static String nb;
     private static String fx;
     private static String po;
+    private static String cp;
+    private static String memo;
     private static String temp;
-
 
 
     @Override
@@ -101,6 +104,7 @@ public class ImageOCRActivity extends AppCompatActivity {
         getSupportActionBar().setTitle("BCManager");
         findViewById(R.id.ocrbtn).setOnClickListener((mClickListener));
 
+        myApp = (BCMApplication) getApplication(); //user정보 가져오기
 
         cardImage = findViewById(R.id.card_image);
         info_name = findViewById(R.id.name);
@@ -124,7 +128,9 @@ public class ImageOCRActivity extends AppCompatActivity {
         nb = "";
         fx = "";
         po = "";
+        cp = "";
         temp = "";
+
 
         if( intent != null){
             byte[] bytes = intent.getByteArrayExtra("image");
@@ -142,10 +148,17 @@ public class ImageOCRActivity extends AppCompatActivity {
 
             nm = info_name.getText().toString();
             ph = info_phone.getText().toString();
+            ad = info_address.getText().toString();
+            em = info_email.getText().toString();
+            nb = info_number.getText().toString();
+            fx = info_fax.getText().toString();
+            po = info_positon.getText().toString();
+            memo = info_memo.getText().toString();
+            cp = info_company.getText().toString();
 
 
             InsertData task = new InsertData();
-            task.execute(CARD_INPUT,nm,ph);
+            task.execute(CARD_INPUT,nm,ph,ad,em,nb,fx,po,memo,cp);
         }
     };
 
@@ -368,31 +381,28 @@ public class ImageOCRActivity extends AppCompatActivity {
                     }
                 }
 
-             else if (textlist.get(i).contains("@")) {
+            else if (textlist.get(i).contains("@")) {
                 if(em.length() < 2) {
                     em = textlist.get(i);
 
-                    if(textlist.get(i).contains("."))
-                        em = em.replace(".", "");
-
-                    if(textlist.get(i).contains("email"))
-                    em = em.replace("email", "");
-                    else if(textlist.get(i).contains("Email"))
-                    em = em.replace("Email", "");
-                    else if(textlist.get(i).contains("E-Mail"))
-                        em = em.replace("E-Mail", "");
-                    else if(textlist.get(i).contains("E-mail"))
-                        em = em.replace("E-mail", "");
+                    if(textlist.get(i).contains("email."))
+                        em = em.replace("email.", "");
+                    else if(textlist.get(i).contains("Email."))
+                        em = em.replace("Email.", "");
+                    else if(textlist.get(i).contains("E-Mail."))
+                        em = em.replace("E-Mail.", "");
+                    else if(textlist.get(i).contains("E-mail."))
+                        em = em.replace("E-mail.", "");
                     else if(textlist.get(i).contains("이메일:"))
                         em = em.replace("이메일:", "");
                 }
             }
 
             else if (textlist.get(i).contains(".com")){
-               if(em.length() < 2) {
-                   em = textlist.get(i);
+                if(em.length() < 2) {
+                    em = textlist.get(i);
 //                   textlist = textlist.replaceAll(em.);
-               }
+                }
             }
 
             else if (textlist.get(i).contains("F.")) {
@@ -402,20 +412,20 @@ public class ImageOCRActivity extends AppCompatActivity {
                     }
                 }
             }
-             else if (textlist.get(i).contains("FAX")) {
+            else if (textlist.get(i).contains("FAX")) {
                 for (int j = 0; j < textlist.get(i).length(); j++) {
                     if (textlist.get(i).charAt(j) >= 48 && textlist.get(i).charAt(j) <= 57) {
                         fx += textlist.get(i).charAt(j);
                     }
                 }
             }
-              else if (textlist.get(i).contains("Fax")) {
-                        for (int j = 0; j < textlist.get(i).length(); j++) {
-                            if (textlist.get(i).charAt(j) >= 48 && textlist.get(i).charAt(j) <= 57) {
-                                fx += textlist.get(i).charAt(j);
-                            }
-                        }
+            else if (textlist.get(i).contains("Fax")) {
+                for (int j = 0; j < textlist.get(i).length(); j++) {
+                    if (textlist.get(i).charAt(j) >= 48 && textlist.get(i).charAt(j) <= 57) {
+                        fx += textlist.get(i).charAt(j);
                     }
+                }
+            }
         }
 
         Log.d(TAG,ph);
@@ -511,7 +521,7 @@ public class ImageOCRActivity extends AppCompatActivity {
             super.onPostExecute(result);
 
             progressDialog.dismiss();
-          //  mTextViewResult.setText("입력되었습니다.");
+            //  mTextViewResult.setText("입력되었습니다.");
             Log.d(TAG, "POST response  - " + result);
         }
 
@@ -521,9 +531,16 @@ public class ImageOCRActivity extends AppCompatActivity {
 
             String nm = (String)params[1];
             String ph = (String)params[2];
+            String ad = (String)params[3];
+            String em = (String)params[4];
+            String nb = (String)params[5];
+            String fx = (String)params[6];
+            String po = (String)params[7];
+            String memo = (String)params[8];
+            String cp = (String)params[9];
 
             String serverURL = (String)params[0];
-            String postParameters = "nm=" + nm + "&ph=" + ph;
+            String postParameters = "nm=" + nm + "&ph=" + ph+ "&ad=" + ad+ "&em=" + em+ "&nb=" + nb + "&fx=" + fx + "&po=" + po + "&memo=" + memo + "&cp=" + cp;
 
             Log.d(TAG,"ddongmmong" + serverURL);
             Log.d(TAG,"ddongmmong"+postParameters);
