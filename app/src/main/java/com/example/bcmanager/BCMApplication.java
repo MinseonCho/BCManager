@@ -32,7 +32,7 @@ public class BCMApplication extends Application {
     public String userImage = null;
     public String userName = null;
     public String loginType = null; // k=kakao, g=google/email
-
+//    public ArrayList<>
 
     private static volatile BCMApplication instance = null;
 

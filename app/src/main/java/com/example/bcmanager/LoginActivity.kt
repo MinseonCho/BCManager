@@ -1,5 +1,8 @@
+@file:Suppress("DEPRECATION")
+
 package com.example.bcmanager
 
+import android.app.ProgressDialog
 import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
@@ -46,6 +49,7 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener, CoroutineScope 
     private lateinit var email: String
     private lateinit var myApp: BCMApplication
     var GOOGLE_LOGIN_CODE = 9001
+    var progressDialog: ProgressDialog? = null
 
     private lateinit var mJob: Job
     override val coroutineContext: CoroutineContext
@@ -53,7 +57,6 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener, CoroutineScope 
 
     //kakao
     // 세션 콜백 구현
-
 
     private val sessionCallback: ISessionCallback = object : ISessionCallback {
         override fun onSessionOpened() {
@@ -134,7 +137,6 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener, CoroutineScope 
         supportActionBar!!.displayOptions = ActionBar.DISPLAY_SHOW_CUSTOM // 커스텀 사용
         supportActionBar!!.setCustomView(R.layout.actionbar_title_nobtn) // 커스텀 사용할 파일 위치
         supportActionBar!!.title = "로그인"
-
         myApp = application as BCMApplication
 
         mJob = Job()
@@ -143,6 +145,11 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener, CoroutineScope 
         login_btn_google.setOnClickListener(this)
         login_btn_signup.setOnClickListener(this)
         login_forgotpw.setOnClickListener(this)
+
+        progressDialog = ProgressDialog(this)
+        progressDialog!!.setMessage("Login running...")
+        progressDialog!!.setCancelable(true)
+        progressDialog!!.setProgressStyle(android.R.style.Widget_ProgressBar_Horizontal)
 
         auth = FirebaseAuth.getInstance()
 
@@ -154,6 +161,7 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener, CoroutineScope 
 
         //kakao
         Session.getCurrentSession().addCallback(sessionCallback);
+        Session.getCurrentSession().checkAndImplicitOpen()
 
     }
 

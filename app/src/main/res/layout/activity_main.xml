@@ -14,34 +14,50 @@
         android:layout_height="match_parent">
 
         <LinearLayout
+            android:layout_marginTop="20dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_horizontal"
             android:orientation="vertical">
 
             <LinearLayout
+                android:id="@+id/linear_goToCardList"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:visibility="gone"
+                android:weightSum="7">
 
-                <TextView
-                    android:id="@+id/welcome_text"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="20dp"
-                    android:lines="2"
-                    android:paddingBottom="5dp"
-                    android:textColor="@color/my_lightgray_sec"
-                    android:textSize="25dp"
-                    android:textStyle="bold"
-                    android:visibility="gone" />
+                <RelativeLayout
+                    android:gravity="center|center_vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
 
-                <!--                <ImageView-->
-                <!--                    android:layout_width="wrap_content"-->
-                <!--                    android:layout_height="wrap_content"-->
-                <!--                    android:src="@drawable/main_card"/>-->
+                    <TextView
+                        android:id="@+id/welcome_text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="20dp"
+                        android:lines="2"
+                        android:layout_alignParentStart="true"
+                        android:paddingBottom="5dp"
+                        android:textColor="@color/my_lightgray_sec"
+                        android:textSize="25dp"
+                        android:layout_centerVertical="true"
+                        android:textStyle="bold" />
 
+
+                    <ImageView
+                        android:layout_marginStart="10dp"
+                        android:layout_toEndOf="@+id/welcome_text"
+                        android:id="@+id/btn_goToCardList"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:src="@android:drawable/ic_menu_rotate" />
+
+                </RelativeLayout>
                 <!--                <TextView-->
                 <!--                    android:layout_width="wrap_content"-->
                 <!--                    android:layout_height="wrap_content"-->
@@ -56,7 +72,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="20dp"
-                android:layout_marginTop="60dp"
+                android:layout_marginTop="30dp"
                 android:layout_marginEnd="20dp"
                 android:layout_marginBottom="40dp"
                 android:gravity="center_horizontal"
@@ -164,12 +180,20 @@
                     android:layout_marginEnd="20dp">
 
                     <TextView
-                        android:id="@+id/cnt_card"
+                        android:id="@+id/cnt"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentStart="true"
                         android:layout_marginStart="10dp"
-                        android:text="명함을 인식중입니다!" />
+                        android:textColor="@color/my_orange" />
+
+                    <TextView
+                        android:id="@+id/cnt_card"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="5dp"
+                        android:layout_toRightOf="@+id/cnt"
+                        android:text="개의 명함을 인식중입니다!" />
 
                     <ImageView
                         android:layout_width="20dp"

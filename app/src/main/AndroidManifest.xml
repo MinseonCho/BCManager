@@ -36,7 +36,6 @@
         android:smallScreens="true" />
 
     <application
-        android:usesCleartextTraffic="true"
         android:name=".BCMApplication"
         android:allowBackup="true"
         android:hardwareAccelerated="false"
@@ -45,8 +44,10 @@
         android:largeHeap="true"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
-        <activity android:name=".SearchActivity"></activity>
+        android:theme="@style/AppTheme"
+        android:usesCleartextTraffic="true">
+        <activity android:name=".CardListActivity"></activity>
+        <activity android:name=".SearchActivity" />
 
         <meta-data
             android:name="com.kakao.sdk.AppKey"
@@ -65,24 +66,27 @@
         <activity android:name=".CustomDialogForCard" />
         <activity android:name=".UserProfileActivity" />
         <activity android:name=".SignUpActivity" />
-        <activity android:name=".LoginActivity" />
-        <activity android:name=".ImageOCRActivity" />
-        <activity android:name=".ConfirmCapture" />
-        <activity android:name=".CameraActivity" />
-        <activity android:name=".MainActivity">
+        <activity android:name=".LoginActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity android:name=".ImageOCRActivity" />
+        <activity android:name=".ConfirmCapture" />
+        <activity android:name=".CameraActivity" />
+        <activity android:name=".MainActivity">
+
             <intent-filter>
-                <action android:name="android.intent.action.VIEW"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-                <category android:name="android.intent.category.BROWSABLE"/>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
 
                 <data
-                    android:scheme="@string/kakao_scheme"
                     android:host="@string/kakaolink_host"
+                    android:scheme="@string/kakao_scheme"
                     tools:ignore="AppLinkUrlError" />
             </intent-filter>
         </activity>

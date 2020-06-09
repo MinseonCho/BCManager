@@ -10,10 +10,12 @@ import android.provider.MediaStore
 import android.util.Log
 import android.view.View
 import android.widget.ImageView
+import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_confirm_capture.*
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
+import java.util.*
 
 class ConfirmCapture : AppCompatActivity(), View.OnClickListener {
 
@@ -24,6 +26,10 @@ class ConfirmCapture : AppCompatActivity(), View.OnClickListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_confirm_capture)
+        Objects.requireNonNull(supportActionBar)!!.setDisplayShowTitleEnabled(false)
+        supportActionBar!!.displayOptions = ActionBar.DISPLAY_SHOW_CUSTOM // 커스텀 사용
+        supportActionBar!!.setCustomView(R.layout.actionbar_title_nobtn) // 커스텀 사용할 파일 위치
+        supportActionBar!!.title = "BCManager"
 
         myApp = BCMApplication()
 

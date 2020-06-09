@@ -88,14 +88,17 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 
     private ImageButton btn_click;
     private ImageButton btn_clickToCamera;
-    private ImageButton btn_clickToShare;
+    private ImageButton btn_clickToSearch;
     private RecyclerView recyclerView;
     private CardRecyclerViewAdapter adapter;
     private TextView cnt_text;
+    private TextView cnt_count_text;
     private TextView noCard_text;
     private TextView card_text;
     private TextView welcome;
     private LinearLayout linearLayout;
+    private LinearLayout linearGoToCardList;
+    private ImageView btn_goToCardList;
     private ImageView actionbar_btn;
     private ArrayList<CardInfoItem.cardInfo> cardsList;
 
@@ -153,7 +156,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 
         btn_click = findViewById(R.id.clickToGallery);
         btn_clickToCamera = findViewById(R.id.clickToCamera);
-        btn_clickToShare = findViewById(R.id.clickToSearch);
+        btn_clickToSearch = findViewById(R.id.clickToSearch);
         recyclerView = findViewById(R.id.recyclerview);
         linearLayout = findViewById(R.id.layout_for_thread);
         cnt_text = findViewById(R.id.cnt_card);
@@ -161,10 +164,11 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         card_text = findViewById(R.id.textview_registerdCard);
         actionbar_btn = findViewById(R.id.actionbar_btn);
         welcome = findViewById(R.id.welcome_text);
-
+        cnt_count_text = findViewById(R.id.cnt);
+        linearGoToCardList = findViewById(R.id.linear_goToCardList);
+        btn_goToCardList = findViewById(R.id.btn_goToCardList);
 
         checkCurrentUser();
-        Session.getCurrentSession().checkAndImplicitOpen();
         getAppKeyHash();
 
 
@@ -191,10 +195,12 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
             Log.d("ID", myApp.userEmail);
             Log.d("ID", myApp.userName);
             getCardInfo();
-            welcome.setVisibility(View.VISIBLE);
-            welcome.setText(myApp.userName + " 님 \n명함을 등록해보세요!");
+            linearGoToCardList.setVisibility(View.VISIBLE);
+//            welcome.setVisibility(View.VISIBLE);
+            welcome.setText(myApp.userName + " 님 인식된 \n명함을 확인하세요!");
         } else {
             welcome.setVisibility(View.GONE);
+            linearGoToCardList.setVisibility(View.GONE);
         }
 
 
@@ -229,17 +235,25 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
             }
         });
 
-        btn_clickToShare.setOnClickListener(new View.OnClickListener() {
+        btn_clickToSearch.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
+                //검색
+            }
+        });
+        btn_goToCardList.setOnClickListener(new View.OnClickListener(){
 
+            @Override
+            public void onClick(View v) {
+                //명함리스트로
+                Toast.makeText(getApplicationContext(), "명함보러가기 클릭", Toast.LENGTH_LONG).show();
             }
         });
 
         if (cnt > 0) {
             linearLayout.setVisibility(View.VISIBLE);
-            cnt_text.setText(cnt + " 개의 명함을 인식 중 입니다!");
+            cnt_count_text.setText(String.valueOf(cnt));
         }
 
         //Receive a value from KakaoLink
@@ -285,7 +299,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                                     cnt++;
                                     if (cnt > 0) {
                                         linearLayout.setVisibility(View.VISIBLE);
-                                        cnt_text.setText(cnt + " 개의 명함을 인식 중 입니다!");
+                                        cnt_count_text.setText(String.valueOf(cnt));
                                     } else {
                                         linearLayout.setVisibility(View.GONE);
                                     }
@@ -337,7 +351,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 
                                     if (cnt > 0) {
                                         linearLayout.setVisibility(View.VISIBLE);
-                                        cnt_text.setText(cnt + " 개의 명함을 인식 중 입니다!");
+                                        cnt_count_text.setText(String.valueOf(cnt));
                                     } else {
                                         linearLayout.setVisibility(View.GONE);
                                     }
@@ -372,7 +386,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                                     cnt++;
                                     if (cnt > 0) {
                                         linearLayout.setVisibility(View.VISIBLE);
-                                        cnt_text.setText(cnt + " 개의 명함을 인식 중 입니다!");
+                                        cnt_count_text.setText(String.valueOf(cnt));
                                     } else {
                                         linearLayout.setVisibility(View.GONE);
                                     }
@@ -434,7 +448,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                                     cnt--;
                                     if (cnt > 0) {
                                         linearLayout.setVisibility(View.VISIBLE);
-                                        cnt_text.setText(cnt + " 개의 명함을 인식 중 입니다!");
+                                        cnt_count_text.setText(String.valueOf(cnt));
                                     } else {
                                         linearLayout.setVisibility(View.GONE);
                                     }
@@ -777,13 +791,16 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
             myApp.userID = user.getUid().toString();
             myApp.loginType = "g";
             myApp.userEmail = user.getEmail();
-            if(user.getPhotoUrl() != null) myApp.userImage = user.getPhotoUrl().toString();
+            if (user.getPhotoUrl() != null) myApp.userImage = user.getPhotoUrl().toString();
             myApp.userName = user.getDisplayName();
             myApp.isLogined = true;
-            welcome.setVisibility(View.VISIBLE);
-            welcome.setText(user.getDisplayName() + " 님 \n명함을 등록해보세요!");
+//            welcome.setVisibility(View.VISIBLE);
+
+            //인식완료됐는데 등록안한 명함이 있는지확인하기.
+            linearGoToCardList.setVisibility(View.VISIBLE);
+            welcome.setText(user.getDisplayName() + " 님 인식된 \n명함을 확인하세요!");
         } else {
-            welcome.setVisibility(View.GONE);
+            linearGoToCardList.setVisibility(View.GONE);
             // No user is signed in
             Log.d(TAG_, "null");
         }

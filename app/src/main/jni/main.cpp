@@ -73,8 +73,9 @@ JNIEXPORT jint JNICALL Java_com_example_bcmanager_CameraActivity_ConvertRGBtoGra
         //Contour를 근사화한 직선을 그린다.
         if (size == 4) {
             for (int i = 0; i < 4; i++) {
-                pts[i].x = approx[i].x * 2;
-                pts[i].y = approx[i].y * 2;
+                approx[i].x *= 2;
+                approx[i].y *= 2;
+                pts[i] = approx[i];
             }
 
 //            int i = 0;
@@ -90,8 +91,8 @@ JNIEXPORT jint JNICALL Java_com_example_bcmanager_CameraActivity_ConvertRGBtoGra
 
 //            (*env).SetFloatArrayRegion(result, 0, 8, fill);
 
-            rectangle(output, approx[0]*2, approx[2]*2,Scalar(104, 212, 160),6);
-
+//            rectangle(output, approx[0]*2, approx[2]*2,Scalar(104, 212, 160),6);
+            polylines(output, approx, true, Scalar(104, 212, 160), 3, LINE_AA);
 //            line(output, approx[0] * 2, approx[approx.size() - 1] * 2, Scalar(104, 212, 160), 8);
 //            for (int k = 0; k < size - 1; k++)
 //                line(output, approx[k] * 2, approx[k + 1] * 2, Scalar(104, 212, 160), 8);
@@ -407,10 +408,11 @@ void calculate_points(Mat &output, int flag) {
     result_pts[3] = pts[diff_max]; //bottom-left
 
     if(flag == 2){
-        result_pts[0].x += 5; result_pts[0].y += 5;
-        result_pts[1].x -= 5; result_pts[1].y += 5;
-        result_pts[2].x -= 5; result_pts[2].y -= 5;
-        result_pts[3].x += 5; result_pts[3].y -= 5;
+        int plusNum = 3;
+        result_pts[0].x += plusNum; result_pts[0].y += plusNum;
+        result_pts[1].x -= plusNum; result_pts[1].y += plusNum;
+        result_pts[2].x -= plusNum; result_pts[2].y -= plusNum;
+        result_pts[3].x += plusNum; result_pts[3].y -= plusNum;
     }
 
     Point2f topLeft = result_pts[0];
