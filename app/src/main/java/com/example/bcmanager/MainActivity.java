@@ -18,6 +18,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Point;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -86,6 +87,8 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
     public static String GET_UNREGISTERD_CARD_INFO = "http://104.197.171.112/get_unregisterd_card.php";
     public static String GET_UNREGISTERD_CARD_COUNT = "http://104.197.171.112/get_count_cards.php";
     public static String CARD_INPUT = "http://104.197.171.112/card_input.php";
+    public static String GET_USER_NUMBER = "http://104.197.171.112/get_user_number.php";
+    public static String DELETE_ITEM = "http://104.197.171.112/delete_item.php";
     /**
      * end
      */
@@ -178,9 +181,9 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         //체크해야 할 것: 로그인 여부, 등록된 카드가져오기, 인식됐지만 등록안된 카드 들고오기
         checkCurrentUser();
         getAppKeyHash();
-        if (myApp.unregisterdCards.size() == 0) {
-            linearGoToCardList.setVisibility(View.GONE);
-        }
+        if (myApp.unregisterdCards.size() > 0) {
+            linearGoToCardList.setVisibility(View.VISIBLE);
+        } else linearGoToCardList.setVisibility(View.GONE);
 
         //handler
         mHandler = new Handler();
@@ -205,11 +208,10 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
             Log.d("ID", myApp.loginType);
             Log.d("ID", myApp.userEmail);
             Log.d("ID", myApp.userName);
-            getCardInfo();
-            getUnregisterdCardsInfo();
-            linearGoToCardList.setVisibility(View.VISIBLE);
-//            welcome.setVisibility(View.VISIBLE);
-            welcome.setText(myApp.userName + " 님 인식된 \n명함을 확인하세요!");
+//            getUserNumber();
+//            getCardInfo();
+            getCardCount();
+//            getUnregisterdCardsInfo();
         } else {
             welcome.setVisibility(View.GONE);
             linearGoToCardList.setVisibility(View.GONE);
@@ -251,7 +253,9 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 
             @Override
             public void onClick(View v) {
-                Test test = new Test(getApplicationContext());
+
+                Bitmap bitmap = ((BitmapDrawable) Objects.requireNonNull(getDrawable(R.drawable.document2))).getBitmap();
+                Test test = new Test(getApplicationContext(), bitmap);
                 test.dd();
             }
         });
@@ -521,39 +525,31 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         // [END check_current_user]
     }
 
-    void getUnregisterdCardsInfo() {
-        HttpConnection httpConn = null;
+    void getCardCount() {
         try {
-            httpConn = new HttpConnection(new URL(GET_UNREGISTERD_CARD_INFO));
+            HttpConnection httpConn = new HttpConnection(new URL(GET_UNREGISTERD_CARD_COUNT));
             httpConn.requestGetCards(myApp.userID, new OnRequestCompleteListener() {
                 @Override
                 public void onSuccess(@org.jetbrains.annotations.Nullable String data) {
 
                     if (data != null && !data.isEmpty()) {
 
-                        myApp.unregisterdCards.clear();
-
-                        Log.d("성공_등록안된카드", data);
+                        Log.d("카운트", data);
                         Gson gson = new GsonBuilder()
                                 .create();
                         JsonParser jsonParser = new JsonParser();
                         JsonObject jsonObject = (JsonObject) jsonParser.parse(data);
                         JsonArray jsonArray = (JsonArray) jsonObject.get("cardInfo");
-
-                        CardInfoItem.cardInfo result;
-                        for (int i = 0; i < jsonArray.size(); i++) {
-
-                            final JsonObject j = jsonArray.get(i).getAsJsonObject();
-                            result = gson.fromJson(j, CardInfoItem.cardInfo.class);
-                            myApp.unregisterdCards.add(result);
-                        Log.d("테스트으", String.valueOf(myApp.unregisterdCards.size()));
-                        Log.d("테스트으", myApp.unregisterdCards.get(i).getCARD_IMAGE());
-                        }
+                        JsonObject j = jsonArray.get(0).getAsJsonObject();
+                        myApp.count = j.get("count").getAsInt();
+                        Log.d("테스트으", String.valueOf(myApp.count));
 
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                linearGoToCardList.setVisibility(View.VISIBLE);
+                                getCardInfo();
+                                if (myApp.count > 0)
+                                    linearGoToCardList.setVisibility(View.VISIBLE);
                             }
                         });
                     }
@@ -567,13 +563,13 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
-
     }
+
 
     void getCardInfo() {
         Log.d("카드가져오기", "");
         try {
-            httpConn = new HttpConnection(new URL(GET_CARDS_INFO));
+            HttpConnection httpConn = new HttpConnection(new URL(GET_CARDS_INFO));
             httpConn.requestGetCards(myApp.userID, new OnRequestCompleteListener() {
                 @Override
                 public void onSuccess(@org.jetbrains.annotations.Nullable String data) {
@@ -597,10 +593,11 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
+                                Log.d("민선선", "");
+                                Log.d("민선선", String.valueOf(cardsList.size()));
                                 card_text.setVisibility(View.VISIBLE);
                                 noCard_text.setVisibility(View.GONE);
                                 adapter = new CardRecyclerViewAdapter(MainActivity.this, cardsList);
-
                                 recyclerView.setAdapter(adapter);
                             }
                         });
@@ -624,6 +621,36 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
             e.printStackTrace();
         }
     }
+//    void getUserNumber() {
+//        try {
+//            HttpConnection httpConnection = new HttpConnection(new URL(GET_USER_NUMBER));
+//            httpConnection.requestGetUserNumber(myApp.userID, new OnRequestCompleteListener() {
+//                @Override
+//                public void onSuccess(@org.jetbrains.annotations.Nullable String data) {
+//                    assert data != null;
+//                    if(!data.isEmpty()) {
+//                        Log.d("성공", data);
+//                        Gson gson = new GsonBuilder().create();
+//                        JsonParser jsonParser = new JsonParser();
+//                        JsonObject jsonObject = (JsonObject) jsonParser.parse(data);
+//                        JsonArray jsonArray = (JsonArray) jsonObject.get("cardInfo");
+//                        JsonObject result = jsonArray.get(0).getAsJsonObject();
+//
+//                        myApp.userNum = String.valueOf(result.get("USER_NUMBER"));
+//
+//                        Log.d("유저넘버", myApp.userNum);
+//                    }
+//                }
+//
+//                @Override
+//                public void onError() {
+//
+//                }
+//            });
+//        } catch (MalformedURLException e) {
+//            e.printStackTrace();
+//        }
+//    }
 
     private void getAppKeyHash() {
         try {

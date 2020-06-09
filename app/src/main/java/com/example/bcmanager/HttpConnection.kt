@@ -74,6 +74,22 @@ class HttpConnection(url: URL): Callback  {
         val client = OkHttpClient()
         client.newCall(request).enqueue(this)
     }
+    fun requestRcgedGetCards(uID: String, callback: OnRequestCompleteListener){
+        this.onRequestCompleteListener = callback
+
+        val body = FormBody.Builder()
+                .add("USER_ID", uID)
+                .build()
+
+        val request = Request.Builder()
+                .url(url!!)
+                .post(body)
+                .build()
+
+        val client = OkHttpClient()
+        client.newCall(request).enqueue(this)
+    }
+
 
     fun signUp(user_id: String, user_name:String, user_email: String){
         httpConnection = HttpConnection(URL(url))
@@ -103,6 +119,37 @@ class HttpConnection(url: URL): Callback  {
         val client = OkHttpClient()
         client.newCall(request).enqueue(this)
     }
+    fun requestDeleteItem(cardNumber: String, callback: OnRequestCompleteListener){
+        this.onRequestCompleteListener = callback
+
+        val body = FormBody.Builder()
+                .add("CARD_NUMBER", cardNumber)
+                .build()
+
+        val request = Request.Builder()
+                .url(url!!)
+                .post(body)
+                .build()
+
+        val client = OkHttpClient()
+        client.newCall(request).enqueue(this)
+    }
+    fun requestGetUserNumber(uID: String, callback: OnRequestCompleteListener){
+        this.onRequestCompleteListener = callback
+
+        val body = FormBody.Builder()
+                .add("USER_ID", uID)
+                .build()
+
+        val request = Request.Builder()
+                .url(url!!)
+                .post(body)
+                .build()
+
+        val client = OkHttpClient()
+        client.newCall(request).enqueue(this)
+    }
+
     override fun onFailure(call: Call, e: IOException) {
         onRequestCompleteListener?.onError()
         println("error on httpConnection")

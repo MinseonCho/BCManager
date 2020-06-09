@@ -10,6 +10,7 @@ import android.provider.MediaStore
 import android.util.Log
 import android.view.View
 import android.widget.ImageView
+import android.widget.Toast
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_confirm_capture.*
@@ -38,7 +39,8 @@ class ConfirmCapture : AppCompatActivity(), View.OnClickListener {
 
         myApp = application as BCMApplication
 
-        goToGallery()
+        if (myApp!!.isLogined) goToGallery()
+        else Toast.makeText(applicationContext, "로그인이 필요합니다.", Toast.LENGTH_LONG).show()
 
         btn_rotate.setOnClickListener(this)
         btn_ok.setOnClickListener(this)
@@ -64,8 +66,8 @@ class ConfirmCapture : AppCompatActivity(), View.OnClickListener {
                 bitImage = BitmapFactory.decodeStream(`in`)
                 `in`.close()
 
-                val date = SimpleDateFormat("yyyy_MM_dd_hh_mm_ss").format(Date());
-                tempSelectFile = File(getFilesDir().getPath(), myApp?.userID + "_" + date + "." + file_extn);
+                val date = SimpleDateFormat("yy_MM_dd_hh_mm_ss").format(Date());
+                tempSelectFile = File(getFilesDir().getPath(), myApp?.userNum + "_" + date + "." + file_extn);
                 val out: OutputStream = FileOutputStream(tempSelectFile);
                 bitImage?.compress(Bitmap.CompressFormat.JPEG, 80, out);
 

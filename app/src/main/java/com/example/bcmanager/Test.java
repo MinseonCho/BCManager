@@ -39,20 +39,22 @@ public class Test {
     private static final int MAX_LABEL_RESULTS = 10;
     private static final int MAX_DIMENSION = 1200;
     private BCMApplication myApp;
+    private Bitmap image;
 
     private static final String TAG = "ddd";
 
     public void dd(){
         Context contexts = context.getApplicationContext();
-        Drawable drawable = contexts.getResources().getDrawable(R.drawable.document2);
+//        Drawable drawable = contexts.getResources().getDrawable(R.drawable.document2);
 
-        Bitmap bitmap = ((BitmapDrawable)drawable).getBitmap();
-        callCloudVision(bitmap);
+//        Bitmap bitmap = ((BitmapDrawable)image).getBitmap();
+        callCloudVision(image);
     }
     Context context;
 
-    Test(Context context){
+    Test(Context context, Bitmap drawable){
         this.context = context;
+        this.image = drawable;
     }
     public void uploadImage(Bitmap bitmap) {
         if (bitmap != null) {

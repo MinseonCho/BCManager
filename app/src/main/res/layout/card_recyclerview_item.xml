@@ -34,6 +34,7 @@
                 android:layout_marginEnd="10dp"
                 android:layout_marginBottom="10dp"
                 android:gravity="center"
+                android:background="@android:color/white"
                 android:orientation="horizontal"
                 android:visibility="visible"
                 android:weightSum="5">

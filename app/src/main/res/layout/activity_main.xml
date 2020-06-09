@@ -14,9 +14,9 @@
         android:layout_height="match_parent">
 
         <LinearLayout
-            android:layout_marginTop="20dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
             android:gravity="center_horizontal"
             android:orientation="vertical">
 
@@ -30,32 +30,32 @@
                 android:weightSum="7">
 
                 <RelativeLayout
-                    android:gravity="center|center_vertical"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    android:gravity="center|center_vertical">
 
                     <TextView
                         android:id="@+id/welcome_text"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_alignParentStart="true"
+                        android:layout_centerVertical="true"
                         android:layout_marginTop="20dp"
                         android:lines="2"
-                        android:layout_alignParentStart="true"
                         android:paddingBottom="5dp"
                         android:textColor="@color/my_lightgray_sec"
                         android:textSize="25dp"
-                        android:layout_centerVertical="true"
                         android:textStyle="bold" />
 
 
                     <ImageView
-                        android:layout_marginStart="10dp"
-                        android:layout_toEndOf="@+id/welcome_text"
                         android:id="@+id/btn_goToCardList"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
                         android:layout_centerVertical="true"
-                        android:src="@android:drawable/ic_menu_rotate" />
+                        android:layout_marginStart="17dp"
+                        android:layout_toEndOf="@+id/welcome_text"
+                        android:src="@drawable/next" />
 
                 </RelativeLayout>
                 <!--                <TextView-->

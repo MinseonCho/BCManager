@@ -29,11 +29,13 @@ public class BCMApplication extends Application {
 
     public boolean isLogined;
     public String userID = null;
+    public String userNum = null;
     public String userEmail = null;
     public String userImage = null;
     public String userName = null;
-    public String loginType = null; // k=kakao, g=google/email
+    public String loginType = null;// k=kakao, g=google/email
     public ArrayList<CardInfoItem.cardInfo> unregisterdCards = new ArrayList<>();
+    public int count=0;
 
     private static volatile BCMApplication instance = null;
 

@@ -53,7 +53,7 @@ import java.util.Objects;
 
 public class ImageOCRActivity extends AppCompatActivity {
 
-    private static final String CLOUD_VISION_API_KEY = "AIzaSyCXyQ0R-emSegoNwWJnbZhFPPbm5rFUdzk";
+    private static final String CLOUD_VISION_API_KEY = "";
     public static String CARD_INPUT = "http://104.197.171.112/card_input.php";
     public static final String FILE_NAME = "temp.jpg";
     private static final String ANDROID_CERT_HEADER = "X-Android-Cert";

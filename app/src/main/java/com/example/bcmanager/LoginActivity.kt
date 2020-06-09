@@ -25,6 +25,10 @@ import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
+import com.google.gson.GsonBuilder
+import com.google.gson.JsonArray
+import com.google.gson.JsonObject
+import com.google.gson.JsonParser
 import com.kakao.auth.ISessionCallback
 import com.kakao.auth.Session
 import com.kakao.network.ErrorResult
@@ -36,6 +40,7 @@ import kotlinx.android.synthetic.main.activity_login.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import java.net.MalformedURLException
 import java.net.URL
 import java.util.*
 import kotlin.coroutines.CoroutineContext
@@ -92,9 +97,9 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener, CoroutineScope 
                     myApp.userImage = result.profileImagePath
                     myApp.userName = result.nickname
                     myApp.isLogined = true;
-                    myApp.loginType ="k"
+                    myApp.loginType = "k"
                     MainActivity.isLogined = true;
-
+                    getUserNumber()
                     val intent = Intent(this@LoginActivity, MainActivity::class.java)
                     intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
 //                    intent.putExtra("kUserID", result.id.toString())
@@ -149,8 +154,9 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener, CoroutineScope 
         login_forgotpw.setOnClickListener(this)
 
         user = FirebaseAuth.getInstance().currentUser
-        if(user != null){
-            moveMainPage(user!!.displayName.toString())
+        if (user != null) {
+            setData(user!!)
+            moveMainPage()
         }
 
         progressDialog = ProgressDialog(this)
@@ -214,15 +220,11 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener, CoroutineScope 
                 login_pw.text.toString()).addOnCompleteListener { task ->
             if (task.isSuccessful) {
                 //Login
-                (task.result!!.user!!.uid).let { moveMainPage(it) }
 
-                val user = auth.currentUser
-                myApp.userID = user?.uid.toString()
-                myApp.userEmail = user?.email.toString()
-                myApp.userImage = user?.photoUrl.toString()
-                myApp.userName =  user?.displayName.toString()
-                myApp.isLogined = true;
-                myApp.loginType ="k"
+                user = auth.currentUser
+                user?.let { setData(it) }
+                moveMainPage()
+
             } else {
                 //Show the error message
                 Toast.makeText(this, task.exception?.message, Toast.LENGTH_LONG).show()
@@ -266,12 +268,39 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener, CoroutineScope 
 //    }
 
 
-    fun moveMainPage(user: String) {
+    fun moveMainPage() {
         myApp.isLogined = true;
+        getUserNumber()
         val intent = Intent(this, MainActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
         startActivity(intent)
         finish()
+    }
+
+    fun getUserNumber() {
+        try {
+            val httpConnection = HttpConnection(URL(MainActivity.GET_USER_NUMBER))
+            httpConnection.requestGetUserNumber(myApp.userID, object : OnRequestCompleteListener {
+                override fun onSuccess(data: String?) {
+                    assert(data != null)
+                    if (!data!!.isEmpty()) {
+                        Log.d("성공", data)
+                        val gson = GsonBuilder().create()
+                        val jsonParser = JsonParser()
+                        val jsonObject = jsonParser.parse(data) as JsonObject
+                        val jsonArray = jsonObject["cardInfo"] as JsonArray
+                        val result = jsonArray[0].asJsonObject
+                        myApp.userNum = result["USER_NUMBER"].toString()
+                        myApp.userNum = myApp.userNum.replace("\"", "")
+                        Log.d("유저넘버", myApp.userNum)
+                    }
+                }
+
+                override fun onError() {}
+            })
+        } catch (e: MalformedURLException) {
+            e.printStackTrace()
+        }
     }
 
     companion object {
@@ -335,6 +364,16 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener, CoroutineScope 
 
     }
 
+    fun setData(user_: FirebaseUser) {
+        httpConnection = HttpConnection(URL(MainActivity.SIGNUP_URL))
+        httpConnection.signUp(user_!!.uid.toString(), user_!!.displayName.toString(), user_!!.email.toString())
+        myApp.userID = user_.uid.toString()
+        myApp.userEmail = user_.email.toString()
+        myApp.userImage = user_.photoUrl.toString()
+        myApp.userName = user_.displayName.toString()
+        myApp.isLogined = true;
+        myApp.loginType = "g"
+    }
 
     fun firebaseAuthWithGoogle(account: GoogleSignInAccount?) {
         val credential = GoogleAuthProvider.getCredential(account?.idToken, null)
@@ -342,17 +381,8 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener, CoroutineScope 
             if (task.isSuccessful) {
                 //Login
                 val user = FirebaseAuth.getInstance().currentUser
-                httpConnection = HttpConnection(URL(MainActivity.SIGNUP_URL))
-                if (user != null) {
-                    httpConnection.signUp(user.uid.toString(), user.displayName.toString(), user.email.toString())
-                }
-                myApp.userID = user?.uid.toString()
-                myApp.userEmail = user?.email.toString()
-                myApp.userImage = user?.photoUrl.toString()
-                myApp.userName =  user?.displayName.toString()
-                myApp.isLogined = true;
-                myApp.loginType ="g"
-                (task.result!!.user!!.uid).let { moveMainPage(it) }
+                user?.let { setData(it) }
+                moveMainPage()
 
             } else {
                 //Show the error message

@@ -18,6 +18,7 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.google.api.client.util.Data
 import java.util.*
+import com.example.bcmanager.MyGlideApp;
 
 class CardRecyclerViewAdapter(val context: Context, val cardList: ArrayList<CardInfoItem.cardInfo>)
     : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
@@ -44,15 +45,12 @@ class CardRecyclerViewAdapter(val context: Context, val cardList: ArrayList<Card
         val instance = cardList[position]
         val cardNumber = cardList[position].CARD_NUMBER
         if (holder is Holder) {
-            val url = MainActivity.IMAGE_URL + cardList[position].CARD_IMAGE
+            val url = MainActivity.IMAGE_URL + instance.CARD_IMAGE
 
-            Glide.with(context).load(url)
+            GlideApp.with(context).load(url)
                     .apply(RequestOptions.fitCenterTransform())
                     .override(MainActivity.device_width - 50, 200)
                     .into(holder.card!!)
-
-
-//            holder.card?.setImageResource(cardList[position].card!!)
 
             holder.changeVisibility(selectedItems.get(position));
 
@@ -144,9 +142,7 @@ class CardRecyclerViewAdapter(val context: Context, val cardList: ArrayList<Card
 
     }
 
-
-
-    class Holder internal constructor(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    class Holder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         var card: ImageView? = null
         var linear_info: LinearLayout? = null
         var linear_contact: LinearLayout? = null
@@ -157,7 +153,7 @@ class CardRecyclerViewAdapter(val context: Context, val cardList: ArrayList<Card
         var expendView: LinearLayout? = null
 
         init {
-            card = itemView.findViewById<ImageView>(R.id.rcy_card_image)
+            card = itemView.findViewById(R.id.rcy_card_image)
             cv = itemView.findViewById(R.id.rcy_cardview)
             expendView = itemView.findViewById(R.id.expend_view)
             linear_info = itemView.findViewById(R.id.linear_detail_info)
@@ -170,36 +166,7 @@ class CardRecyclerViewAdapter(val context: Context, val cardList: ArrayList<Card
 
         fun changeVisibility(isExpanded: Boolean) {
             expendView!!.setVisibility(if (isExpanded) View.VISIBLE else View.GONE)
-            // ValueAnimator.ofInt(int... values)는 View가 변할 값을 지정, 인자는 int 배열
-
-            // ValueAnimator.ofInt(int... values)는 View가 변할 값을 지정, 인자는 int 배열
-//            val va = ValueAnimator()
-//            // Animation이 실행되는 시간, n/1000초
-//            // Animation이 실행되는 시간, n/1000초
-//            va.setDuration(600)
-//            va.addUpdateListener(object : ValueAnimator.AnimatorUpdateListener {
-//                override fun onAnimationUpdate(animation: ValueAnimator) {
-//
-//                     expendView!!.setVisibility(if (isExpanded) View.VISIBLE else View.GONE)
-//                }
-//            })
-//            // Animation start
-//            va.start()
         }
-
-//        override fun onClick(v: View?) {
-//            when(v?.getId()) {
-//                R.id.linear_detail_info -> {
-//                    val intent = Intent(context, DetailInfoActivity::class.java)
-//                    Log.d("카드넘버", cardInfo.CARD_NUMBER.toString())
-//                    intent.putExtra("cardNumber", cardInfo.CARD_NUMBER)
-//                    context.startActivity(intent)
-//                }
-//                    R.id.linear_contact ->
-//
-//
-//            }
-//        }
 
     }
 }
