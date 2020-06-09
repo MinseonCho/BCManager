@@ -251,8 +251,8 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 
             @Override
             public void onClick(View v) {
-                Test test = new Test(getApplicationContext());
-                test.dd();
+//                Test test = new Test(getApplicationContext());
+//                test.dd();
             }
         });
         btn_goToCardList.setOnClickListener(new View.OnClickListener() {
@@ -328,9 +328,10 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                             byte[] byteArray = stream.toByteArray();
 
                             cnt--;
-                            Intent intent = new Intent(getApplicationContext(), ImageOCRActivity.class);
-                            intent.putExtra("image", byteArray);
-                            startActivity(intent);
+
+                            CardOCR cardocr = new CardOCR(getApplicationContext(), result);
+                            cardocr.dd();
+                        //    startActivity(intent);
 
                             mHandler.post(new Runnable() {
                                 @Override
@@ -409,9 +410,9 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                                 bitmapOutput.compress(Bitmap.CompressFormat.JPEG, 100, stream);
                                 byte[] byteArray = stream.toByteArray();
 
-                                Intent intent = new Intent(getApplicationContext(), ImageOCRActivity.class);
-                                intent.putExtra("image", byteArray);
-                                startActivity(intent);
+
+                                CardOCR cardocr = new CardOCR(getApplicationContext(),bitmapOutput);
+                                cardocr.dd();
                             } else {
                                 Toast.makeText(getApplicationContext(), "다시 시도해주세요.", Toast.LENGTH_SHORT).show();
                             }
