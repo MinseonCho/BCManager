@@ -23,6 +23,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import com.kakao.auth.ISessionCallback
 import com.kakao.auth.Session
@@ -48,6 +49,7 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener, CoroutineScope 
     private lateinit var httpConnection: HttpConnection
     private lateinit var email: String
     private lateinit var myApp: BCMApplication
+    var user: FirebaseUser? = null
     var GOOGLE_LOGIN_CODE = 9001
     var progressDialog: ProgressDialog? = null
 
@@ -146,6 +148,11 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener, CoroutineScope 
         login_btn_signup.setOnClickListener(this)
         login_forgotpw.setOnClickListener(this)
 
+        user = FirebaseAuth.getInstance().currentUser
+        if(user != null){
+            moveMainPage(user!!.displayName.toString())
+        }
+
         progressDialog = ProgressDialog(this)
         progressDialog!!.setMessage("Login running...")
         progressDialog!!.setCancelable(true)
@@ -153,15 +160,18 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener, CoroutineScope 
 
         auth = FirebaseAuth.getInstance()
 
+
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_web_client_id))
                 .requestEmail()
                 .build()
         googleSignInClient = GoogleSignIn.getClient(this, gso)
 
+
         //kakao
         Session.getCurrentSession().addCallback(sessionCallback);
         Session.getCurrentSession().checkAndImplicitOpen()
+
 
     }
 
@@ -257,11 +267,11 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener, CoroutineScope 
 
 
     fun moveMainPage(user: String) {
-        MainActivity.isLogined = true;
         myApp.isLogined = true;
         val intent = Intent(this, MainActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
         startActivity(intent)
+        finish()
     }
 
     companion object {

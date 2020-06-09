@@ -1,17 +1,21 @@
 package com.example.bcmanager
+import android.app.Application
 import android.util.Log
 import okhttp3.*
 import java.io.File
 import java.io.IOException
 import java.net.URL
 import java.text.Normalizer
+import kotlin.jvm.internal.Ref
 
 class HttpConnection(url: URL): Callback  {
 
     private var url: String? = null
     private var data: String? = null
     private var onRequestCompleteListener : OnRequestCompleteListener? = null
+
     private lateinit var httpConnection: HttpConnection
+
     init {
         this.url = url.toString()
     }
@@ -19,12 +23,13 @@ class HttpConnection(url: URL): Callback  {
     /**
      * 웹 서버로 요청을 한다.
      */
-    fun requestInsertImage(file: File, callback: OnRequestCompleteListener) {
+    fun requestInsertImage(file: File, myApp: BCMApplication, callback: OnRequestCompleteListener) {
         this.onRequestCompleteListener = callback
 
         val body = MultipartBody.Builder()
                 .setType(MultipartBody.FORM)
                 .addFormDataPart("files", file.name, RequestBody.create(MultipartBody.FORM, file))
+                .addFormDataPart("USER_ID", myApp.userID )
                 .build()
 
         val request = Request.Builder()
@@ -69,6 +74,7 @@ class HttpConnection(url: URL): Callback  {
         val client = OkHttpClient()
         client.newCall(request).enqueue(this)
     }
+
     fun signUp(user_id: String, user_name:String, user_email: String){
         httpConnection = HttpConnection(URL(url))
         httpConnection.requestSignUp(user_name, user_id, user_email, object : OnRequestCompleteListener{

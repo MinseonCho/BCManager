@@ -26,6 +26,7 @@ import android.os.Looper;
 import android.os.MessageQueue;
 import android.provider.MediaStore;
 import android.util.Base64;
+import android.util.JsonReader;
 import android.util.Log;
 import android.view.Display;
 import android.view.Menu;
@@ -77,10 +78,13 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
      * url
      */
     public static String IMAGE_URL = "http://104.197.171.112/dbimages/";
+    public static String INSERT_IMAGE_URL = "http://104.197.171.112/insert_image.php";
     public static String GET_IMAGE_URL = "http://104.197.171.112/get_image.php";
     public static String SIGNUP_URL = "http://104.197.171.112/signup.php";
     public static String GET_CARDS_INFO = "http://104.197.171.112/get_cards.php";
     public static String GET_CARD_INFO = "http://104.197.171.112/get_card.php";
+    public static String GET_UNREGISTERD_CARD_INFO = "http://104.197.171.112/get_unregisterd_card.php";
+    public static String GET_UNREGISTERD_CARD_COUNT = "http://104.197.171.112/get_count_cards.php";
     public static String CARD_INPUT = "http://104.197.171.112/card_input.php";
     /**
      * end
@@ -101,6 +105,8 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
     private ImageView btn_goToCardList;
     private ImageView actionbar_btn;
     private ArrayList<CardInfoItem.cardInfo> cardsList;
+    private ArrayList<CardInfoItem.cardInfo> unRegedcardsList;
+    private int card_cound = 0;
 
     private static final String TAG = "opencv";
     private static final int REQUEST_CODE_GALLERY = 200;
@@ -168,15 +174,20 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         linearGoToCardList = findViewById(R.id.linear_goToCardList);
         btn_goToCardList = findViewById(R.id.btn_goToCardList);
 
+
+        //체크해야 할 것: 로그인 여부, 등록된 카드가져오기, 인식됐지만 등록안된 카드 들고오기
         checkCurrentUser();
         getAppKeyHash();
-
+        if (myApp.unregisterdCards.size() == 0) {
+            linearGoToCardList.setVisibility(View.GONE);
+        }
 
         //handler
         mHandler = new Handler();
 
         //recyclerview
         cardsList = new ArrayList<>();
+        unRegedcardsList = new ArrayList<>();
         recyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
         recyclerView.setNestedScrollingEnabled(false);
 
@@ -195,6 +206,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
             Log.d("ID", myApp.userEmail);
             Log.d("ID", myApp.userName);
             getCardInfo();
+            getUnregisterdCardsInfo();
             linearGoToCardList.setVisibility(View.VISIBLE);
 //            welcome.setVisibility(View.VISIBLE);
             welcome.setText(myApp.userName + " 님 인식된 \n명함을 확인하세요!");
@@ -239,15 +251,17 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 
             @Override
             public void onClick(View v) {
-                //검색
+                Test test = new Test(getApplicationContext());
+                test.dd();
             }
         });
-        btn_goToCardList.setOnClickListener(new View.OnClickListener(){
+        btn_goToCardList.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
-                //명함리스트로
-                Toast.makeText(getApplicationContext(), "명함보러가기 클릭", Toast.LENGTH_LONG).show();
+                //명함리스트로;
+                Intent intent = new Intent(getApplicationContext(), CardListActivity.class);
+                startActivity(new Intent(getApplicationContext(), CardListActivity.class));
             }
         });
 
@@ -308,8 +322,6 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 
                             byte[] bytes = datas.getByteArrayExtra("image");
                             Bitmap result = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-                            Log.d("result", String.valueOf(result.getWidth()) + String.valueOf(result.getHeight()));
-//                    inputImage.setImageBitmap((Bitmap) data.getParcelableExtra("image"));
 
                             ByteArrayOutputStream stream = new ByteArrayOutputStream();
                             result.compress(Bitmap.CompressFormat.JPEG, 100, stream);
@@ -319,30 +331,6 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                             Intent intent = new Intent(getApplicationContext(), ImageOCRActivity.class);
                             intent.putExtra("image", byteArray);
                             startActivity(intent);
-
-//                            Mat mat_img = new Mat();
-//                            Utils.bitmapToMat(result, mat_img);
-//                            Log.d("result_mat_img", String.valueOf(mat_img.rows()) + String.valueOf(mat_img.cols()));
-//                            Mat output = new Mat();
-//
-//                            RecognitionCard(mat_img.getNativeObjAddr(), output.getNativeObjAddr());
-//                            cnt--;
-//
-//                            if (!output.empty()) {
-//
-//                                Bitmap bitmapOutput = Bitmap.createBitmap(output.cols(), output.rows(), Bitmap.Config.RGB_565);
-//                                Utils.matToBitmap(output, bitmapOutput);
-//
-//                                ByteArrayOutputStream stream = new ByteArrayOutputStream();
-//                                bitmapOutput.compress(Bitmap.CompressFormat.JPEG, 100, stream);
-//                                byte[] byteArray = stream.toByteArray();
-//
-//                                Intent intent = new Intent(getApplicationContext(), ImageOCRActivity.class);
-//                                intent.putExtra("image", byteArray);
-//                                startActivity(intent);
-//                            } else {
-//                                Toast.makeText(getApplicationContext(), "다시 시도해주세요.", Toast.LENGTH_SHORT).show();
-//                            }
 
                             mHandler.post(new Runnable() {
                                 @Override
@@ -393,20 +381,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                                 }
                             });
 
-
-                            Log.d("사이즈", String.valueOf(bitmap.getWidth()) + " " + String.valueOf(bitmap.getHeight()));
-
-//                                String date = new SimpleDateFormat("yyyy_MM_dd_hh_mm_ss").format(new Date());
-//                                File tempSelectFile = new File(getFilesDir().getPath(), date + "." + file_extn);
-//                                OutputStream out = new FileOutputStream(tempSelectFile);
-//                                bitmap.compress(Bitmap.CompressFormat.JPEG, 40, out);
-//
-//                                Bitmap image = BitmapFactory.decodeFile(tempSelectFile.getPath());
-//                                out.close();
-
                             Log.d("image사이즈", String.valueOf(bitmap.getWidth()) + " " + String.valueOf(bitmap.getHeight()));
-//                    Bitmap test = getResizedBitmap(image, 1500,843);
-//                    Log.d("test사이즈", String.valueOf(test.getWidth()) + " "+ String.valueOf(test.getHeight()));
 
                             double image_height = bitmap.getHeight();
                             double image_width = bitmap.getWidth();
@@ -465,237 +440,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                 }
             }
         }
-//        if (requestCode == REQUEST_CODE_GALLERY) {
-//            if (resultCode == RESULT_OK) {
-//                assert data != null;
-//                Uri dataUri = data.getData();
-//
-//
-//                String filePath = getRealPathFromURI(dataUri);
-//                String file_extn = filePath.substring(filePath.lastIndexOf(".") + 1);
-//                InputStream in = null;
-//                try {
-//                    in = getContentResolver().openInputStream(dataUri);
-//                    Bitmap img = BitmapFactory.decodeStream(in);
-//                    in.close();
-//                    Log.d("사이즈", String.valueOf(img.getWidth()) + " " + String.valueOf(img.getHeight()));
-//
-//                    String date = new SimpleDateFormat("yyyy_MM_dd_hh_mm_ss").format(new Date());
-//                    File tempSelectFile = new File(getFilesDir().getPath(), date + "." + file_extn);
-//                    OutputStream out = new FileOutputStream(tempSelectFile);
-//                    img.compress(Bitmap.CompressFormat.JPEG, 40, out);
-//
-//                    Bitmap image = BitmapFactory.decodeFile(tempSelectFile.getPath());
-//                    out.close();
-//
-//                    ByteArrayOutputStream stream = new ByteArrayOutputStream();
-//                    image.compress(Bitmap.CompressFormat.JPEG, 60, stream);
-//                    byte[] byteArray = stream.toByteArray();
-//
-//                    Intent intent = new Intent(getApplicationContext(), ConfirmCapture.class);
-//                    intent.putExtra("image", byteArray);
-//                    startActivityForResult(intent, 300);
-//
-//                } catch (FileNotFoundException e) {
-//                    e.printStackTrace();
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
 
-
-        // ///////////////////
-//                assert data != null;
-//                final Uri dataUri = data.getData();
-//
-//                               final Thread thread = new Thread((new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        //ui 작업 수행x
-//                        Looper.prepare();
-//                        MessageQueue messageQueue = Looper.myQueue();
-//                        try {
-//
-//                            mHandler.post(new Runnable() {
-//                                @Override
-//                                public void run() {
-//                                    //ui 작업 수행o
-//                                    cnt++;
-//                                    if (cnt > 0) {
-//                                        linearLayout.setVisibility(View.VISIBLE);
-//                                        cnt_text.setText(cnt + " 개의 명함을 인식 중 입니다!");
-//                                    } else {
-//                                        linearLayout.setVisibility(View.GONE);
-//                                    }
-//                                }
-//                            });
-//                            String filePath = getRealPathFromURI(dataUri);
-//                            String file_extn = filePath.substring(filePath.lastIndexOf(".") + 1);
-//                            InputStream in = null;
-//                            if (dataUri != null)
-//                                in = getContentResolver().openInputStream(dataUri);
-//
-//                            Bitmap img = BitmapFactory.decodeStream(in);
-//                            in.close();
-//
-//                            Log.d("사이즈", String.valueOf(img.getWidth()) + " " + String.valueOf(img.getHeight()));
-//
-//                            String date = new SimpleDateFormat("yyyy_MM_dd_hh_mm_ss").format(new Date());
-//                            File tempSelectFile = new File(getFilesDir().getPath(), date + "." + file_extn);
-//                            OutputStream out = new FileOutputStream(tempSelectFile);
-//                            img.compress(Bitmap.CompressFormat.JPEG, 40, out);
-//
-//                            Bitmap image = BitmapFactory.decodeFile(tempSelectFile.getPath());
-//                            out.close();
-//
-//                            Log.d("image사이즈", String.valueOf(image.getWidth()) + " " + String.valueOf(image.getHeight()));
-////                    Bitmap test = getResizedBitmap(image, 1500,843);
-////                    Log.d("test사이즈", String.valueOf(test.getWidth()) + " "+ String.valueOf(test.getHeight()));
-//
-//                            double image_height = image.getHeight();
-//                            double image_width = image.getWidth();
-//                            double tmps = image_width / device_width;
-//                            int dst_height = (int) (image_height / (image_width / device_width));
-//                            Log.d("tmps", String.valueOf(tmps));
-//                            Log.d("image_height", String.valueOf(image_height));
-//                            Log.d("image_width", String.valueOf(image_width));
-//                            Log.d("dst_height", String.valueOf(dst_height));
-//                            image = Bitmap.createScaledBitmap(image, device_width, dst_height, true);
-//
-//                            Mat mat_img = new Mat();
-//                            Utils.bitmapToMat(image, mat_img);
-//
-//                            Mat output = new Mat();
-//
-//                            RecognitionCard(mat_img.getNativeObjAddr(), output.getNativeObjAddr());
-//
-//                            if (!output.empty()) {
-//
-//                                Bitmap bitmapOutput = Bitmap.createBitmap(output.cols(), output.rows(), Bitmap.Config.RGB_565);
-//                                Utils.matToBitmap(output, bitmapOutput);
-//
-//                                ByteArrayOutputStream stream = new ByteArrayOutputStream();
-//                                bitmapOutput.compress(Bitmap.CompressFormat.JPEG, 100, stream);
-//                                byte[] byteArray = stream.toByteArray();
-//
-//                                Intent intent = new Intent(getApplicationContext(), ImageOCRActivity.class);
-//                                intent.putExtra("image", byteArray);
-//                                startActivity(intent);
-//                            } else {
-//                                Toast.makeText(getApplicationContext(), "다시 시도해주세요.", Toast.LENGTH_SHORT).show();
-//                            }
-//
-//                            mHandler.post(new Runnable() {
-//                                @Override
-//                                public void run() {
-//                                    //ui 작업 수행o
-//                                    cnt--;
-//                                    if (cnt > 0) {
-//                                        linearLayout.setVisibility(View.VISIBLE);
-//                                        cnt_text.setText(cnt + " 개의 명함을 인식 중 입니다!");
-//                                    } else {
-//                                        linearLayout.setVisibility(View.GONE);
-//                                    }
-//
-//                                }
-//                            });
-//                            Looper.loop();
-//                        }
-//                        //image resize
-//                        catch (FileNotFoundException e) {
-//                            e.printStackTrace();
-//                        } catch (IOException e) {
-//                            e.printStackTrace();
-//                        }
-//
-//
-//                    }
-//                }));
-//                thread.start();
-
-
-        // /////////////////////
-
-//                    ByteArrayOutputStream stream = new ByteArrayOutputStream();
-//                    test.compress(Bitmap.CompressFormat.JPEG, 60, stream);
-//                    byte[] byteArray = stream.toByteArray();
-//
-//                    Intent intent = new Intent(getApplicationContext(), ImageOCRActivity.class);
-//                    intent.putExtra("image", byteArray);
-//                    startActivity(intent);
-
-//                    httpConn = new HttpConnection(new URL(IMAGE_URL));
-//                    httpConn.requestInsertImage(tempSelectFile, new OnRequestCompleteListener() {
-//                        @Override
-//                        public void onSuccess(@org.jetbrains.annotations.Nullable String data) {
-//                            Log.d("민선", "httpConnection onSuccess");
-//                            try {
-//                                ServerRequest serverRequest = new ServerRequest(new URL(GET_IMAGE_URL));
-//                                serverRequest.getImage(String.valueOf(1), new OnRequestCompleteListener() {
-//                                    @Override
-//                                    public void onSuccess(@org.jetbrains.annotations.Nullable String data) {
-//                                        JsonParser jsonParser = new JsonParser();
-//                                        JsonObject jsonObject = (JsonObject) jsonParser.parse(data);
-//                                        JsonArray jsonArray = (JsonArray) jsonObject.get("seoon53");
-//
-//                                        final JsonObject j = jsonArray.get(0).getAsJsonObject();
-//                                        final String image = j.get("TEST_IMAGE").getAsString();
-//                                        runOnUiThread(new Runnable() {
-//                                            @Override
-//                                            public void run() {
-//                                                Intent intent = new Intent(getApplicationContext(), ImageOCRActivity.class);
-//                                                intent.putExtra("image", image);
-//                                                startActivity(intent);
-//                                            }
-//                                        });
-//                                    }
-//
-//                                    @Override
-//                                    public void onError() {
-//
-//                                    }
-//                                });
-//                            } catch (MalformedURLException e) {
-//                                e.printStackTrace();
-//                            }
-//                        }
-//
-//                        @Override
-//                        public void onError() {
-//                            Log.d("onError", "httpConnection onError");
-//                        }
-//                    });
-
-
-//            }
-//        }
-    }
-
-
-    public String getRealPathFromURI(Uri contentUri) {
-
-        String[] proj = {MediaStore.Images.Media.DATA};
-        Cursor cursor = getContentResolver().query(contentUri, proj, null, null, null);
-        assert cursor != null;
-        cursor.moveToFirst();
-        int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-        return cursor.getString(column_index);
-    }
-
-    public Bitmap getResizedBitmap(Bitmap bm, int newWidth, int newHeight) {
-        int width = bm.getWidth();
-        int height = bm.getHeight();
-        float scaleWidth = ((float) newWidth) / width;
-        float scaleHeight = ((float) newHeight) / height;
-        // CREATE A MATRIX FOR THE MANIPULATION
-        Matrix matrix = new Matrix();
-        // RESIZE THE BIT MAP
-        matrix.postScale(scaleWidth, scaleHeight);
-
-        // "RECREATE" THE NEW BITMAP
-        Bitmap resizedBitmap = Bitmap.createBitmap(
-                bm, 0, 0, width, height, matrix, false);
-        bm.recycle();
-        return resizedBitmap;
     }
 
     @Override
@@ -703,14 +448,6 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         super.onDestroy();
     }
 
-//    @Override
-//    public boolean onCreateOptionsMenu(Menu menu) {
-//
-//        if (isLogined) getMenuInflater().inflate(R.menu.menu_login, menu);
-//        else getMenuInflater().inflate(R.menu.menu, menu);
-//
-//        return true;
-//    }
 
     public void showPopup(View v) {
         PopupMenu popup = new PopupMenu(this, v);
@@ -753,32 +490,8 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         }
     }
 
-//    @Override
-//    public boolean onOptionsItemSelected(MenuItem item) {
-//        Log.d("쇼팝업","onOptionsItemSelected");
-//        // Handle presses on the action bar items
-//        switch (item.getItemId()) {
-//            case R.id.menu_login:
-//                startActivity(new Intent(this, LoginActivity.class));
-//                return true;
-//            case R.id.menu_logout:
-//                FirebaseAuth.getInstance().signOut();
-//                finish();
-//                startActivity(getIntent());
-//                isLogined = false;
-//                return true;
-//            case R.id.menu_userinfo:
-//                startActivity(new Intent(this, UserProfileActivity.class));
-//                return true;
-//            default:
-//                return super.onOptionsItemSelected(item);
-//        }
-//    }
-
-
     public void checkCurrentUser() {
         // [START check_current_user]
-        Log.d("체크커런트유저", "");
         user = FirebaseAuth.getInstance().getCurrentUser();
         if (user != null) {
             Log.d("파이어베이스 로그인", "");
@@ -794,7 +507,6 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
             if (user.getPhotoUrl() != null) myApp.userImage = user.getPhotoUrl().toString();
             myApp.userName = user.getDisplayName();
             myApp.isLogined = true;
-//            welcome.setVisibility(View.VISIBLE);
 
             //인식완료됐는데 등록안한 명함이 있는지확인하기.
             linearGoToCardList.setVisibility(View.VISIBLE);
@@ -807,6 +519,55 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 
 
         // [END check_current_user]
+    }
+
+    void getUnregisterdCardsInfo() {
+        HttpConnection httpConn = null;
+        try {
+            httpConn = new HttpConnection(new URL(GET_UNREGISTERD_CARD_INFO));
+            httpConn.requestGetCards(myApp.userID, new OnRequestCompleteListener() {
+                @Override
+                public void onSuccess(@org.jetbrains.annotations.Nullable String data) {
+
+                    if (data != null && !data.isEmpty()) {
+
+                        myApp.unregisterdCards.clear();
+
+                        Log.d("성공_등록안된카드", data);
+                        Gson gson = new GsonBuilder()
+                                .create();
+                        JsonParser jsonParser = new JsonParser();
+                        JsonObject jsonObject = (JsonObject) jsonParser.parse(data);
+                        JsonArray jsonArray = (JsonArray) jsonObject.get("cardInfo");
+
+                        CardInfoItem.cardInfo result;
+                        for (int i = 0; i < jsonArray.size(); i++) {
+
+                            final JsonObject j = jsonArray.get(i).getAsJsonObject();
+                            result = gson.fromJson(j, CardInfoItem.cardInfo.class);
+                            myApp.unregisterdCards.add(result);
+                        Log.d("테스트으", String.valueOf(myApp.unregisterdCards.size()));
+                        Log.d("테스트으", myApp.unregisterdCards.get(i).getCARD_IMAGE());
+                        }
+
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                linearGoToCardList.setVisibility(View.VISIBLE);
+                            }
+                        });
+                    }
+                }
+
+                @Override
+                public void onError() {
+
+                }
+            });
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+
     }
 
     void getCardInfo() {

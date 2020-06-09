@@ -7,9 +7,9 @@
     tools:context=".CardListActivity">
 
     <androidx.recyclerview.widget.RecyclerView
-        android:layout_marginTop="10dp"
         android:layout_marginBottom="10dp"
-        android:id="@+id/card_recyclerview"
+        android:id="@+id/rcged_card_recyclerview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
+
 </LinearLayout>

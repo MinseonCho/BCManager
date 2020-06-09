@@ -22,6 +22,7 @@ import com.kakao.auth.ISessionConfig;
 import com.kakao.auth.KakaoAdapter;
 import com.kakao.auth.KakaoSDK;
 
+import java.util.ArrayList;
 import java.util.Objects;
 
 public class BCMApplication extends Application {
@@ -32,7 +33,7 @@ public class BCMApplication extends Application {
     public String userImage = null;
     public String userName = null;
     public String loginType = null; // k=kakao, g=google/email
-//    public ArrayList<>
+    public ArrayList<CardInfoItem.cardInfo> unregisterdCards = new ArrayList<>();
 
     private static volatile BCMApplication instance = null;
 

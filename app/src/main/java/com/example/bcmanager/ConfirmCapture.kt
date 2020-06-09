@@ -13,8 +13,9 @@ import android.widget.ImageView
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_confirm_capture.*
-import java.io.ByteArrayOutputStream
-import java.io.InputStream
+import java.io.*
+import java.net.URL
+import java.text.SimpleDateFormat
 import java.util.*
 
 class ConfirmCapture : AppCompatActivity(), View.OnClickListener {
@@ -22,7 +23,11 @@ class ConfirmCapture : AppCompatActivity(), View.OnClickListener {
     var image: ImageView? = null
     var bitImage: Bitmap? = null
     private val REQUEST_CODE_GALLERY = 200
-    var myApp: BCMApplication? = null
+    private var myApp: BCMApplication? = null
+
+
+    lateinit var tempSelectFile: File
+    lateinit var httpConnection: HttpConnection
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_confirm_capture)
@@ -31,7 +36,7 @@ class ConfirmCapture : AppCompatActivity(), View.OnClickListener {
         supportActionBar!!.setCustomView(R.layout.actionbar_title_nobtn) // 커스텀 사용할 파일 위치
         supportActionBar!!.title = "BCManager"
 
-        myApp = BCMApplication()
+        myApp = application as BCMApplication
 
         goToGallery()
 
@@ -59,8 +64,14 @@ class ConfirmCapture : AppCompatActivity(), View.OnClickListener {
                 bitImage = BitmapFactory.decodeStream(`in`)
                 `in`.close()
 
+                val date = SimpleDateFormat("yyyy_MM_dd_hh_mm_ss").format(Date());
+                tempSelectFile = File(getFilesDir().getPath(), myApp?.userID + "_" + date + "." + file_extn);
+                val out: OutputStream = FileOutputStream(tempSelectFile);
+                bitImage?.compress(Bitmap.CompressFormat.JPEG, 80, out);
+
+                out.close();
                 test_image.setImageBitmap(bitImage)
-            }else{
+            } else {
                 finish()
             }
         }
@@ -75,7 +86,7 @@ class ConfirmCapture : AppCompatActivity(), View.OnClickListener {
                 val matrix = Matrix()
                 matrix.postRotate(90F)
                 val scaledBitmap = Bitmap.createScaledBitmap(bitImage, bitImage!!.width, bitImage!!.height, true)
-                bitImage = Bitmap.createBitmap (scaledBitmap, 0, 0, scaledBitmap.getWidth(), scaledBitmap.getHeight(), matrix, true)
+                bitImage = Bitmap.createBitmap(scaledBitmap, 0, 0, scaledBitmap.getWidth(), scaledBitmap.getHeight(), matrix, true)
                 test_image.setImageBitmap(bitImage)
 //                bitImage?.recycle()
                 scaledBitmap.recycle()
@@ -84,6 +95,24 @@ class ConfirmCapture : AppCompatActivity(), View.OnClickListener {
                 goToGallery()
             }
             R.id.btn_ok -> {
+
+//                val image = BitmapFactory.decodeFile(tempSelectFile.getPath());
+
+                httpConnection = HttpConnection(URL(MainActivity.INSERT_IMAGE_URL))
+                myApp?.let {
+                    httpConnection.requestInsertImage(tempSelectFile, it, object : OnRequestCompleteListener {
+                        override fun onSuccess(data: String?) {
+                            if (data!!.isNotEmpty()) {
+                                Log.d("이미지 저장 성공", data)
+                            }
+                        }
+
+                        override fun onError() {
+                            Log.d("이미지 저장 실패", "")
+                        }
+
+                    })
+                }
 
                 val stream = ByteArrayOutputStream()
                 bitImage?.compress(Bitmap.CompressFormat.JPEG, 60, stream)
