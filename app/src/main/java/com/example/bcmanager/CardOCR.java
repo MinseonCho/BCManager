@@ -61,7 +61,6 @@ public class CardOCR extends Activity {
     private static String temp;
     private static String ocruserid;
     private static String fn;
-    private static Bitmap photo;
 
     private static final String TAG = "ddd";
 
@@ -350,7 +349,7 @@ public class CardOCR extends Activity {
 
         for(int i = 0; i<textlist.size();i++) {
 
-            if (textlist.get(i).length() <= 8) {
+            if (textlist.get(i).length() <= 9) {
                 if (cp.length() < 2) {
                     cp = textlist.get(i);
                 }
