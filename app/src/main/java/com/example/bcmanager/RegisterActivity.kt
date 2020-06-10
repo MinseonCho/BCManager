@@ -1,8 +1,10 @@
 package com.example.bcmanager
 
+import android.app.Activity
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.ActionBar
@@ -15,6 +17,7 @@ class RegisterActivity : AppCompatActivity(), View.OnClickListener {
 
     var intent_: Intent? = null
     lateinit var tCardNumber: String
+    lateinit var myApp: BCMApplication
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,6 +27,8 @@ class RegisterActivity : AppCompatActivity(), View.OnClickListener {
         supportActionBar!!.displayOptions = ActionBar.DISPLAY_SHOW_CUSTOM // 커스텀 사용
         supportActionBar!!.setCustomView(R.layout.actionbar_title) // 커스텀 사용할 파일 위치
         supportActionBar!!.title = "BCManager"
+
+        myApp = application as BCMApplication
 
         intent_ = intent
         if(intent_ != null){
@@ -53,16 +58,28 @@ class RegisterActivity : AppCompatActivity(), View.OnClickListener {
                 Toast.makeText(applicationContext, "확인클릭", Toast.LENGTH_LONG).show()
                 //CARD_TB에 저장 / TCARD_TB꺼 삭제 / 해당 리스트에서 삭제
                 val httpConnection = HttpConnection(URL(MainActivity.REGISTER_CARD))
-                httpConnection.requestRegister(tCardNumber, object : OnRequestCompleteListener{
+                httpConnection.requestRegister(tCardNumber, myApp.userNum, object : OnRequestCompleteListener{
                     override fun onSuccess(data: String?) {
                         if(data != null){
-                            if(data.equals("1")) Toast.makeText(applicationContext, "등록되었습니다", Toast.LENGTH_LONG).show()
-                            else Toast.makeText(applicationContext, "등록이 실패되었습니다", Toast.LENGTH_LONG).show()
+                            runOnUiThread(Runnable {
+                                if(data.equals("1")) Toast.makeText(applicationContext, "등록되었습니다", Toast.LENGTH_LONG).show()
+                                else Toast.makeText(applicationContext, "등록이 실패되었습니다", Toast.LENGTH_LONG).show()
+
+                                myApp.count--;
+
+                                val intent_ = Intent()
+                                intent_.setFlags(Activity.RESULT_OK)
+//                                val intent = Intent(applicationContext, CardListActivity::class.java)
+//                                intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+//                                startActivity(intent)
+                                finish()
+                            })
+
                         }
                     }
 
                     override fun onError() {
-                        Toast.makeText(applicationContext, "등록이 실패되었습니다.", Toast.LENGTH_LONG).show()
+                        Log.d("RegisterActivity","등록실패")
                     }
 
                 })

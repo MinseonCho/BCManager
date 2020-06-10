@@ -26,7 +26,7 @@ class ConfirmCapture : AppCompatActivity(), View.OnClickListener {
     private val REQUEST_CODE_GALLERY = 200
     private var myApp: BCMApplication? = null
     lateinit var fileName: String
-
+    var filePath: String? = null
 
     lateinit var tempSelectFile: File
     lateinit var httpConnection: HttpConnection
@@ -60,8 +60,8 @@ class ConfirmCapture : AppCompatActivity(), View.OnClickListener {
             if (resultCode == Activity.RESULT_OK) {
                 assert(data != null)
                 val dataUri = data!!.data
-                val filePath: String = myApp!!.getRealPathFromURI(this@ConfirmCapture, dataUri)
-                val file_extn = filePath.substring(filePath.lastIndexOf(".") + 1)
+                filePath = myApp!!.getRealPathFromURI(this@ConfirmCapture, dataUri)
+                val file_extn = filePath?.substring(filePath?.lastIndexOf(".")!! + 1)
                 var `in`: InputStream? = null
                 `in` = contentResolver.openInputStream(dataUri)
                 bitImage = BitmapFactory.decodeStream(`in`)
@@ -73,8 +73,8 @@ class ConfirmCapture : AppCompatActivity(), View.OnClickListener {
 
                 val out: OutputStream = FileOutputStream(tempSelectFile);
                 bitImage?.compress(Bitmap.CompressFormat.JPEG, 100, out);
-
                 out.close();
+
                 test_image.setImageBitmap(bitImage)
             } else {
                 finish()

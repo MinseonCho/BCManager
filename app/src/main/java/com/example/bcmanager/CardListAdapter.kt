@@ -59,7 +59,7 @@ class CardListAdapter(val context: Context, val cardList: ArrayList<CardInfoItem
             notifyItemRemoved(position);
             notifyItemRangeChanged(position, cardList.size);
 
-            mCallback?.onClick(item.CARD_NUMBER.toString())
+            mCallback?.onClick(item.CARD_NUMBER.toString(), 100, position)
 //            val httpConnection = HttpConnection(URL(MainActivity.DELETE_ITEM))
 //            httpConnection.requestDeleteItem(item.CARD_NUMBER.toString(), object : OnRequestCompleteListener{
 //                override fun onSuccess(data: String?) {

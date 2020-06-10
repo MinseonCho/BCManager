@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.content.Context;
 import android.content.Intent;
@@ -98,7 +99,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
     private ImageButton btn_clickToCamera;
     private ImageButton btn_clickToSearch;
     private RecyclerView recyclerView;
-    private CardRecyclerViewAdapter adapter;
+    private CardRecyclerViewAdapter adapter = null;
     private TextView cnt_text;
     private TextView cnt_count_text;
     private TextView noCard_text;
@@ -110,11 +111,13 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
     private ImageView actionbar_btn;
     private ArrayList<CardInfoItem.cardInfo> cardsList;
     private ArrayList<CardInfoItem.cardInfo> unRegedcardsList;
+    private SwipeRefreshLayout refreshLayout = null;
     private int card_cound = 0;
 
     private static final String TAG = "opencv";
     private static final int REQUEST_CODE_GALLERY = 200;
     private static final int REQUEST_CODE = 300;
+    private static final int REQUEST_CODE_RESTART = 400;
 
     public static HttpConnection httpConn;
     public static Context mContext;
@@ -177,14 +180,15 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         cnt_count_text = findViewById(R.id.cnt);
         linearGoToCardList = findViewById(R.id.linear_goToCardList);
         btn_goToCardList = findViewById(R.id.btn_goToCardList);
-
+        refreshLayout = findViewById(R.id.refresh_layout);
 
         //체크해야 할 것: 로그인 여부, 등록된 카드가져오기, 인식됐지만 등록안된 카드 들고오기
         checkCurrentUser();
         getAppKeyHash();
-        if (myApp.unregisterdCards.size() > 0) {
-            linearGoToCardList.setVisibility(View.VISIBLE);
-        } else linearGoToCardList.setVisibility(View.GONE);
+
+//        if (myApp.unregisterdCards.size() > 0) {
+//            linearGoToCardList.setVisibility(View.VISIBLE);
+//        } else linearGoToCardList.setVisibility(View.GONE);
 
         //handler
         mHandler = new Handler();
@@ -192,7 +196,13 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         //recyclerview
         cardsList = new ArrayList<>();
         unRegedcardsList = new ArrayList<>();
-        recyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
+
+
+        LinearLayoutManager mLayoutManager = new LinearLayoutManager(this);
+        mLayoutManager.setReverseLayout(true);
+        mLayoutManager.setStackFromEnd(true);
+        recyclerView.setLayoutManager(mLayoutManager);
+
         recyclerView.setNestedScrollingEnabled(false);
 
         //Display
@@ -211,10 +221,8 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
             Log.d("ID", myApp.userName);
 //            getUserNumber();
 //            getCardInfo();
-            getCardCount();
 //            getUnregisterdCardsInfo();
         } else {
-            welcome.setVisibility(View.GONE);
             linearGoToCardList.setVisibility(View.GONE);
         }
 
@@ -270,8 +278,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
             @Override
             public void onClick(View v) {
                 //명함리스트로;
-                Intent intent = new Intent(getApplicationContext(), CardListActivity.class);
-                startActivity(new Intent(getApplicationContext(), CardListActivity.class));
+                startActivityForResult(new Intent(getApplicationContext(), CardListActivity.class), REQUEST_CODE_RESTART);
             }
         });
 
@@ -298,13 +305,29 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 
         //End of kakaolink
 
+        refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                cardsList.clear();
+                getCardCount();
+                refreshLayout.setRefreshing(false);
+            }
+        });
+        refreshLayout.setColorSchemeColors(getResources().getColor(R.color.my_green));
+
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable final Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        Log.d("test", "onActivityResult");
+        Log.d(TAG_, "onActivityResult");
+        if (requestCode == REQUEST_CODE_RESTART) {
+            if(resultCode == RESULT_OK) {
+                Log.d(TAG_, "onActivityResult_1");
+                startActivity(getIntent());
+            }
+        }
         if (requestCode == 100) {
             if (resultCode == RESULT_OK) {
                 if (data != null) {
@@ -369,6 +392,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                 //        val intent = intent
                 if (data != null) {
                     byte[] bytes = data.getByteArrayExtra("image");
+                    String filename = data.getStringExtra("fileName");
                     final Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
 
                     final Thread thread = new Thread((new Runnable() {
@@ -421,7 +445,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                                 byte[] byteArray = stream.toByteArray();
 
 
-                                CardOCR cardocr = new CardOCR(getApplicationContext(),bitmapOutput);
+                                CardOCR cardocr = new CardOCR(getApplicationContext(), bitmapOutput);
                                 cardocr.dd();
                             } else {
                                 Toast.makeText(getApplicationContext(), "다시 시도해주세요.", Toast.LENGTH_SHORT).show();
@@ -574,7 +598,6 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 
 
     void getCardInfo() {
-        Log.d("카드가져오기", "");
         try {
             HttpConnection httpConn = new HttpConnection(new URL(GET_CARDS_INFO));
             httpConn.requestGetCards(myApp.userID, new OnRequestCompleteListener() {
@@ -582,6 +605,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                 public void onSuccess(@org.jetbrains.annotations.Nullable String data) {
 
                     if (data != null && !data.isEmpty()) {
+                        cardsList.clear();
                         Log.d("성공", data);
                         Gson gson = new GsonBuilder().create();
                         JsonParser jsonParser = new JsonParser();
@@ -590,18 +614,15 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 
                         CardInfoItem.cardInfo result;
                         for (int i = 0; i < jsonArray.size(); i++) {
-
                             final JsonObject j = jsonArray.get(i).getAsJsonObject();
                             result = gson.fromJson(j, CardInfoItem.cardInfo.class);
-
                             cardsList.add(result);
                         }
 
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                Log.d("민선선", "");
-                                Log.d("민선선", String.valueOf(cardsList.size()));
+                                Log.d(TAG_, String.valueOf(cardsList.size()));
                                 card_text.setVisibility(View.VISIBLE);
                                 noCard_text.setVisibility(View.GONE);
                                 adapter = new CardRecyclerViewAdapter(MainActivity.this, cardsList);
@@ -628,7 +649,9 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
             e.printStackTrace();
         }
     }
-//    void getUserNumber() {
+
+
+    //    void getUserNumber() {
 //        try {
 //            HttpConnection httpConnection = new HttpConnection(new URL(GET_USER_NUMBER));
 //            httpConnection.requestGetUserNumber(myApp.userID, new OnRequestCompleteListener() {
@@ -658,6 +681,16 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 //            e.printStackTrace();
 //        }
 //    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.d("MainActivity", "onResume실행");
+        if(myApp.isLogined) getCardCount();
+        if(myApp.count == 0){
+            linearGoToCardList.setVisibility(View.GONE);
+        }
+    }
 
     private void getAppKeyHash() {
         try {

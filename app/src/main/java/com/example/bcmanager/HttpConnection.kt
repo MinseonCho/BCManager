@@ -120,11 +120,12 @@ class HttpConnection(url: URL): Callback  {
         client.newCall(request).enqueue(this)
     }
 
-    fun requestRegister(tCardNumber: String, callback: OnRequestCompleteListener){
+    fun requestRegister(tCardNumber: String, userNum: String, callback: OnRequestCompleteListener){
         this.onRequestCompleteListener = callback
 
         val body = FormBody.Builder()
                 .add("TCARD_NUMBER", tCardNumber)
+                .add("USER_NUMBER", userNum)
                 .build()
 
         val request = Request.Builder()
