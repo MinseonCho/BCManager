@@ -49,7 +49,7 @@ class CardRecyclerViewAdapter(val context: Context, val cardList: ArrayList<Card
 
             GlideApp.with(context).load(url)
                     .apply(RequestOptions.fitCenterTransform())
-                    .override(MainActivity.device_width - 50, 200)
+                    .override(MainActivity.device_width, 400)
                     .into(holder.card!!)
 
             holder.changeVisibility(selectedItems.get(position));

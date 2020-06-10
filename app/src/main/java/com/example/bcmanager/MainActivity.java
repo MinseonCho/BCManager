@@ -89,6 +89,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
     public static String CARD_INPUT = "http://104.197.171.112/card_input.php";
     public static String GET_USER_NUMBER = "http://104.197.171.112/get_user_number.php";
     public static String DELETE_ITEM = "http://104.197.171.112/delete_item.php";
+    public static String REGISTER_CARD = "http://104.197.171.112/moveToCardTB.php";
     /**
      * end
      */
@@ -338,9 +339,9 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 
                             cnt--;
 
-                            CardOCR cardocr = new CardOCR(getApplicationContext(), result);
-                            cardocr.dd();
-                        //    startActivity(intent);
+                            Intent intent = new Intent(getApplicationContext(), ImageOCRActivity.class);
+                            intent.putExtra("image", byteArray);
+                            startActivity(intent);
 
                             mHandler.post(new Runnable() {
                                 @Override

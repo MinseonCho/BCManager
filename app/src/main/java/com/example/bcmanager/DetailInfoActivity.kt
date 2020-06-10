@@ -72,7 +72,7 @@ class DetailInfoActivity : AppCompatActivity(), View.OnClickListener, PopupMenu.
 
                         Glide.with(this@DetailInfoActivity)
                                 .load(MainActivity.IMAGE_URL+result?.CARD_IMAGE)
-                                .override(MainActivity.device_width, 200)
+                                .override(MainActivity.device_width, 400)
                                 .into(detail_card)
                     }
                 }

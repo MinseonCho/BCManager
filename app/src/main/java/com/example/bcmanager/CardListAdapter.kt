@@ -37,7 +37,6 @@ class CardListAdapter(val context: Context, val cardList: ArrayList<CardInfoItem
 
         Glide.with(context).load(url)
                 .apply(RequestOptions.fitCenterTransform())
-                .override(200, 150)
                 .into(holder.cardImage)
         holder.cv.setOnClickListener {
             val intent = Intent(context, RegisterActivity::class.java)

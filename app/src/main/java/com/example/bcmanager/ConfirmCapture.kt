@@ -25,6 +25,7 @@ class ConfirmCapture : AppCompatActivity(), View.OnClickListener {
     var bitImage: Bitmap? = null
     private val REQUEST_CODE_GALLERY = 200
     private var myApp: BCMApplication? = null
+    lateinit var fileName: String
 
 
     lateinit var tempSelectFile: File
@@ -67,9 +68,11 @@ class ConfirmCapture : AppCompatActivity(), View.OnClickListener {
                 `in`.close()
 
                 val date = SimpleDateFormat("yy_MM_dd_hh_mm_ss").format(Date());
-                tempSelectFile = File(getFilesDir().getPath(), myApp?.userNum + "_" + date + "." + file_extn);
+                fileName = myApp?.userNum + "_" + date + "." + file_extn
+                tempSelectFile = File(getFilesDir().getPath(), fileName);
+
                 val out: OutputStream = FileOutputStream(tempSelectFile);
-                bitImage?.compress(Bitmap.CompressFormat.JPEG, 80, out);
+                bitImage?.compress(Bitmap.CompressFormat.JPEG, 100, out);
 
                 out.close();
                 test_image.setImageBitmap(bitImage)
@@ -122,6 +125,7 @@ class ConfirmCapture : AppCompatActivity(), View.OnClickListener {
 
                 val intent = Intent()
                 intent.putExtra("image", byteArray)
+                intent.putExtra("fileName", fileName)
                 setResult(RESULT_OK, intent);
                 finish();
             }

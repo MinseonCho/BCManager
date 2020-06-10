@@ -119,6 +119,23 @@ class HttpConnection(url: URL): Callback  {
         val client = OkHttpClient()
         client.newCall(request).enqueue(this)
     }
+
+    fun requestRegister(tCardNumber: String, callback: OnRequestCompleteListener){
+        this.onRequestCompleteListener = callback
+
+        val body = FormBody.Builder()
+                .add("TCARD_NUMBER", tCardNumber)
+                .build()
+
+        val request = Request.Builder()
+                .url(url!!)
+                .post(body)
+                .build()
+
+        val client = OkHttpClient()
+        client.newCall(request).enqueue(this)
+    }
+
     fun requestDeleteItem(cardNumber: String, callback: OnRequestCompleteListener){
         this.onRequestCompleteListener = callback
 
