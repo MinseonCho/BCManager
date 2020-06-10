@@ -1,13 +1,8 @@
 package com.example.bcmanager;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -47,7 +42,7 @@ public class CardOCR extends Activity {
     private static final String ANDROID_PACKAGE_HEADER = "X-Android-Package";
     private static final int MAX_LABEL_RESULTS = 10;
     private static final int MAX_DIMENSION = 1200;
-    private BCMApplication myApp;
+    //  private BCMApplication myApp;
 
     private static ArrayList<String> textlist = new ArrayList<String>();
     private static ArrayList<String> city_address = new ArrayList<String>();
@@ -62,24 +57,37 @@ public class CardOCR extends Activity {
     private static String po;
     private static String cp;
     private static String memo;
-    private static int done;
+    private static String done;
     private static String temp;
+    private static String ocruserid;
+    private static String fn;
+    private static Bitmap photo;
 
     private static final String TAG = "ddd";
 
-    public void dd() {
-//        Log.d(TAG,"USER학인" + myApp.userID);
-//        InsertData task = new InsertData();
-//        task.execute(CARD_INPUT,nm,ph,ad,em,nb,fx,po,memo,cp, myApp.userID);
+    public static String dd() {
+        Log.d(TAG,"DD함수");
+        Log.d(TAG,"ad확인db"+ad);
+        Log.d(TAG,"nm확인db"+ nm);
+        Log.d(TAG,"fx확인db"+ fx);
+        Log.d(TAG,"cp확인db"+cp);
+
+        done = "1";
+        InsertData task = new InsertData();
+        task.execute(CARD_INPUT,nm,ph,ad,em,nb,fx,po,memo,cp,ocruserid,done,fn);
+        return done;
     }
 
     Context context;
 
-    CardOCR(Context context, Bitmap bitmap) {
+    CardOCR(Context context, Bitmap bitmap, String userid, String filename) {
         this.context = context;
         callCloudVision(bitmap);
-        myApp = (BCMApplication) getApplication();
-
+        // myApp = (BCMApplication) getApplication();
+        ocruserid = userid;
+        fn = filename;
+        Log.d(TAG,"USER체크" + userid);
+        Log.d(TAG,"filename체크" + filename);
         textlist.clear();
         ph = "";
         nm = "";
@@ -89,7 +97,7 @@ public class CardOCR extends Activity {
         fx = "";
         po = "";
         cp = "";
-        memo = "";
+        memo = null;
         temp = "";
 
 
@@ -217,6 +225,7 @@ public class CardOCR extends Activity {
                 Log.d(TAG, "failed to make API request because of other IOException " +
                         e.getMessage());
             }
+
             return "Cloud Vision API request failed. Check logs for details.";
         }
 
@@ -245,7 +254,7 @@ public class CardOCR extends Activity {
             message = "nothing";
             Log.d(TAG, "MESSAGE = " + message);
         }
-
+        memo = message;
 
         String text = "";
         city_address.addAll(Arrays.asList("서울특별시", "인천광역시", "대구광역시", "울산광역시", "부산광역시", "광주광역시", "대전광역시",
@@ -262,24 +271,24 @@ public class CardOCR extends Activity {
         city_number.addAll(Arrays.asList("02", "051", "053", "032", "062", "042", "052", "044", "031", "033", "043", "041", "063", "061", "054", "055", "064"));
         job_position.addAll(Arrays.asList("회장", "부회장", "사장", "부사장", "전무", "상무", "부장", "차장", "대리", "과장", "사원", "팀장", "이사", "교수", "대표", "대표이사", "점장", "지점장"));
 
-        int plus = 0;
-        for (int i = 0; i < message.length(); i++) {
-            if (message.charAt(i) != '\n') {
+        int plus=0;
+        for(int i=0;i<message.length();i++){
+            if(message.charAt(i) != '\n') {
                 for (int j = i; ; j++) {
-                    if (message.charAt(j) != 32 && message.charAt(j) != '\n')
+                    if(message.charAt(j) != 32 && message.charAt(j) != '\n')
                         text += message.charAt(j);
-                    if (message.charAt(j) == '\n') {
-                        i = j;
+                    if(message.charAt(j) == '\n') {
+                        i=j;
                         break;
                     }
                 }
             }
             textlist.add(text);
-            Log.d(TAG, textlist.get(plus++));
+            Log.d(TAG,textlist.get(plus++));
             text = "";
         }
 
-        for (int i = 0; i < textlist.size(); i++) {
+        for(int i = 0; i<textlist.size();i++) {
 
             if (textlist.get(i).contains("010"))
                 for (int j = 0; j < textlist.get(i).length(); j++) {
@@ -288,39 +297,45 @@ public class CardOCR extends Activity {
                     }
                 }
 
-            else if (textlist.get(i).contains("@")) {
-                if (em.length() < 2) {
+            if (textlist.get(i).contains("@")) {
+                if(em.length() < 2) {
                     em = textlist.get(i);
 
-                    if (textlist.get(i).contains("email."))
+                    if(textlist.get(i).contains("email."))
                         em = em.replace("email.", "");
-                    else if (textlist.get(i).contains("Email."))
+                    else if(textlist.get(i).contains("Email."))
                         em = em.replace("Email.", "");
-                    else if (textlist.get(i).contains("E-Mail."))
+                    else if(textlist.get(i).contains("E-Mail."))
                         em = em.replace("E-Mail.", "");
-                    else if (textlist.get(i).contains("E-mail."))
+                    else if(textlist.get(i).contains("E-mail."))
                         em = em.replace("E-mail.", "");
-                    else if (textlist.get(i).contains("이메일:"))
+                    else if(textlist.get(i).contains("이메일:"))
                         em = em.replace("이메일:", "");
                 }
-            } else if (textlist.get(i).contains(".com")) {
-                if (em.length() < 2) {
+            }
+
+            else if (textlist.get(i).contains(".com")){
+                if(em.length() < 2) {
                     em = textlist.get(i);
-//                   textlist = textlist.replaceAll(em.);
                 }
-            } else if (textlist.get(i).contains("F.")) {
+            }
+            Log.d(TAG,"em = "+ em);
+
+            if (textlist.get(i).contains("F.")) {
                 for (int j = 0; j < textlist.get(i).length(); j++) {
                     if (textlist.get(i).charAt(j) >= 48 && textlist.get(i).charAt(j) <= 57) {
                         fx += textlist.get(i).charAt(j);
                     }
                 }
-            } else if (textlist.get(i).contains("FAX")) {
+            }
+            else if (textlist.get(i).contains("FAX")) {
                 for (int j = 0; j < textlist.get(i).length(); j++) {
                     if (textlist.get(i).charAt(j) >= 48 && textlist.get(i).charAt(j) <= 57) {
                         fx += textlist.get(i).charAt(j);
                     }
                 }
-            } else if (textlist.get(i).contains("Fax")) {
+            }
+            else if (textlist.get(i).contains("Fax")) {
                 for (int j = 0; j < textlist.get(i).length(); j++) {
                     if (textlist.get(i).charAt(j) >= 48 && textlist.get(i).charAt(j) <= 57) {
                         fx += textlist.get(i).charAt(j);
@@ -329,18 +344,28 @@ public class CardOCR extends Activity {
             }
         }
 
-        Log.d(TAG, ph);
-        Log.d(TAG, nm);
-        Log.d(TAG, em);
+        Log.d(TAG,ph);
+        Log.d(TAG,nm);
+        Log.d(TAG,em);
+
+        for(int i = 0; i<textlist.size();i++) {
+
+            if (textlist.get(i).length() <= 8) {
+                if (cp.length() < 2) {
+                    cp = textlist.get(i);
+                }
+            }
+        }
+        Log.d(TAG,"cp확인 " + cp);
 
         loop:
-        for (int i = 0; i < textlist.size(); i++) {
+        for(int i = 0; i<textlist.size();i++) {
 
             if (textlist.get(i).length() == 3)
                 nm = textlist.get(i);
 
             else if (textlist.get(i).length() == 5) {
-                if (nm.length() < 2) {
+                if(nm.length() < 2) {
                     for (int j = 0; j < job_position.size(); j++) {
                         if (textlist.get(i).contains(job_position.get(j))) {
                             temp = textlist.get(i);
@@ -350,8 +375,9 @@ public class CardOCR extends Activity {
                         }
                     }
                 }
-            } else if (textlist.get(i).length() == 7) {
-                if (nm.length() < 2) {
+            }
+            else if (textlist.get(i).length() == 7) {
+                if(nm.length() < 2) {
                     for (int j = 0; j < job_position.size(); j++) {
                         if (textlist.get(i).contains(job_position.get(j))) {
                             temp = textlist.get(i);
@@ -364,7 +390,10 @@ public class CardOCR extends Activity {
             }
         }
 
-        for (int i = 0; i < textlist.size(); i++) {
+
+        Log.d(TAG,"po확인 = " +po);
+
+        for(int i = 0; i<textlist.size();i++) {
 
             for (int j = 0; j < city_address.size(); j++) {
 
@@ -373,20 +402,20 @@ public class CardOCR extends Activity {
             }
 
             for (int j = 0; j < job_position.size(); j++) {
-                if (po.length() < 2) {
+                if(po.length() < 2) {
                     if (textlist.get(i).contains(job_position.get(j)))
                         po = job_position.get(j);
                 }
             }
         }
-        Log.d(TAG, ad);
+        Log.d(TAG,"ad확인 = " +ad);
 
         loop:
-        for (int i = 0; i < textlist.size(); i++) {
+        for(int i = 0; i<textlist.size();i++){
 
-            for (int j = 0; j < city_number.size(); j++) {
+            for(int j = 0; j<city_number.size();j++){
 
-                if (textlist.get(i).contains(city_number.get(j))) {
+                if(textlist.get(i).contains(city_number.get(j))) {
 
                     for (int k = 0; k < textlist.get(i).length(); k++) {
                         if (textlist.get(i).charAt(k) >= 48 && textlist.get(i).charAt(k) <= 57) {
@@ -398,112 +427,116 @@ public class CardOCR extends Activity {
 
             }
         }
-        Log.d(TAG, nb);
-        Log.d(TAG, fx);
-        done = 1;
 
-
+        Log.d(TAG, "nb값" +nb);
+        Log.d(TAG, "fx = "+fx);
+        done = "1";
+        Log.d(TAG,"done값" + done);
+        dd();
         return message.toString();
 
     }
 
-//    class InsertData extends AsyncTask<String, Void, String> {
-//        ProgressDialog progressDialog;
-//
-//        @Override
-//        protected void onPreExecute() {
-//            super.onPreExecute();
-//
+    static class InsertData extends AsyncTask<String, Void, String> {
+        //       ProgressDialog progressDialog;
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+
 //            progressDialog = ProgressDialog.show(CardOCR.this,
 //                    "Please Wait", null, true, true);
-//        }
-//
-//
+        }
+
+
 //        @Override
 //        protected void onPostExecute(String result) {
 //            super.onPostExecute(result);
 //
-//            progressDialog.dismiss();
+//          //  progressDialog.dismiss();
 //            //  mTextViewResult.setText("입력되었습니다.");
 //            Log.d(TAG, "POST response  - " + result);
 //        }
-//
-//
-//        @Override
-//        protected String doInBackground(String... params) {
-//
-//            String nm = (String)params[1];
-//            String ph = (String)params[2];
-//            String ad = (String)params[3];
-//            String em = (String)params[4];
-//            String nb = (String)params[5];
-//            String fx = (String)params[6];
-//            String po = (String)params[7];
-//            String memo = (String)params[8];
-//            String cp = (String)params[9];
-//            String done = (String)params[10];
-//
-//            String serverURL = (String)params[0];
-//            String postParameters = "nm=" + nm + "&ph=" + ph+ "&ad=" + ad+ "&em=" + em+ "&nb=" + nb + "&fx=" + fx + "&po=" + po + "&memo=" + memo + "&cp=" + cp + done +"&done=";
-//
-//            Log.d(TAG,"ddongmmong" + serverURL);
-//            Log.d(TAG,"ddongmmong"+postParameters);
-//
-//
-//            try {
-//
-//                URL url = new URL(serverURL);
-//                HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
-//
-//
-//                httpURLConnection.setReadTimeout(5000);
-//                httpURLConnection.setConnectTimeout(5000);
-//                httpURLConnection.setRequestMethod("POST");
-//                httpURLConnection.connect();
-//
-//
-//                OutputStream outputStream = httpURLConnection.getOutputStream();
-//                outputStream.write(postParameters.getBytes("UTF-8"));
-//                outputStream.flush();
-//                outputStream.close();
-//
-//
-//                int responseStatusCode = httpURLConnection.getResponseCode();
-//                Log.d(TAG, "POST response code - " + responseStatusCode);
-//
-//                InputStream inputStream;
-//                if(responseStatusCode == HttpURLConnection.HTTP_OK) {
-//                    inputStream = httpURLConnection.getInputStream();
-//                }
-//                else{
-//                    inputStream = httpURLConnection.getErrorStream();
-//                }
-//
-//
-//                InputStreamReader inputStreamReader = new InputStreamReader(inputStream, "UTF-8");
-//                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-//
-//                StringBuilder sb = new StringBuilder();
-//                String line = null;
-//
-//                while((line = bufferedReader.readLine()) != null){
-//                    sb.append(line);
-//                }
-//
-//
-//                bufferedReader.close();
-//
-//
-//                return sb.toString();
-//
-//
-//            } catch (Exception e) {
-//
-//                Log.d(TAG, "InsertData: Error ", e);
-//
-//                return new String("Error: " + e.getMessage());
-//            }
-//
-//        }
-//    }
+
+
+        @Override
+        protected String doInBackground(String... params) {
+
+            Log.d(TAG, "DB확인");
+            String nm = (String)params[1];
+            String ph = (String)params[2];
+            String ad = (String)params[3];
+            String em = (String)params[4];
+            String nb = (String)params[5];
+            String fx = (String)params[6];
+            String po = (String)params[7];
+            String memo = (String)params[8];
+            String cp = (String)params[9];
+            String ocruserid = (String)params[10];
+            String done = (String)params[11];
+            String fn = (String)params[12];
+
+            String serverURL = (String)params[0];
+            String postParameters = "&nm=" + nm + "&ph=" + ph+ "&ad=" + ad+ "&em=" + em+ "&nb=" + nb + "&fx=" + fx + "&po=" + po + "&memo=" + memo + "&cp=" + cp  + "&ocruserid="+ ocruserid + "&done=" + done + "&fn=" + fn ;
+
+            Log.d(TAG,"ddongmmong" + serverURL);
+            Log.d(TAG,"ddongmmong"+postParameters);
+
+
+            try {
+
+                URL url = new URL(serverURL);
+                HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
+
+
+                httpURLConnection.setReadTimeout(5000);
+                httpURLConnection.setConnectTimeout(5000);
+                httpURLConnection.setRequestMethod("POST");
+                httpURLConnection.connect();
+
+
+                OutputStream outputStream = httpURLConnection.getOutputStream();
+                outputStream.write(postParameters.getBytes("UTF-8"));
+                outputStream.flush();
+                outputStream.close();
+
+
+                int responseStatusCode = httpURLConnection.getResponseCode();
+                Log.d(TAG, "POST response code - " + responseStatusCode);
+
+                InputStream inputStream;
+                if(responseStatusCode == HttpURLConnection.HTTP_OK) {
+                    inputStream = httpURLConnection.getInputStream();
+                }
+                else{
+                    inputStream = httpURLConnection.getErrorStream();
+                }
+
+
+                InputStreamReader inputStreamReader = new InputStreamReader(inputStream, "UTF-8");
+                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+
+                StringBuilder sb = new StringBuilder();
+                String line = null;
+
+                while((line = bufferedReader.readLine()) != null){
+                    sb.append(line);
+                }
+
+
+                bufferedReader.close();
+
+
+                return sb.toString();
+
+
+            } catch (Exception e) {
+
+                Log.d(TAG, "InsertData: Error ", e);
+
+                return new String("Error: " + e.getMessage());
+            }
+
+        }
+    }
 }
