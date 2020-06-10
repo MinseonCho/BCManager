@@ -72,7 +72,9 @@ class ConfirmCapture : AppCompatActivity(), View.OnClickListener {
                 tempSelectFile = File(getFilesDir().getPath(), fileName);
 
                 val out: OutputStream = FileOutputStream(tempSelectFile);
-                bitImage?.compress(Bitmap.CompressFormat.JPEG, 100, out);
+
+                bitImage?.compress(Bitmap.CompressFormat.JPEG, 40, out);
+
                 out.close();
 
                 test_image.setImageBitmap(bitImage)
@@ -119,8 +121,25 @@ class ConfirmCapture : AppCompatActivity(), View.OnClickListener {
                     })
                 }
 
+                Log.d("image_width__", bitImage?.width.toString())
+                Log.d("image_height__", bitImage?.height.toString())
+                Log.d("image_height__", bitImage?.byteCount.toString())
                 val stream = ByteArrayOutputStream()
-                bitImage?.compress(Bitmap.CompressFormat.JPEG, 60, stream)
+                if (bitImage?.width!! > 2000) {
+//                    val options: BitmapFactory.Options = BitmapFactory.Options()
+//                    options.inSampleSize = 4
+//                    bitImage = BitmapFactory.decodeFile(filePath, options)
+
+                    val result = Bitmap.createBitmap(bitImage, 0, 0, 720, 300)
+
+                    Log.d("image_width_1", result?.width.toString())
+                    Log.d("image_height_1", result?.height.toString())
+                    Log.d("image_height_1", result?.byteCount.toString())
+                    bitImage?.compress(Bitmap.CompressFormat.JPEG, 20, stream)
+                } else {
+                    bitImage?.compress(Bitmap.CompressFormat.JPEG, 70, stream)
+                }
+
                 val byteArray = stream.toByteArray()
 
                 val intent = Intent()

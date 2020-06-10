@@ -115,6 +115,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
     private int card_cound = 0;
 
     private static final String TAG = "opencv";
+    public static String userid = ""; //ocr
     private static final int REQUEST_CODE_GALLERY = 200;
     private static final int REQUEST_CODE = 300;
     private static final int REQUEST_CODE_RESTART = 400;
@@ -392,7 +393,9 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                 //        val intent = intent
                 if (data != null) {
                     byte[] bytes = data.getByteArrayExtra("image");
-                    String filename = data.getStringExtra("fileName");
+
+                    final String filename = data.getStringExtra("fileName");
+
                     final Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
 
                     final Thread thread = new Thread((new Runnable() {
@@ -444,9 +447,9 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                                 bitmapOutput.compress(Bitmap.CompressFormat.JPEG, 100, stream);
                                 byte[] byteArray = stream.toByteArray();
 
+                                userid = myApp.userID;
+                                CardOCR cardocr = new CardOCR(getApplicationContext(),bitmapOutput, userid, filename);
 
-                                CardOCR cardocr = new CardOCR(getApplicationContext(), bitmapOutput);
-                                cardocr.dd();
                             } else {
                                 Toast.makeText(getApplicationContext(), "다시 시도해주세요.", Toast.LENGTH_SHORT).show();
                             }

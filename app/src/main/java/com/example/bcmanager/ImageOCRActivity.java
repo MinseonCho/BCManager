@@ -53,7 +53,7 @@ import java.util.Objects;
 
 public class ImageOCRActivity extends AppCompatActivity {
 
-    private static final String CLOUD_VISION_API_KEY = "";
+    private static final String CLOUD_VISION_API_KEY = "AIzaSyCXyQ0R-emSegoNwWJnbZhFPPbm5rFUdzk";
     public static String CARD_INPUT = "http://104.197.171.112/card_input.php";
     public static final String FILE_NAME = "temp.jpg";
     private static final String ANDROID_CERT_HEADER = "X-Android-Cert";
@@ -92,7 +92,7 @@ public class ImageOCRActivity extends AppCompatActivity {
     private static String cp;
     private static String memo;
     private static String temp;
-
+    private static String ocruserid;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -118,6 +118,8 @@ public class ImageOCRActivity extends AppCompatActivity {
         info_memo = findViewById(R.id.memo);
 
         Intent intent = getIntent();
+        ocruserid = myApp.userID;
+        Log.d("TAG","MYAPPUSERID확인"+ ocruserid);
 
 
         textlist.clear();
@@ -156,9 +158,8 @@ public class ImageOCRActivity extends AppCompatActivity {
             memo = info_memo.getText().toString();
             cp = info_company.getText().toString();
 
-
             InsertData task = new InsertData();
-            task.execute(CARD_INPUT,nm,ph,ad,em,nb,fx,po,memo,cp);
+            task.execute(CARD_INPUT,nm,ph,ad,em,nb,fx,po,memo,cp, ocruserid);
         }
     };
 
@@ -340,6 +341,7 @@ public class ImageOCRActivity extends AppCompatActivity {
         } else {
             message = "nothing";
         }
+
         String text = "";
         city_address.addAll(Arrays.asList("서울특별시", "인천광역시", "대구광역시", "울산광역시", "부산광역시", "광주광역시", "대전광역시",
                 "부천시", "시흥시", "고양시", "성남시", "파주시", "화성시", "수원시", "안성시", "평택시", "과천시", "안양시",
@@ -431,6 +433,16 @@ public class ImageOCRActivity extends AppCompatActivity {
         Log.d(TAG,ph);
         Log.d(TAG,nm);
         Log.d(TAG,em);
+
+        for(int i = 0; i<textlist.size();i++) {
+
+            if (textlist.get(i).length() <= 9) {
+                if (cp.length() < 2) {
+                    cp = textlist.get(i);
+                }
+            }
+        }
+        Log.d(TAG,"camera_cp확인 " + cp);
 
         loop:
         for(int i = 0; i<textlist.size();i++) {
