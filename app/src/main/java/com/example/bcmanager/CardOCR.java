@@ -82,6 +82,7 @@ public class CardOCR extends Activity {
     CardOCR(Context context, Bitmap bitmap, String userid, String filename) {
         this.context = context;
         callCloudVision(bitmap);
+
         // myApp = (BCMApplication) getApplication();
         ocruserid = userid;
         fn = filename;

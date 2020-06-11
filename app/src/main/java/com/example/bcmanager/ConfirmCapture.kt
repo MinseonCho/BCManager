@@ -5,6 +5,7 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
+import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
@@ -27,6 +28,7 @@ class ConfirmCapture : AppCompatActivity(), View.OnClickListener {
     private var myApp: BCMApplication? = null
     lateinit var fileName: String
     var filePath: String? = null
+    var dataUri: Uri? = null
 
     lateinit var tempSelectFile: File
     lateinit var httpConnection: HttpConnection
@@ -59,7 +61,7 @@ class ConfirmCapture : AppCompatActivity(), View.OnClickListener {
         if (requestCode == REQUEST_CODE_GALLERY) {
             if (resultCode == Activity.RESULT_OK) {
                 assert(data != null)
-                val dataUri = data!!.data
+                dataUri = data!!.data
                 filePath = myApp!!.getRealPathFromURI(this@ConfirmCapture, dataUri)
                 val file_extn = filePath?.substring(filePath?.lastIndexOf(".")!! + 1)
                 var `in`: InputStream? = null
@@ -95,6 +97,8 @@ class ConfirmCapture : AppCompatActivity(), View.OnClickListener {
                 val scaledBitmap = Bitmap.createScaledBitmap(bitImage, bitImage!!.width, bitImage!!.height, true)
                 bitImage = Bitmap.createBitmap(scaledBitmap, 0, 0, scaledBitmap.getWidth(), scaledBitmap.getHeight(), matrix, true)
                 test_image.setImageBitmap(bitImage)
+
+
 //                bitImage?.recycle()
                 scaledBitmap.recycle()
             }
@@ -104,6 +108,12 @@ class ConfirmCapture : AppCompatActivity(), View.OnClickListener {
             R.id.btn_ok -> {
 
 //                val image = BitmapFactory.decodeFile(tempSelectFile.getPath());
+
+                val out: OutputStream = FileOutputStream(tempSelectFile);
+
+                bitImage?.compress(Bitmap.CompressFormat.JPEG, 40, out);
+
+                out.close();
 
                 httpConnection = HttpConnection(URL(MainActivity.INSERT_IMAGE_URL))
                 myApp?.let {

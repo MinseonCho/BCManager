@@ -324,7 +324,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 
         Log.d(TAG_, "onActivityResult");
         if (requestCode == REQUEST_CODE_RESTART) {
-            if(resultCode == RESULT_OK) {
+            if (resultCode == RESULT_OK) {
                 Log.d(TAG_, "onActivityResult_1");
                 startActivity(getIntent());
             }
@@ -448,7 +448,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                                 byte[] byteArray = stream.toByteArray();
 
                                 userid = myApp.userID;
-                                CardOCR cardocr = new CardOCR(getApplicationContext(),bitmapOutput, userid, filename);
+                                CardOCR cardocr = new CardOCR(getApplicationContext(), bitmapOutput, userid, filename);
 
                             } else {
                                 Toast.makeText(getApplicationContext(), "다시 시도해주세요.", Toast.LENGTH_SHORT).show();
@@ -530,26 +530,27 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 
     public void checkCurrentUser() {
         // [START check_current_user]
-        user = FirebaseAuth.getInstance().getCurrentUser();
-        if (user != null) {
-            Log.d("파이어베이스 로그인", "");
-            // User is signed in
-            Log.d("INFOuserName", user.getDisplayName() + "");
-            Log.d("INFOemail", user.getEmail() + "");
-            Log.d("INFOuserphonenumber", user.getPhoneNumber() + "");
-            Log.d("INFOUID", user.getUid() + "");
-            Log.d("INFOphotourl", String.valueOf(user.getPhotoUrl()) + "");
-            myApp.userID = user.getUid().toString();
-            myApp.loginType = "g";
-            myApp.userEmail = user.getEmail();
-            if (user.getPhotoUrl() != null) myApp.userImage = user.getPhotoUrl().toString();
-            myApp.userName = user.getDisplayName();
-            myApp.isLogined = true;
+//        user = FirebaseAuth.getInstance().getCurrentUser();
+        if (myApp.isLogined) {
+
+//            Log.d("파이어베이스 로그인", "");
+//            // User is signed in
+//            Log.d("INFOuserName", user.getDisplayName() + "");
+//            Log.d("INFOemail", user.getEmail() + "");
+//            Log.d("INFOuserphonenumber", user.getPhoneNumber() + "");
+//            Log.d("INFOUID", user.getUid() + "");
+//            Log.d("INFOphotourl", String.valueOf(user.getPhotoUrl()) + "");
+//            myApp.userID = user.getUid().toString();
+//            myApp.loginType = "g";
+//            myApp.userEmail = user.getEmail();
+//            if (user.getPhotoUrl() != null) myApp.userImage = user.getPhotoUrl().toString();
+//            myApp.userName = user.getDisplayName();
+//            myApp.isLogined = true;
 
             //인식완료됐는데 등록안한 명함이 있는지확인하기.
-            linearGoToCardList.setVisibility(View.VISIBLE);
-            welcome.setText(user.getDisplayName() + " 님 인식된 \n명함을 확인하세요!");
-        } else {
+//            linearGoToCardList.setVisibility(View.VISIBLE);
+            welcome.setText(myApp.userName + " 님 인식된 \n명함을 확인하세요!");
+        }else {
             linearGoToCardList.setVisibility(View.GONE);
             // No user is signed in
             Log.d(TAG_, "null");
@@ -689,8 +690,8 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
     protected void onResume() {
         super.onResume();
         Log.d("MainActivity", "onResume실행");
-        if(myApp.isLogined) getCardCount();
-        if(myApp.count == 0){
+        if (myApp.isLogined) getCardCount();
+        if (myApp.count == 0) {
             linearGoToCardList.setVisibility(View.GONE);
         }
     }

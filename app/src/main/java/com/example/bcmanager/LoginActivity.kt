@@ -129,7 +129,7 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener, CoroutineScope 
         // User is signed in
         val user = FirebaseAuth.getInstance().currentUser
         if (user?.displayName != null) {
-            // User is signed in
+            getUserNumber()
         } else {
             // No user is signed in
         }
@@ -138,6 +138,9 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener, CoroutineScope 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        Log.d("LoginActivity", "onCreate")
+
         setContentView(R.layout.activity_login)
         setTitle("로그인")
         Objects.requireNonNull(supportActionBar)!!.setDisplayShowTitleEnabled(false)
@@ -212,6 +215,7 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener, CoroutineScope 
 
     fun signinEmail() {
 
+        Log.d("LoginActivity", "signinEmail")
         if (!validateForm()) {
             return
         }
@@ -269,6 +273,7 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener, CoroutineScope 
 
 
     fun moveMainPage() {
+        Log.d("LoginActivity", "moveMainPage")
         myApp.isLogined = true;
         getUserNumber()
         val intent = Intent(this, MainActivity::class.java)
@@ -278,6 +283,7 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener, CoroutineScope 
     }
 
     fun getUserNumber() {
+        Log.d("LoginActivity", "getUserNumber")
         try {
             val httpConnection = HttpConnection(URL(MainActivity.GET_USER_NUMBER))
             httpConnection.requestGetUserNumber(myApp.userID, object : OnRequestCompleteListener {
@@ -350,6 +356,7 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener, CoroutineScope 
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         // 카카오톡|스토리 간편로그인 실행 결과를 받아서 SDK로 전달
+        Log.d("LoginActivity", "onActivityResult")
         if (Session.getCurrentSession().handleActivityResult(requestCode, resultCode, data)) {
             return;
         }
@@ -365,6 +372,7 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener, CoroutineScope 
     }
 
     fun setData(user_: FirebaseUser) {
+        Log.d("LoginActivity", "setData")
         httpConnection = HttpConnection(URL(MainActivity.SIGNUP_URL))
         httpConnection.signUp(user_!!.uid.toString(), user_!!.displayName.toString(), user_!!.email.toString())
         myApp.userID = user_.uid.toString()
@@ -376,10 +384,12 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener, CoroutineScope 
     }
 
     fun firebaseAuthWithGoogle(account: GoogleSignInAccount?) {
+        Log.d("LoginActivity", "firebaseAuthWithGoogle")
         val credential = GoogleAuthProvider.getCredential(account?.idToken, null)
         auth.signInWithCredential(credential).addOnCompleteListener { task ->
             if (task.isSuccessful) {
                 //Login
+                Log.d("LoginActivity", "firebaseAuthWithGoogle isSuccessful")
                 val user = FirebaseAuth.getInstance().currentUser
                 user?.let { setData(it) }
                 moveMainPage()
