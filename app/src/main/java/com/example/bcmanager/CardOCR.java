@@ -33,6 +33,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 public class CardOCR extends Activity {
     private static final String CLOUD_VISION_API_KEY = "AIzaSyCXyQ0R-emSegoNwWJnbZhFPPbm5rFUdzk";
@@ -65,29 +66,52 @@ public class CardOCR extends Activity {
     private static final String TAG = "ddd";
 
     public static String dd() {
-        Log.d(TAG,"DD함수");
-        Log.d(TAG,"ad확인db"+ad);
-        Log.d(TAG,"nm확인db"+ nm);
-        Log.d(TAG,"fx확인db"+ fx);
-        Log.d(TAG,"cp확인db"+cp);
-
+        Log.d(TAG, "DD함수");
+        Log.d(TAG, "ad확인db" + ad);
+        Log.d(TAG, "nm확인db" + nm);
+        Log.d(TAG, "fx확인db" + fx);
+        Log.d(TAG, "cp확인db" + cp);
+//        putData();
 //        done = "1";
+        String result = "0";
         InsertData task = new InsertData();
-        task.execute(CARD_INPUT,nm,ph,ad,em,nb,fx,po,memo,cp,ocruserid,done,fn);
-        return done;
+
+        result = String.valueOf(task.execute(CARD_INPUT, nm, ph, ad, em, nb, fx, po, memo, cp, ocruserid, done, fn));
+
+        Log.d(TAG, "result확인 try안 = " + result);
+
+
+        if (result.isEmpty() || result.equals("") || result == null || result.contains("Error")) {
+            //실패
+            result = "0";
+        } else {
+            result = "1";
+        }
+
+        //        putData();
+//        Log.d(TAG,"result확인 if 전 = "+result);
+//        if(result != "0"){
+////            result = "1";
+        Log.d(TAG, "result확인db " + result);
+//        }
+        return result;
     }
+
+//    public static String putData(){
+//        Log.d("putData함수 확인",done);
+//        return done;
+//    }
 
     Context context;
 
     CardOCR(Context context, Bitmap bitmap, String userid, String filename) {
         this.context = context;
-        callCloudVision(bitmap);
-
+//        callCloudVision(bitmap);
         // myApp = (BCMApplication) getApplication();
         ocruserid = userid;
         fn = filename;
-        Log.d(TAG,"USER체크" + userid);
-        Log.d(TAG,"filename체크" + filename);
+        Log.d(TAG, "USER체크" + userid);
+        Log.d(TAG, "filename체크" + filename);
         textlist.clear();
         ph = "";
         nm = "";
@@ -103,24 +127,11 @@ public class CardOCR extends Activity {
 
     }
 
-    public void uploadImage(Bitmap bitmap) {
-        if (bitmap != null) {
-            // scale the image to save on bandwidth
-//                Bitmap bitmap =
-//                        scaleBitmapDown(
-//                                MediaStore.Images.Media.getBitmap(getContentResolver(), uri),
-//                                MAX_DIMENSION);
 
-            callCloudVision(bitmap);
-//                cardImage.setImageBitmap(bitmap);
 
-        } else {
-            Log.d(TAG, "Image picker gave us a null image.");
-            //Toast.makeText(this, R.string.image_picker_error, Toast.LENGTH_LONG).show();
-        }
-    }
+    //메인에서 인식 함수 실행 -> 결과 받고 -> dd함수 실행? 하면 될까?
 
-    private Vision.Images.Annotate prepareAnnotationRequest(final Bitmap bitmap) throws IOException {
+    public Vision.Images.Annotate prepareAnnotationRequest(final Bitmap bitmap) throws IOException {
         HttpTransport httpTransport = AndroidHttp.newCompatibleTransport();
         JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
 
@@ -182,30 +193,19 @@ public class CardOCR extends Activity {
                 vision.images().annotate(batchAnnotateImagesRequest);
         // Due to a bug: requests to Vision API containing large images fail when GZipped.
         annotateRequest.setDisableGZipContent(true);
-        Log.d(TAG, "created Cloud Vision request object, sending request");
+        Log.d(TAG, "created Cloud Vision request object, sending request__prepareAnnotationRequest");
 
         return annotateRequest;
     }
 
-    private void callCloudVision(final Bitmap bitmap) {
-        // Switch text to loading
-        Log.d(TAG, "로로로로");
 
-        // Do the real work in an async task, because we need to use the network anyway
-        try {
-            AsyncTask<Object, Void, String> labelDetectionTask = new CardOCR.LableDetectionTask(context, prepareAnnotationRequest(bitmap));
-            labelDetectionTask.execute();
-        } catch (IOException e) {
-            Log.d(TAG, "failed to make API request because of other IOException " +
-                    e.getMessage());
-        }
-    }
-
-    private static class LableDetectionTask extends AsyncTask<Object, Void, String> {
+    public static class LableDetectionTask extends AsyncTask<Object, Void, String> {
         private final WeakReference<Context> mActivityWeakReference;
         private Vision.Images.Annotate mRequest;
+        public AsyncResponse delegate = null;
 
-        LableDetectionTask(Context activity, Vision.Images.Annotate annotate) {
+        LableDetectionTask(Context activity, Vision.Images.Annotate annotate,  AsyncResponse delegate) {
+            this.delegate =delegate;
             mActivityWeakReference = new WeakReference<>(activity);
             mRequest = annotate;
         }
@@ -216,8 +216,6 @@ public class CardOCR extends Activity {
                 Log.d(TAG, "created Cloud Vision request object, sending request");
                 BatchAnnotateImagesResponse response = mRequest.execute();
                 return convertResponseToString(response);
-
-
 
             } catch (GoogleJsonResponseException e) {
                 Log.d(TAG, "failed to make API request because " + e.getContent());
@@ -230,13 +228,16 @@ public class CardOCR extends Activity {
         }
 
         protected void onPostExecute(String result) {
+            Log.d(TAG, "onPostExecute 실행");
             Context activity = mActivityWeakReference.get();
             if (activity != null) {
+                delegate.processFinish("true");
                 Log.d("테스트", result);
-//                TextView imageDetail = activity.findViewById(R.id.name);
-//                imageDetail.setText(result);
             }
+
         }
+
+
     }
 
     private static String convertResponseToString(BatchAnnotateImagesResponse response) {
@@ -271,24 +272,24 @@ public class CardOCR extends Activity {
         city_number.addAll(Arrays.asList("02", "051", "053", "032", "062", "042", "052", "044", "031", "033", "043", "041", "063", "061", "054", "055", "064"));
         job_position.addAll(Arrays.asList("회장", "부회장", "사장", "부사장", "전무", "상무", "부장", "차장", "대리", "과장", "사원", "팀장", "이사", "교수", "대표", "대표이사", "점장", "지점장"));
 
-        int plus=0;
-        for(int i=0;i<message.length();i++){
-            if(message.charAt(i) != '\n') {
+        int plus = 0;
+        for (int i = 0; i < message.length(); i++) {
+            if (message.charAt(i) != '\n') {
                 for (int j = i; ; j++) {
-                    if(message.charAt(j) != 32 && message.charAt(j) != '\n')
+                    if (message.charAt(j) != 32 && message.charAt(j) != '\n')
                         text += message.charAt(j);
-                    if(message.charAt(j) == '\n') {
-                        i=j;
+                    if (message.charAt(j) == '\n') {
+                        i = j;
                         break;
                     }
                 }
             }
             textlist.add(text);
-            Log.d(TAG,textlist.get(plus++));
+            Log.d(TAG, textlist.get(plus++));
             text = "";
         }
 
-        for(int i = 0; i<textlist.size();i++) {
+        for (int i = 0; i < textlist.size(); i++) {
 
             if (textlist.get(i).contains("010"))
                 for (int j = 0; j < textlist.get(i).length(); j++) {
@@ -298,28 +299,26 @@ public class CardOCR extends Activity {
                 }
 
             if (textlist.get(i).contains("@")) {
-                if(em.length() < 2) {
+                if (em.length() < 2) {
                     em = textlist.get(i);
 
-                    if(textlist.get(i).contains("email."))
+                    if (textlist.get(i).contains("email."))
                         em = em.replace("email.", "");
-                    else if(textlist.get(i).contains("Email."))
+                    else if (textlist.get(i).contains("Email."))
                         em = em.replace("Email.", "");
-                    else if(textlist.get(i).contains("E-Mail."))
+                    else if (textlist.get(i).contains("E-Mail."))
                         em = em.replace("E-Mail.", "");
-                    else if(textlist.get(i).contains("E-mail."))
+                    else if (textlist.get(i).contains("E-mail."))
                         em = em.replace("E-mail.", "");
-                    else if(textlist.get(i).contains("이메일:"))
+                    else if (textlist.get(i).contains("이메일:"))
                         em = em.replace("이메일:", "");
                 }
-            }
-
-            else if (textlist.get(i).contains(".com")){
-                if(em.length() < 2) {
+            } else if (textlist.get(i).contains(".com")) {
+                if (em.length() < 2) {
                     em = textlist.get(i);
                 }
             }
-            Log.d(TAG,"em = "+ em);
+            Log.d(TAG, "em = " + em);
 
             if (textlist.get(i).contains("F.")) {
                 for (int j = 0; j < textlist.get(i).length(); j++) {
@@ -327,15 +326,13 @@ public class CardOCR extends Activity {
                         fx += textlist.get(i).charAt(j);
                     }
                 }
-            }
-            else if (textlist.get(i).contains("FAX")) {
+            } else if (textlist.get(i).contains("FAX")) {
                 for (int j = 0; j < textlist.get(i).length(); j++) {
                     if (textlist.get(i).charAt(j) >= 48 && textlist.get(i).charAt(j) <= 57) {
                         fx += textlist.get(i).charAt(j);
                     }
                 }
-            }
-            else if (textlist.get(i).contains("Fax")) {
+            } else if (textlist.get(i).contains("Fax")) {
                 for (int j = 0; j < textlist.get(i).length(); j++) {
                     if (textlist.get(i).charAt(j) >= 48 && textlist.get(i).charAt(j) <= 57) {
                         fx += textlist.get(i).charAt(j);
@@ -344,11 +341,11 @@ public class CardOCR extends Activity {
             }
         }
 
-        Log.d(TAG,ph);
-        Log.d(TAG,nm);
-        Log.d(TAG,em);
+        Log.d(TAG, ph);
+        Log.d(TAG, nm);
+        Log.d(TAG, em);
 
-        for(int i = 0; i<textlist.size();i++) {
+        for (int i = 0; i < textlist.size(); i++) {
 
             if (textlist.get(i).length() <= 9) {
                 if (cp.length() < 2) {
@@ -356,16 +353,16 @@ public class CardOCR extends Activity {
                 }
             }
         }
-        Log.d(TAG,"cp확인 " + cp);
+        Log.d(TAG, "cp확인 " + cp);
 
         loop:
-        for(int i = 0; i<textlist.size();i++) {
+        for (int i = 0; i < textlist.size(); i++) {
 
             if (textlist.get(i).length() == 3)
                 nm = textlist.get(i);
 
             else if (textlist.get(i).length() == 5) {
-                if(nm.length() < 2) {
+                if (nm.length() < 2) {
                     for (int j = 0; j < job_position.size(); j++) {
                         if (textlist.get(i).contains(job_position.get(j))) {
                             temp = textlist.get(i);
@@ -375,9 +372,8 @@ public class CardOCR extends Activity {
                         }
                     }
                 }
-            }
-            else if (textlist.get(i).length() == 7) {
-                if(nm.length() < 2) {
+            } else if (textlist.get(i).length() == 7) {
+                if (nm.length() < 2) {
                     for (int j = 0; j < job_position.size(); j++) {
                         if (textlist.get(i).contains(job_position.get(j))) {
                             temp = textlist.get(i);
@@ -391,9 +387,9 @@ public class CardOCR extends Activity {
         }
 
 
-        Log.d(TAG,"po확인 = " +po);
+        Log.d(TAG, "po확인 = " + po);
 
-        for(int i = 0; i<textlist.size();i++) {
+        for (int i = 0; i < textlist.size(); i++) {
 
             for (int j = 0; j < city_address.size(); j++) {
 
@@ -402,25 +398,25 @@ public class CardOCR extends Activity {
             }
 
             for (int j = 0; j < job_position.size(); j++) {
-                if(po.length() < 2) {
+                if (po.length() < 2) {
                     if (textlist.get(i).contains(job_position.get(j)))
                         po = job_position.get(j);
                 }
             }
         }
-        Log.d(TAG,"ad확인 = " +ad);
+        Log.d(TAG, "ad확인 = " + ad);
 
         loop:
-        for(int i = 0; i<textlist.size();i++){
+        for (int i = 0; i < textlist.size(); i++) {
 
-            for(int j = 0; j<city_number.size();j++){
+            for (int j = 0; j < city_number.size(); j++) {
 
-                if(textlist.get(i).contains(city_number.get(j))) {
+                if (textlist.get(i).contains(city_number.get(j))) {
 
                     for (int k = 0; k < textlist.get(i).length(); k++) {
                         if (textlist.get(i).charAt(k) >= 48 && textlist.get(i).charAt(k) <= 57) {
-                           if(nb.length() < 10)
-                               nb += textlist.get(i).charAt(k);
+                            if (nb.length() < 10)
+                                nb += textlist.get(i).charAt(k);
                         }
                     }
                     break loop;
@@ -429,13 +425,16 @@ public class CardOCR extends Activity {
             }
         }
 
-        Log.d(TAG, "nb값" +nb);
-        Log.d(TAG, "fx = "+fx);
+        Log.d(TAG, "nb값" + nb);
+        Log.d(TAG, "fx = " + fx);
         done = "1";
-        Log.d(TAG,"done값" + done);
-        dd();
-        return message.toString();
-
+        Log.d(TAG, "done값" + done);
+        String tmp = dd();
+        if(tmp.equals("1")){
+            return message.toString();
+        }else{
+            return message.toString();
+        }
     }
 
     static class InsertData extends AsyncTask<String, Void, String> {
@@ -444,7 +443,7 @@ public class CardOCR extends Activity {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-
+            Log.d("에러어어엉2", "InsertData  onPreExecute");
 //            progressDialog = ProgressDialog.show(CardOCR.this,
 //                    "Please Wait", null, true, true);
         }
@@ -462,26 +461,26 @@ public class CardOCR extends Activity {
 
         @Override
         protected String doInBackground(String... params) {
-
+            Log.d("에러어어엉2", "InsertData  doInBackground");
             Log.d(TAG, "DB확인");
-            String nm = (String)params[1];
-            String ph = (String)params[2];
-            String ad = (String)params[3];
-            String em = (String)params[4];
-            String nb = (String)params[5];
-            String fx = (String)params[6];
-            String po = (String)params[7];
-            String memo = (String)params[8];
-            String cp = (String)params[9];
-            String ocruserid = (String)params[10];
-            String done = (String)params[11];
-            String fn = (String)params[12];
+            String nm = (String) params[1];
+            String ph = (String) params[2];
+            String ad = (String) params[3];
+            String em = (String) params[4];
+            String nb = (String) params[5];
+            String fx = (String) params[6];
+            String po = (String) params[7];
+            String memo = (String) params[8];
+            String cp = (String) params[9];
+            String ocruserid = (String) params[10];
+            String done = (String) params[11];
+            String fn = (String) params[12];
 
-            String serverURL = (String)params[0];
-            String postParameters = "&nm=" + nm + "&ph=" + ph+ "&ad=" + ad+ "&em=" + em+ "&nb=" + nb + "&fx=" + fx + "&po=" + po + "&memo=" + memo + "&cp=" + cp  + "&ocruserid="+ ocruserid + "&done=" + done + "&fn=" + fn ;
+            String serverURL = (String) params[0];
+            String postParameters = "&nm=" + nm + "&ph=" + ph + "&ad=" + ad + "&em=" + em + "&nb=" + nb + "&fx=" + fx + "&po=" + po + "&memo=" + memo + "&cp=" + cp + "&ocruserid=" + ocruserid + "&done=" + done + "&fn=" + fn;
 
-            Log.d(TAG,"ddongmmong" + serverURL);
-            Log.d(TAG,"ddongmmong"+postParameters);
+            Log.d(TAG, "ddongmmong" + serverURL);
+            Log.d(TAG, "ddongmmong" + postParameters);
 
 
             try {
@@ -506,10 +505,11 @@ public class CardOCR extends Activity {
                 Log.d(TAG, "POST response code - " + responseStatusCode);
 
                 InputStream inputStream;
-                if(responseStatusCode == HttpURLConnection.HTTP_OK) {
+                if (responseStatusCode == HttpURLConnection.HTTP_OK) {
+                    Log.d("에러어어엉2", "HttpURLConnection.HTTP_OK");
                     inputStream = httpURLConnection.getInputStream();
-                }
-                else{
+                } else {
+                    Log.d("에러어어엉2", "HttpURLConnection.HTTP_NO");
                     inputStream = httpURLConnection.getErrorStream();
                 }
 
@@ -520,8 +520,10 @@ public class CardOCR extends Activity {
                 StringBuilder sb = new StringBuilder();
                 String line = null;
 
-                while((line = bufferedReader.readLine()) != null){
+                while ((line = bufferedReader.readLine()) != null) {
+                    Log.d("에러어어엉2", " 와일 몇번? : ");
                     sb.append(line);
+                    Log.d("에러어어엉2", sb.toString());
                 }
 
 

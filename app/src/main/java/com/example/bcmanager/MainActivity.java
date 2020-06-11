@@ -74,7 +74,7 @@ import java.util.Objects;
 
 import static org.opencv.imgcodecs.Imgcodecs.imread;
 
-public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuItemClickListener {
+public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuItemClickListener, AsyncResponse {
     private String TAG_ = "MainAcitivity";
     /**
      * url
@@ -442,22 +442,38 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 
                             if (!output.empty()) {
 
-                                Bitmap bitmapOutput = Bitmap.createBitmap(output.cols(), output.rows(), Bitmap.Config.RGB_565);
+                                final Bitmap bitmapOutput = Bitmap.createBitmap(output.cols(), output.rows(), Bitmap.Config.RGB_565);
                                 Utils.matToBitmap(output, bitmapOutput);
 
                                 ByteArrayOutputStream stream = new ByteArrayOutputStream();
                                 bitmapOutput.compress(Bitmap.CompressFormat.JPEG, 100, stream);
                                 byte[] byteArray = stream.toByteArray();
 
+                                done = "0";
+                                Log.d("이전done값 확인한다", done);
                                 userid = myApp.userID;
 
-                                CardOCR cardocr = new CardOCR(getApplicationContext(),bitmapOutput, userid, filename);
-                                done = cardocr.dd();
-                                Log.d("done값 확인한다",done);
+                                final CardOCR cardocr = new CardOCR(getApplicationContext(), bitmapOutput, userid, filename);
 
-                            } else {
-                                Toast.makeText(getApplicationContext(), "다시 시도해주세요.", Toast.LENGTH_SHORT).show();
-                            }
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        CardOCR.LableDetectionTask task = null;
+                                        Log.d("areyouok?", "No. I'm not..");
+                                        try {
+                                            task = new CardOCR.LableDetectionTask(getApplicationContext(), cardocr.prepareAnnotationRequest(bitmapOutput), MainActivity.this);
+                                            task.execute();
+                                        } catch (IOException e) {
+                                            e.printStackTrace();
+                                        }
+
+                                    }
+                                });
+
+
+                        } else {
+                            Toast.makeText(getApplicationContext(), "다시 시도해주세요.", Toast.LENGTH_SHORT).show();
+                        }
 
                             mHandler.post(new Runnable() {
                                 @Override
@@ -555,7 +571,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
             //인식완료됐는데 등록안한 명함이 있는지확인하기.
 //            linearGoToCardList.setVisibility(View.VISIBLE);
             welcome.setText(myApp.userName + " 님 인식된 \n명함을 확인하세요!");
-        }else {
+        } else {
             linearGoToCardList.setVisibility(View.GONE);
             // No user is signed in
             Log.d(TAG_, "null");
@@ -716,5 +732,20 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
             Log.e("name not found", e.toString());
         }
     }
+
+    @Override
+    public void processFinish(String output) {
+        if (output.equals("true")) {
+            cardsList.clear();
+            getCardCount();
+        }
+    }
+
 }
+
+interface AsyncResponse {
+    void processFinish(String output);
+}
+
+
 
