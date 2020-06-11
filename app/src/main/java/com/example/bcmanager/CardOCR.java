@@ -71,7 +71,7 @@ public class CardOCR extends Activity {
         Log.d(TAG,"fx확인db"+ fx);
         Log.d(TAG,"cp확인db"+cp);
 
-        done = "1";
+//        done = "1";
         InsertData task = new InsertData();
         task.execute(CARD_INPUT,nm,ph,ad,em,nb,fx,po,memo,cp,ocruserid,done,fn);
         return done;
@@ -418,7 +418,8 @@ public class CardOCR extends Activity {
 
                     for (int k = 0; k < textlist.get(i).length(); k++) {
                         if (textlist.get(i).charAt(k) >= 48 && textlist.get(i).charAt(k) <= 57) {
-                            nb += textlist.get(i).charAt(k);
+                           if(nb.length() < 10)
+                               nb += textlist.get(i).charAt(k);
                         }
                     }
                     break loop;

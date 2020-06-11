@@ -135,6 +135,8 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
     public Intent kUserIntent;
     private BCMApplication myApp;
 
+    public static String done;//ocr인식 확인
+
     public native void RecognitionCard(long inputImage, long outputImage);
 
     static {
@@ -449,6 +451,8 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 
                                 userid = myApp.userID;
                                 CardOCR cardocr = new CardOCR(getApplicationContext(),bitmapOutput, userid, filename);
+                                done = cardocr.dd();
+                                Log.d("done값 확인한다",done);
 
                             } else {
                                 Toast.makeText(getApplicationContext(), "다시 시도해주세요.", Toast.LENGTH_SHORT).show();
