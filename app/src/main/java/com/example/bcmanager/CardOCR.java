@@ -43,6 +43,8 @@ public class CardOCR extends Activity {
     private static final String ANDROID_PACKAGE_HEADER = "X-Android-Package";
     private static final int MAX_LABEL_RESULTS = 10;
     private static final int MAX_DIMENSION = 1200;
+    public static AsyncResponse delegate = null;
+
     //  private BCMApplication myApp;
 
     private static ArrayList<String> textlist = new ArrayList<String>();
@@ -65,8 +67,8 @@ public class CardOCR extends Activity {
 
     private static final String TAG = "ddd";
 
-    public static String dd() {
-        Log.d(TAG, "DD함수");
+    public static String dd(AsyncResponse delegate) {
+        Log.d("DD함수", "실행 ");
         Log.d(TAG, "ad확인db" + ad);
         Log.d(TAG, "nm확인db" + nm);
         Log.d(TAG, "fx확인db" + fx);
@@ -74,18 +76,18 @@ public class CardOCR extends Activity {
 //        putData();
 //        done = "1";
         String result = "0";
-        InsertData task = new InsertData();
+        InsertData task = new InsertData(delegate);
 
-        result = String.valueOf(task.execute(CARD_INPUT, nm, ph, ad, em, nb, fx, po, memo, cp, ocruserid, done, fn));
+        result = task.execute(CARD_INPUT, nm, ph, ad, em, nb, fx, po, memo, cp, ocruserid, done, fn).toString();
 
         Log.d(TAG, "result확인 try안 = " + result);
 
 
-        if (result.isEmpty() || result.equals("") || result == null || result.contains("Error")) {
-            //실패
-            result = "0";
-        } else {
+//        if (result.isEmpty() || result.equals("") || result == null || result.contains("Error")) {
+        if (result.equals("true")) {
             result = "1";
+        } else {
+            result = "0";
         }
 
         //        putData();
@@ -126,7 +128,6 @@ public class CardOCR extends Activity {
 
 
     }
-
 
 
     //메인에서 인식 함수 실행 -> 결과 받고 -> dd함수 실행? 하면 될까?
@@ -202,10 +203,10 @@ public class CardOCR extends Activity {
     public static class LableDetectionTask extends AsyncTask<Object, Void, String> {
         private final WeakReference<Context> mActivityWeakReference;
         private Vision.Images.Annotate mRequest;
-        public AsyncResponse delegate = null;
+        AsyncResponse delegate = null;
 
-        LableDetectionTask(Context activity, Vision.Images.Annotate annotate,  AsyncResponse delegate) {
-            this.delegate =delegate;
+        LableDetectionTask(Context activity, Vision.Images.Annotate annotate, AsyncResponse delegate) {
+            this.delegate = delegate;
             mActivityWeakReference = new WeakReference<>(activity);
             mRequest = annotate;
         }
@@ -215,7 +216,7 @@ public class CardOCR extends Activity {
             try {
                 Log.d(TAG, "created Cloud Vision request object, sending request");
                 BatchAnnotateImagesResponse response = mRequest.execute();
-                return convertResponseToString(response);
+                return convertResponseToString(response, delegate);
 
             } catch (GoogleJsonResponseException e) {
                 Log.d(TAG, "failed to make API request because " + e.getContent());
@@ -231,8 +232,9 @@ public class CardOCR extends Activity {
             Log.d(TAG, "onPostExecute 실행");
             Context activity = mActivityWeakReference.get();
             if (activity != null) {
-                delegate.processFinish("true");
                 Log.d("테스트", result);
+//                delegate.processFinish("true");
+
             }
 
         }
@@ -240,7 +242,7 @@ public class CardOCR extends Activity {
 
     }
 
-    private static String convertResponseToString(BatchAnnotateImagesResponse response) {
+    private static String convertResponseToString(BatchAnnotateImagesResponse response, AsyncResponse delegate) {
         String message = "I found these things:\n\n";
         Log.d(TAG, "MESSAGE = " + message);
 
@@ -429,40 +431,52 @@ public class CardOCR extends Activity {
         Log.d(TAG, "fx = " + fx);
         done = "1";
         Log.d(TAG, "done값" + done);
-        String tmp = dd();
-        if(tmp.equals("1")){
+        Log.d("convert어쩌구", "텍스트 추출 완료");
+        String tmp = dd(delegate);
+        if (tmp.equals("1")) {
+            Log.d("convert어쩌구", "텍스트 저장 완료");
             return message.toString();
-        }else{
+        } else {
             return message.toString();
         }
     }
 
     static class InsertData extends AsyncTask<String, Void, String> {
         //       ProgressDialog progressDialog;
+        public AsyncResponse delegate = null;
 
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            Log.d("에러어어엉2", "InsertData  onPreExecute");
+            Log.d("InsertData", "onPreExecute");
 //            progressDialog = ProgressDialog.show(CardOCR.this,
 //                    "Please Wait", null, true, true);
         }
 
+        public InsertData(AsyncResponse delegate) {
+            this.delegate = delegate;
+        }
 
-//        @Override
-//        protected void onPostExecute(String result) {
-//            super.onPostExecute(result);
-//
-//          //  progressDialog.dismiss();
-//            //  mTextViewResult.setText("입력되었습니다.");
-//            Log.d(TAG, "POST response  - " + result);
-//        }
+        @Override
+        protected void onPostExecute(String result) {
+            super.onPostExecute(result);
+            Log.d("InsertData", "onPostExecute");
+            Log.d("InsertData result  " , result.toString());
+
+//            delegate.processFinish(result);
+
+            delegate.processFinish(result);
+            //  progressDialog.dismiss();
+            //  mTextViewResult.setText("입력되었습니다.");
+            Log.d(TAG, "POST response  - " + result);
+
+        }
 
 
         @Override
         protected String doInBackground(String... params) {
-            Log.d("에러어어엉2", "InsertData  doInBackground");
-            Log.d(TAG, "DB확인");
+            Log.d("InsertData", "doInBackground");
+//            Log.d(TAG, "DB확인");
             String nm = (String) params[1];
             String ph = (String) params[2];
             String ad = (String) params[3];
@@ -526,9 +540,9 @@ public class CardOCR extends Activity {
                     Log.d("에러어어엉2", sb.toString());
                 }
 
-
+                Log.d("에러어어엉21", sb.toString());
                 bufferedReader.close();
-
+                Log.d("에러어어엉22", sb.toString());
 
                 return sb.toString();
 

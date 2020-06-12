@@ -113,6 +113,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
     private ArrayList<CardInfoItem.cardInfo> unRegedcardsList;
     private SwipeRefreshLayout refreshLayout = null;
     private int card_cound = 0;
+    CardOCR cardocr;
 
     private static final String TAG = "opencv";
     public static String userid = ""; //ocr
@@ -451,17 +452,14 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                                 bitmapOutput.compress(Bitmap.CompressFormat.JPEG, 100, stream);
                                 byte[] byteArray = stream.toByteArray();
 
-                                done = "0";
-                                Log.d("이전done값 확인한다", done);
                                 userid = myApp.userID;
 
-                                final CardOCR cardocr = new CardOCR(getApplicationContext(), bitmapOutput, userid, filename);
+                                cardocr = new CardOCR(getApplicationContext(), bitmapOutput, userid, filename);
 
                                 runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
                                         CardOCR.LableDetectionTask task = null;
-                                        Log.d("areyouok?", "No. I'm not..");
                                         try {
                                             task = new CardOCR.LableDetectionTask(getApplicationContext(), cardocr.prepareAnnotationRequest(bitmapOutput), MainActivity.this);
                                             task.execute();
@@ -610,7 +608,6 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                         JsonArray jsonArray = (JsonArray) jsonObject.get("cardInfo");
                         JsonObject j = jsonArray.get(0).getAsJsonObject();
                         myApp.count = j.get("count").getAsInt();
-                        Log.d("테스트으", String.valueOf(myApp.count));
 
                         runOnUiThread(new Runnable() {
                             @Override
@@ -618,6 +615,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                                 getCardInfo();
                                 if (myApp.count > 0)
                                     linearGoToCardList.setVisibility(View.VISIBLE);
+                                else linearGoToCardList.setVisibility(View.GONE);
                             }
                         });
                     }
@@ -643,7 +641,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 
                     if (data != null && !data.isEmpty()) {
                         cardsList.clear();
-                        Log.d("성공", data);
+                        Log.d("성공 ", data);
                         Gson gson = new GsonBuilder().create();
                         JsonParser jsonParser = new JsonParser();
                         JsonObject jsonObject = (JsonObject) jsonParser.parse(data);
@@ -747,10 +745,31 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 
     @Override
     public void processFinish(String output) {
-        if (output.equals("true")) {
+        Log.d("processFinish", "성공");
+
+        String tmp = output;
+        cardsList.clear();
+        Log.d("processFinish", " cardsList.clear(); " + cardsList.size());
+        Log.d("processFinish", " output" + output);
+        Log.d("output.length1", String.valueOf(output.length()));
+//        output.trim();
+        output.replaceAll(" ","");
+        Log.d("output.length2", String.valueOf(output.length()));
+        Log.d("output", String.valueOf(output.equals("true ")));
+        Log.d("output",output.toUpperCase());
+        if(output.equals("true")){
+            Log.d("processFinish", "내부");
+        }
+//        if (Objects.equals(output, "true")) {
+//            Log.d("processFinish", "내부");
+////            cardocr.dd();
             cardsList.clear();
             getCardCount();
-        }
+
+
+//        }else{
+//            Log.d("processFinish", "실패");
+//        }
     }
 
 }

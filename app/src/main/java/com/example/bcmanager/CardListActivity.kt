@@ -27,13 +27,14 @@ class CardListActivity : AppCompatActivity(), OnItemClick {
     val REQUESTCODE_ = 500
     lateinit var myApp: BCMApplication
     var httpConn: HttpConnection? = null
+    var countOfCard: Int = 0
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_card_list)
 
-        Log.d("CardListActivity","onCreate")
+        Log.d("CardListActivity", "onCreate")
         Objects.requireNonNull(supportActionBar)!!.setDisplayShowTitleEnabled(false)
         supportActionBar!!.displayOptions = ActionBar.DISPLAY_SHOW_CUSTOM // 커스텀 사용
         supportActionBar!!.setCustomView(R.layout.actionbar_title_nobtn) // 커스텀 사용할 파일 위치
@@ -47,13 +48,14 @@ class CardListActivity : AppCompatActivity(), OnItemClick {
         Log.d("CardListActivity", myApp.count.toString())
 
         val layoutManager = LinearLayoutManager(this@CardListActivity)
+        layoutManager.reverseLayout = true;
+        layoutManager.stackFromEnd = true;
         rcged_card_recyclerview.setLayoutManager(layoutManager)
-
 
     }
 
     fun getUnregisterdCardsInfo() {
-        Log.d("CardListActivity","getUnregisterdCardsInfo")
+        Log.d("CardListActivity", "getUnregisterdCardsInfo")
 
         try {
             httpConn = HttpConnection(URL(MainActivity.GET_UNREGISTERD_CARD_INFO))
@@ -68,20 +70,24 @@ class CardListActivity : AppCompatActivity(), OnItemClick {
                         val jsonObject = jsonParser.parse(data) as JsonObject
                         val jsonArray = jsonObject["cardInfo"] as JsonArray
                         var result: cardInfo?
-                        Log.d("CardListActivity","jsonArray.size =" + jsonArray.size())
+                        Log.d("CardListActivity", "jsonArray.size =" + jsonArray.size())
                         cardList.clear()
+                        countOfCard = 0
                         for (i in 0 until jsonArray.size()) {
                             val j = jsonArray[i].asJsonObject
                             result = gson.fromJson(j, cardInfo::class.java)
                             cardList.add(result)
-                            Log.d("테스트으", cardList.size.toString())
                         }
                         runOnUiThread {
+                            countOfCard = cardList.size;
+                            Log.d("인식된 카드 리스트 사이즈 : ", cardList.size.toString())
                             cardListAdapter = CardListAdapter(this@CardListActivity, cardList, this@CardListActivity)
                             rcged_card_recyclerview.adapter = cardListAdapter
+
+
                         }
-                    }else{
-                        Log.d("CardListActivity","카드없음")
+                    } else {
+                        Log.d("CardListActivity", "카드없음")
                         finish()
                     }
                 }
@@ -98,12 +104,18 @@ class CardListActivity : AppCompatActivity(), OnItemClick {
         val httpConnection = HttpConnection(URL(MainActivity.DELETE_ITEM))
         httpConnection.requestDeleteItem(value, object : OnRequestCompleteListener {
             override fun onSuccess(data: String?) {
-                if (data != null) {
-                    if (data.isNotEmpty()) {
-                        if (data.equals("1")) Log.d("삭제 결과", data)
-                        else Log.d("삭제 결과", data)
+                if (data != null && data.isNotEmpty()) {
+                    Log.d("deleteItem data ", data)
 
+                    myApp.count--;
+                    Log.d("마이너스된 count ", myApp.count.toString())
+                    if (myApp.count == 0) {
+                        runOnUiThread(Runnable {
+                            finish()
+                        })
                     }
+
+
                 }
             }
 
@@ -136,14 +148,13 @@ class CardListActivity : AppCompatActivity(), OnItemClick {
     }
 
 
-
     override fun onResume() {
         super.onResume()
-        Log.d("CardListActivity","onResume")
-        Log.d("CardListActivity","onResume cardList.size = " + cardList.size)
+        Log.d("CardListActivity", "onResume")
+        Log.d("CardListActivity", "onResume cardList.size = " + cardList.size)
 
         cardList.clear()
-        Log.d("CardListActivity","onResume cardList.size = " + cardList.size)
+        Log.d("CardListActivity", "onResume cardList.size = " + cardList.size)
 
         getUnregisterdCardsInfo()
 //        cardListAdapter?.notifyDataSetChanged()
