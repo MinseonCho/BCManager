@@ -92,7 +92,7 @@ public class ImageOCRActivity extends AppCompatActivity {
     private static String cp;
     private static String memo;
     private static String temp;
-    private static String ocruserid;
+    private static String ocrusernum;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -118,8 +118,8 @@ public class ImageOCRActivity extends AppCompatActivity {
         info_memo = findViewById(R.id.memo);
 
         Intent intent = getIntent();
-        ocruserid = myApp.userID;
-        Log.d("TAG","MYAPPUSERID확인"+ ocruserid);
+        ocrusernum = myApp.userNum;
+        Log.d("TAG","MYAPPUSERID확인"+ ocrusernum);
 
 
         textlist.clear();
@@ -148,6 +148,7 @@ public class ImageOCRActivity extends AppCompatActivity {
         @Override
         public void onClick(View view) {
 
+
             nm = info_name.getText().toString();
             ph = info_phone.getText().toString();
             ad = info_address.getText().toString();
@@ -159,7 +160,7 @@ public class ImageOCRActivity extends AppCompatActivity {
             cp = info_company.getText().toString();
 
             InsertData task = new InsertData();
-            task.execute(CARD_INPUT,nm,ph,ad,em,nb,fx,po,memo,cp, ocruserid);
+            task.execute(CARD_INPUT,nm,ph,ad,em,nb,fx,po,memo,cp,ocrusernum);
         }
     };
 
@@ -434,7 +435,8 @@ public class ImageOCRActivity extends AppCompatActivity {
         Log.d(TAG,nm);
         Log.d(TAG,em);
 
-        for(int i = 0; i<textlist.size();i++) {
+
+        for (int i = 0; i < textlist.size(); i++) {
 
             if (textlist.get(i).length() <= 9) {
                 if (cp.length() < 2) {
@@ -442,6 +444,7 @@ public class ImageOCRActivity extends AppCompatActivity {
                 }
             }
         }
+
         Log.d(TAG,"camera_cp확인 " + cp);
 
         loop:
@@ -550,9 +553,10 @@ public class ImageOCRActivity extends AppCompatActivity {
             String po = (String)params[7];
             String memo = (String)params[8];
             String cp = (String)params[9];
+            String ocrusernum = (String)params[10];
 
             String serverURL = (String)params[0];
-            String postParameters = "nm=" + nm + "&ph=" + ph+ "&ad=" + ad+ "&em=" + em+ "&nb=" + nb + "&fx=" + fx + "&po=" + po + "&memo=" + memo + "&cp=" + cp;
+            String postParameters = "&nm=" + nm + "&ph=" + ph+ "&ad=" + ad+ "&em=" + em+ "&nb=" + nb + "&fx=" + fx + "&po=" + po + "&memo=" + memo + "&cp=" + cp +"&ocrusernum=" +  ocrusernum ;
 
             Log.d(TAG,"ddongmmong" + serverURL);
             Log.d(TAG,"ddongmmong"+postParameters);
