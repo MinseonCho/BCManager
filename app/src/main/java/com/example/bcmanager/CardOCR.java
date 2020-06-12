@@ -36,7 +36,7 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 public class CardOCR extends Activity {
-    private static final String CLOUD_VISION_API_KEY = "AIzaSyCXyQ0R-emSegoNwWJnbZhFPPbm5rFUdzk";
+    private static final String CLOUD_VISION_API_KEY = "";
     public static String CARD_INPUT = "http://104.197.171.112/precard_input.php";
     public static final String FILE_NAME = "temp.jpg";
     private static final String ANDROID_CERT_HEADER = "X-Android-Cert";
@@ -271,7 +271,7 @@ public class CardOCR extends Activity {
 
         Log.d(TAG, String.valueOf(city_address));
 
-        city_number.addAll(Arrays.asList("02", "051", "053", "032", "062", "042", "052", "044", "031", "033", "043", "041", "063", "061", "054", "055", "064"));
+        city_number.addAll(Arrays.asList( "051", "053", "032", "062", "042", "052", "044", "031", "033", "043", "041", "063", "061", "054", "055", "064","02"));
         job_position.addAll(Arrays.asList("회장", "부회장", "사장", "부사장", "전무", "상무", "부장", "차장", "대리", "과장", "사원", "팀장", "이사", "교수", "대표", "대표이사", "점장", "지점장"));
 
         int plus = 0;
@@ -293,12 +293,16 @@ public class CardOCR extends Activity {
 
         for (int i = 0; i < textlist.size(); i++) {
 
-            if (textlist.get(i).contains("010"))
-                for (int j = 0; j < textlist.get(i).length(); j++) {
-                    if (textlist.get(i).charAt(j) >= 48 && textlist.get(i).charAt(j) <= 57) {
-                        ph += textlist.get(i).charAt(j);
-                    }
+            int phindex;
+            if (textlist.get(i).contains("010")) {
+                phindex = textlist.get(i).indexOf("010");
+                for (int j = phindex; j < textlist.get(i).length(); j++) {
+                    ph += textlist.get(i).charAt(j);
                 }
+                if(ph.contains("."))
+                    ph = ph.replace(".", "-");
+            }
+
 
             if (textlist.get(i).contains("@")) {
                 if (em.length() < 2) {
@@ -312,6 +316,8 @@ public class CardOCR extends Activity {
                         em = em.replace("E-Mail.", "");
                     else if (textlist.get(i).contains("E-mail."))
                         em = em.replace("E-mail.", "");
+                    else if (textlist.get(i).contains("E-mail"))
+                        em = em.replace("E-mail", "");
                     else if (textlist.get(i).contains("이메일:"))
                         em = em.replace("이메일:", "");
                 }
@@ -322,25 +328,7 @@ public class CardOCR extends Activity {
             }
             Log.d(TAG, "em = " + em);
 
-//            if (textlist.get(i).contains("F.")) {
-//                for (int j = 0; j < textlist.get(i).length(); j++) {
-//                    if (textlist.get(i).charAt(j) >= 48 && textlist.get(i).charAt(j) <= 57) {
-//                        fx += textlist.get(i).charAt(j);
-//                    }
-//                }
-//            } else if (textlist.get(i).contains("FAX")) {
-//                for (int j = 0; j < textlist.get(i).length(); j++) {
-//                    if (textlist.get(i).charAt(j) >= 48 && textlist.get(i).charAt(j) <= 57) {
-//                        fx += textlist.get(i).charAt(j);
-//                    }
-//                }
-//            } else if (textlist.get(i).contains("Fax")) {
-//                for (int j = 0; j < textlist.get(i).length(); j++) {
-//                    if (textlist.get(i).charAt(j) >= 48 && textlist.get(i).charAt(j) <= 57) {
-//                        fx += textlist.get(i).charAt(j);
-//                    }
-//                }
-//            }
+
         }
 
         Log.d(TAG, ph);
@@ -351,15 +339,6 @@ public class CardOCR extends Activity {
         fx = Fxdetection("FAX", fx);
         fx = Fxdetection("Fax", fx);
 
-        for (int i = 0; i < textlist.size(); i++) {
-
-            if (textlist.get(i).length() <= 9) {
-                if (cp.length() < 2) {
-                    cp = textlist.get(i);
-                }
-            }
-        }
-        Log.d(TAG, "cp확인 " + cp);
 
         loop:
         for (int i = 0; i < textlist.size(); i++) {
@@ -412,25 +391,44 @@ public class CardOCR extends Activity {
         }
         Log.d(TAG, "ad확인 = " + ad);
 
+        int telindex;
         loop:
         for (int i = 0; i < textlist.size(); i++) {
-
             for (int j = 0; j < city_number.size(); j++) {
-
                 if (textlist.get(i).contains(city_number.get(j))) {
-
-                    for (int k = 0; k < textlist.get(i).length(); k++) {
-                        if (textlist.get(i).charAt(k) >= 48 && textlist.get(i).charAt(k) <= 57) {
-                            if (nb.length() < 10)
-                                nb += textlist.get(i).charAt(k);
-                        }
+                    telindex = textlist.get(i).indexOf(city_number.get(j));
+                    for (int k = telindex; k < textlist.get(i).length(); k++) {
+                        if (nb.length() < 12)
+                            nb += textlist.get(i).charAt(k);
                     }
+                    if(nb.contains(")"))
+                         nb = nb.replace(")", "-");
+                    else if(nb.contains("."))
+                        nb = nb.replace(".", "-");
                     break loop;
                 }
-
             }
         }
 
+        for (int i = 0; i < textlist.size(); i++) {
+
+            if (textlist.get(i).length() <= 10) {
+                Log.d(TAG, "cp위한 nm확인 = " + nm);
+                Log.d(TAG, "po가뭣이냐" + po);
+                if(textlist.get(i).contains(nm)){}
+                else {
+                    if (cp.length() < 2) {
+                        cp = textlist.get(i);
+                        Log.d(TAG, "cp가뭣이냐" + cp);
+//                        if(cp == po){ //po랑 cp랑 같을때가 문제임 -> 아직 cameraocr에 적용 안했음
+//                            cp = "";
+//                            Log.d(TAG, "cp위한 po확인3 = " + cp);
+//                        }
+                    }
+                }
+            }
+        }
+        Log.d(TAG, "cp확인 " + cp);
         Log.d(TAG, "nb값" + nb);
         Log.d(TAG, "fx = " + fx);
         done = "1";
@@ -450,10 +448,10 @@ public class CardOCR extends Activity {
         int faxindex = 0;
         for (int i = 0; i < textlist.size(); i++) {
             if (textlist.get(i).contains(findstring)) {
+                Log.d("TAG", "findstring = " + findstring);
                 faxindex = textlist.get(i).lastIndexOf(findstring);
                 Log.d("TAG", "faxindex = " + faxindex);
                 for (int j = faxindex; j < textlist.get(i).length(); j++) {
-                    Log.d("TAG", "faxindexjjjjjj = " + j);
                     if (textlist.get(i).charAt(j) >= 48 && textlist.get(i).charAt(j) <= 57) {
                         detailstring += textlist.get(i).charAt(j);
                         Log.d("TAG", "faxindexdetail = " + detailstring);
