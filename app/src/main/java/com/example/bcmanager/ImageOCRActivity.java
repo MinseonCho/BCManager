@@ -161,6 +161,8 @@ public class ImageOCRActivity extends AppCompatActivity {
 
             InsertData task = new InsertData();
             task.execute(CARD_INPUT,nm,ph,ad,em,nb,fx,po,memo,cp,ocrusernum);
+
+            finish();
         }
     };
 
@@ -284,6 +286,7 @@ public class ImageOCRActivity extends AppCompatActivity {
                 TextView numberDetail = activity.findViewById(R.id.number);
                 TextView faxDetail = activity.findViewById(R.id.fax);
                 TextView positionDetail = activity.findViewById(R.id.position);
+                TextView companyDetail = activity.findViewById(R.id.company);
                 imageDetail.setText(result);
                 phone_number.setText(ph);
                 nameDetail.setText(nm);
@@ -292,6 +295,7 @@ public class ImageOCRActivity extends AppCompatActivity {
                 numberDetail.setText(nb);
                 faxDetail.setText(fx);
                 positionDetail.setText(po);
+                positionDetail.setText(cp);
             }
         }
     }
@@ -377,14 +381,15 @@ public class ImageOCRActivity extends AppCompatActivity {
 
         for(int i = 0; i<textlist.size();i++) {
 
-            if (textlist.get(i).contains("010"))
+            if (textlist.get(i).contains("010")){
                 for (int j = 0; j < textlist.get(i).length(); j++) {
                     if (textlist.get(i).charAt(j) >= 48 && textlist.get(i).charAt(j) <= 57) {
                         ph += textlist.get(i).charAt(j);
                     }
                 }
+            }
 
-            else if (textlist.get(i).contains("@")) {
+            if (textlist.get(i).contains("@")) {
                 if(em.length() < 2) {
                     em = textlist.get(i);
 
@@ -404,37 +409,38 @@ public class ImageOCRActivity extends AppCompatActivity {
             else if (textlist.get(i).contains(".com")){
                 if(em.length() < 2) {
                     em = textlist.get(i);
-//                   textlist = textlist.replaceAll(em.);
                 }
             }
 
-            else if (textlist.get(i).contains("F.")) {
-                for (int j = 0; j < textlist.get(i).length(); j++) {
-                    if (textlist.get(i).charAt(j) >= 48 && textlist.get(i).charAt(j) <= 57) {
-                        fx += textlist.get(i).charAt(j);
-                    }
-                }
-            }
-            else if (textlist.get(i).contains("FAX")) {
-                for (int j = 0; j < textlist.get(i).length(); j++) {
-                    if (textlist.get(i).charAt(j) >= 48 && textlist.get(i).charAt(j) <= 57) {
-                        fx += textlist.get(i).charAt(j);
-                    }
-                }
-            }
-            else if (textlist.get(i).contains("Fax")) {
-                for (int j = 0; j < textlist.get(i).length(); j++) {
-                    if (textlist.get(i).charAt(j) >= 48 && textlist.get(i).charAt(j) <= 57) {
-                        fx += textlist.get(i).charAt(j);
-                    }
-                }
-            }
+//            else if (textlist.get(i).contains("F.")) {
+//                for (int j = 0; j < textlist.get(i).length(); j++) {
+//                    if (textlist.get(i).charAt(j) >= 48 && textlist.get(i).charAt(j) <= 57) {
+//                        fx += textlist.get(i).charAt(j);
+//                    }
+//                }
+//            }
+//            else if (textlist.get(i).contains("FAX")) {
+//                for (int j = 0; j < textlist.get(i).length(); j++) {
+//                    if (textlist.get(i).charAt(j) >= 48 && textlist.get(i).charAt(j) <= 57) {
+//                        fx += textlist.get(i).charAt(j);
+//                    }
+//                }
+//            }
+//            else if (textlist.get(i).contains("Fax")) {
+//                for (int j = 0; j < textlist.get(i).length(); j++) {
+//                    if (textlist.get(i).charAt(j) >= 48 && textlist.get(i).charAt(j) <= 57) {
+//                        fx += textlist.get(i).charAt(j);
+//                    }
+//                }
+//            }
         }
 
         Log.d(TAG,ph);
         Log.d(TAG,nm);
         Log.d(TAG,em);
-
+        fx = Fxdetection("F.",fx);
+        fx = Fxdetection("FAX",fx);
+        fx = Fxdetection("Fax",fx);
 
         for (int i = 0; i < textlist.size(); i++) {
 
@@ -479,7 +485,7 @@ public class ImageOCRActivity extends AppCompatActivity {
             }
         }
 
-        for(int i = 0; i<textlist.size();i++) {
+        for(int i = 0; i<textlist.size();i++) { //address
 
             for (int j = 0; j < city_address.size(); j++) {
 
@@ -487,7 +493,7 @@ public class ImageOCRActivity extends AppCompatActivity {
                     ad = textlist.get(i);
             }
 
-            for (int j = 0; j < job_position.size(); j++) {
+            for (int j = 0; j < job_position.size(); j++) { //position
                 if(po.length() < 2) {
                     if (textlist.get(i).contains(job_position.get(j)))
                         po = job_position.get(j);
@@ -497,7 +503,7 @@ public class ImageOCRActivity extends AppCompatActivity {
         Log.d(TAG,ad);
 
         loop:
-        for(int i = 0; i<textlist.size();i++){
+        for(int i = 0; i<textlist.size();i++){ //Telnumber
 
             for(int j = 0; j<city_number.size();j++){
 
@@ -517,6 +523,25 @@ public class ImageOCRActivity extends AppCompatActivity {
         Log.d(TAG,fx);
 
         return message.toString();
+    }
+
+    private static String Fxdetection(String findstring, String detailstring) { //휴대폰 & 팩스번호 추출
+        Log.d("TAG", "Fxdetection진입성공 ");
+        int faxindex = 0;
+        for (int i = 0; i < textlist.size(); i++) {
+            if (textlist.get(i).contains(findstring)) {
+                faxindex = textlist.get(i).lastIndexOf(findstring);
+                Log.d("TAG", "faxindex = " + faxindex);
+                for (int j = faxindex; j < textlist.get(i).length(); j++) {
+                    Log.d("TAG", "faxindexjjjjjj = " + j);
+                    if (textlist.get(i).charAt(j) >= 48 && textlist.get(i).charAt(j) <= 57) {
+                        detailstring += textlist.get(i).charAt(j);
+                        Log.d("TAG", "faxindexdetail = " + detailstring);
+                    }
+                }
+            }
+        }
+        return detailstring;
     }
 
     class InsertData extends AsyncTask<String, Void, String>{

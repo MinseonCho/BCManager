@@ -322,30 +322,34 @@ public class CardOCR extends Activity {
             }
             Log.d(TAG, "em = " + em);
 
-            if (textlist.get(i).contains("F.")) {
-                for (int j = 0; j < textlist.get(i).length(); j++) {
-                    if (textlist.get(i).charAt(j) >= 48 && textlist.get(i).charAt(j) <= 57) {
-                        fx += textlist.get(i).charAt(j);
-                    }
-                }
-            } else if (textlist.get(i).contains("FAX")) {
-                for (int j = 0; j < textlist.get(i).length(); j++) {
-                    if (textlist.get(i).charAt(j) >= 48 && textlist.get(i).charAt(j) <= 57) {
-                        fx += textlist.get(i).charAt(j);
-                    }
-                }
-            } else if (textlist.get(i).contains("Fax")) {
-                for (int j = 0; j < textlist.get(i).length(); j++) {
-                    if (textlist.get(i).charAt(j) >= 48 && textlist.get(i).charAt(j) <= 57) {
-                        fx += textlist.get(i).charAt(j);
-                    }
-                }
-            }
+//            if (textlist.get(i).contains("F.")) {
+//                for (int j = 0; j < textlist.get(i).length(); j++) {
+//                    if (textlist.get(i).charAt(j) >= 48 && textlist.get(i).charAt(j) <= 57) {
+//                        fx += textlist.get(i).charAt(j);
+//                    }
+//                }
+//            } else if (textlist.get(i).contains("FAX")) {
+//                for (int j = 0; j < textlist.get(i).length(); j++) {
+//                    if (textlist.get(i).charAt(j) >= 48 && textlist.get(i).charAt(j) <= 57) {
+//                        fx += textlist.get(i).charAt(j);
+//                    }
+//                }
+//            } else if (textlist.get(i).contains("Fax")) {
+//                for (int j = 0; j < textlist.get(i).length(); j++) {
+//                    if (textlist.get(i).charAt(j) >= 48 && textlist.get(i).charAt(j) <= 57) {
+//                        fx += textlist.get(i).charAt(j);
+//                    }
+//                }
+//            }
         }
 
         Log.d(TAG, ph);
         Log.d(TAG, nm);
         Log.d(TAG, em);
+
+        fx = Fxdetection("F.", fx);
+        fx = Fxdetection("FAX", fx);
+        fx = Fxdetection("Fax", fx);
 
         for (int i = 0; i < textlist.size(); i++) {
 
@@ -439,6 +443,25 @@ public class CardOCR extends Activity {
         } else {
             return message.toString();
         }
+    }
+
+    private static String Fxdetection(String findstring, String detailstring) { //휴대폰 & 팩스번호 추출
+        Log.d("TAG", "Fxdetection진입성공 ");
+        int faxindex = 0;
+        for (int i = 0; i < textlist.size(); i++) {
+            if (textlist.get(i).contains(findstring)) {
+                faxindex = textlist.get(i).lastIndexOf(findstring);
+                Log.d("TAG", "faxindex = " + faxindex);
+                for (int j = faxindex; j < textlist.get(i).length(); j++) {
+                    Log.d("TAG", "faxindexjjjjjj = " + j);
+                    if (textlist.get(i).charAt(j) >= 48 && textlist.get(i).charAt(j) <= 57) {
+                        detailstring += textlist.get(i).charAt(j);
+                        Log.d("TAG", "faxindexdetail = " + detailstring);
+                    }
+                }
+            }
+        }
+        return detailstring;
     }
 
     static class InsertData extends AsyncTask<String, Void, String> {
