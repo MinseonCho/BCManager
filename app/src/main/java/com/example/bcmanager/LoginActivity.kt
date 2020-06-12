@@ -98,7 +98,6 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener, CoroutineScope 
                     myApp.userName = result.nickname
                     myApp.isLogined = true;
                     myApp.loginType = "k"
-                    MainActivity.isLogined = true;
                     getUserNumber()
                     val intent = Intent(this@LoginActivity, MainActivity::class.java)
                     intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
@@ -106,6 +105,7 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener, CoroutineScope 
 //                    intent.putExtra("KUserName", result.nickname)
 //                    intent.putExtra("KUserImage",result.profileImagePath)
                     startActivity(intent)
+                    finish()
 
                     // register or login
                 }

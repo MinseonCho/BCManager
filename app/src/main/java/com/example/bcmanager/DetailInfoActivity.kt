@@ -25,6 +25,7 @@ class DetailInfoActivity : AppCompatActivity(), View.OnClickListener, PopupMenu.
 
     private lateinit var httpConnection: HttpConnection
     private lateinit var cardNumber: String
+    private lateinit var myApp: BCMApplication
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_detail_info)
@@ -38,6 +39,7 @@ class DetailInfoActivity : AppCompatActivity(), View.OnClickListener, PopupMenu.
         val detailIntent = intent
         cardNumber = detailIntent.getIntExtra("cardNumber", 0).toString()
 
+        myApp = application as BCMApplication
         Log.d("cardNumber", cardNumber)
         getCardInfo()
 
@@ -107,7 +109,7 @@ class DetailInfoActivity : AppCompatActivity(), View.OnClickListener, PopupMenu.
                 FirebaseAuth.getInstance().signOut()
                 finish()
                 startActivity(intent)
-                MainActivity.isLogined = false
+                myApp.isLogined = false
                 true
             }
             R.id.menu_userinfo -> {
@@ -122,7 +124,7 @@ class DetailInfoActivity : AppCompatActivity(), View.OnClickListener, PopupMenu.
         val popup = PopupMenu(this, v!!)
         popup.setOnMenuItemClickListener(this)
         val inflater = popup.menuInflater
-        if (MainActivity.isLogined) inflater.inflate(R.menu.menu_login, popup.menu) else inflater.inflate(R.menu.menu, popup.menu)
+        if (myApp.isLogined) inflater.inflate(R.menu.menu_login, popup.menu) else inflater.inflate(R.menu.menu, popup.menu)
         popup.show()
     }
 

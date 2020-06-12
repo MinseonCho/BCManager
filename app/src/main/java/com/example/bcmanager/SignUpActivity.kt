@@ -22,6 +22,7 @@ class SignUpActivity : AppCompatActivity(), View.OnClickListener {
 
     var firebaseAuth: FirebaseAuth? = null
     private lateinit var httpConnection: HttpConnection
+    private lateinit var myApp: BCMApplication
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,6 +32,7 @@ class SignUpActivity : AppCompatActivity(), View.OnClickListener {
         supportActionBar!!.setCustomView(R.layout.actionbar_title_nobtn) // 커스텀 사용할 파일 위치
         supportActionBar!!.title = "회원가입"
 
+        myApp = application as BCMApplication
         signup.setOnClickListener(this)
         firebaseAuth = FirebaseAuth.getInstance();
     }
@@ -62,7 +64,12 @@ class SignUpActivity : AppCompatActivity(), View.OnClickListener {
                                         httpConnection = HttpConnection(URL(MainActivity.SIGNUP_URL))
                                         httpConnection.signUp(user.uid.toString(), user.displayName.toString(), user.email.toString())
 
-                                        MainActivity.isLogined = true;
+                                        myApp.isLogined = true;
+                                        myApp.userName = user.displayName
+                                        myApp.loginType = "g"
+                                        myApp.userID = user.uid
+                                        myApp.userEmail = user.email
+
                                         val intent = Intent(this@SignUpActivity, MainActivity::class.java)
                                         intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
                                         startActivity(intent)

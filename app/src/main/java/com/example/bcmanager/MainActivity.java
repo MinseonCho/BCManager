@@ -129,10 +129,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
     public static int device_width = 0, device_height = 0;
 
     //user
-    FirebaseUser user;
-    public static String uID;
-    public static boolean isLogined = false;
-    public Intent kUserIntent;
+//    FirebaseUser user;
     private BCMApplication myApp;
 
     public static String done;//ocr인식 확인
@@ -311,9 +308,14 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                cardsList.clear();
-                getCardCount();
-                refreshLayout.setRefreshing(false);
+                if(myApp.isLogined) {
+                    cardsList.clear();
+                    getCardCount();
+                    refreshLayout.setRefreshing(false);
+                }
+                else{
+                    refreshLayout.setRefreshing(false);
+                }
             }
         });
         refreshLayout.setColorSchemeColors(getResources().getColor(R.color.my_green));
@@ -525,20 +527,26 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                 return true;
             case R.id.menu_logout:
                 if (myApp.loginType.equals("g")) {
+                    Log.d("FirebaseAuth Login", "Logout");
                     FirebaseAuth.getInstance().signOut();
+
                 } else {
+
+                    Log.d("Kakao Login", "Logout");
+                    Log.d("Kakao Login_type  ", myApp.loginType);
                     UserManagement.getInstance().requestLogout(new LogoutResponseCallback() {
                         @Override
                         public void onCompleteLogout() {
-                            Intent intent = new Intent(MainActivity.this, MainActivity.class);
-                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                            startActivity(intent);
+                            initUserData();
+                            startActivity(getIntent());
+//                            Intent intent = new Intent(MainActivity.this, MainActivity.class);
+//                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+//                            startActivity(intent);
                         }
                     });
                 }
                 finish();
-                isLogined = false;
-                myApp.isLogined = false;
+                initUserData();
                 startActivity(getIntent());
                 return true;
             case R.id.menu_userinfo:
@@ -547,6 +555,10 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    public void initUserData(){
+        myApp.isLogined = false;
     }
 
     public void checkCurrentUser() {
