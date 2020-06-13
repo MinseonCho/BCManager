@@ -9,7 +9,7 @@ using namespace std;
 
 static Point2f pts[4];
 static Point2f result_pts[4];
-Point2f dst_pts[4];
+
 float maxWidth;
 float maxHeight;
 
@@ -19,7 +19,7 @@ float resize(Mat img_src, Mat &img_resize, int resize_width);
 
 bool compareContourAreas(std::vector<cv::Point> contour1, std::vector<cv::Point> contour2);
 
-void calculate_points(Mat &output, int flag);
+void calculate_points(Mat &output);
 
 void recognition_card_first(Mat &input, Mat &output); //first step for card recognition
 void recognition_card_sec(Mat &input, Mat &output); //second step for card recognition
@@ -29,17 +29,11 @@ extern "C" {
 
 JNIEXPORT jint JNICALL Java_com_example_bcmanager_CameraActivity_ConvertRGBtoGray(
         JNIEnv *env, jobject instance, jlong matAddrInput, jlong matAddrResult) {
-    int area = 0, cnt = 0;
+
     // TODO: implement BlurImage()
 
     Mat &input = *(Mat *) matAddrInput;
-    CV_Assert(input.data);
     Mat &output = *(Mat *) matAddrResult;
-    vector<int>::iterator it;
-
-    jfloatArray result;
-    jfloat fill[8];
-    result = (*env).NewFloatArray(8);
 
     LOGD("%d : input.cols", input.cols);
     LOGD("%d : input.rows", input.rows);
@@ -60,14 +54,12 @@ JNIEXPORT jint JNICALL Java_com_example_bcmanager_CameraActivity_ConvertRGBtoGra
     int size = contours.size();
     test = contours[size - 1];
 
-
     vector<Point> approx;
+    vector<Point2f> tmp_pts;
 
     approxPolyDP(Mat(test), approx, arcLength(Mat(test), true) * 0.02, true);
 
-
     int tmp_area = int(((grayInput.rows * grayInput.cols) * 0.1));
-
     if (fabs(contourArea(Mat(approx))) > tmp_area) {
         int size = approx.size();
         //Contour를 근사화한 직선을 그린다.
@@ -77,30 +69,27 @@ JNIEXPORT jint JNICALL Java_com_example_bcmanager_CameraActivity_ConvertRGBtoGra
                 approx[i].y *= 2;
                 pts[i] = approx[i];
             }
+            int sum_min = 0, sum_max = 0, diff_min = 0, diff_max = 0;
+            float sum[4], diff[4];
 
-//            int i = 0;
-//            int j = 0;
-//            while (i < 8) {
-//                if (i % 2 == 0) fill[i] = approx[j].x;
-//                if (i % 2 != 0) {
-//                    fill[i] = approx[j].y;
-//                    j++;
-//                }
-//                i++;
-//            }
-
-//            (*env).SetFloatArrayRegion(result, 0, 8, fill);
-
-//            rectangle(output, approx[0]*2, approx[2]*2,Scalar(104, 212, 160),6);
+            for (int i = 0; i < 4; i++) {
+                sum[i] = approx[i].x + approx[i].y;
+                diff[i] = (approx[i].y - approx[i].x);
+            }
+            for (int i = 1; i < 4; i++) {
+                if (sum[sum_max] < sum[i]) sum_max = i;
+                if (sum[sum_min] > sum[i]) sum_min = i;
+                if (diff[diff_max] < diff[i]) diff_max = i;
+                if (diff[diff_min] > diff[i]) diff_min = i;
+            }
+            approx[sum_min].x -= 4; approx[sum_min].y -=4;
+            approx[sum_max].x += 4; approx[sum_max].y +=4;
+            approx[diff_min].x += 4; approx[diff_min].y -=4;
+            approx[diff_max].x -= 4; approx[diff_max].y +=4;
             polylines(output, approx, true, Scalar(104, 212, 160), 3, LINE_AA);
-//            line(output, approx[0] * 2, approx[approx.size() - 1] * 2, Scalar(104, 212, 160), 8);
-//            for (int k = 0; k < size - 1; k++)
-//                line(output, approx[k] * 2, approx[k + 1] * 2, Scalar(104, 212, 160), 8);
-
             return 100;
         }
     }
-//    (*env).SetFloatArrayRegion(result, 0, 4, fill);
 
     LOGD("%d : output.cols", output.cols);
     LOGD("%d : output.rows", output.rows);
@@ -130,12 +119,12 @@ Java_com_example_bcmanager_CameraActivity_ImageProcessing(JNIEnv *env, jobject t
 
     LOGD("값값 = %f, %f", pts[0].x, pts[0].y);
 
-    pts[0].x += 5; pts[0].y +=5;
-    pts[1].x += 5; pts[1].y +=5;
-    pts[2].x += 5; pts[2].y +=5;
-    pts[3].x += 5; pts[3].y +=5;
+//    pts[0].x += 5; pts[0].y +=5;
+//    pts[1].x += 5; pts[1].y +=5;
+//    pts[2].x += 5; pts[2].y +=5;
+//    pts[3].x += 5; pts[3].y +=5;
 
-    calculate_points(output_, 2);
+    calculate_points(output_);
 }
 }
 
@@ -208,7 +197,7 @@ void recognition_card_first(Mat &input, Mat &output) {
         for (int i = 0; i < 4; i++) {
             pts[i] = result_approx[i];
         }
-        calculate_points(output, 1);
+        calculate_points(output);
 
     } else {
         recognition_card_sec(input, output);
@@ -264,7 +253,7 @@ void recognition_card_sec(Mat &input, Mat &output) {
         for (int k = 0; k < 4; k++) {
             pts[k] = result_approx[k];
         }
-        calculate_points(output, 1);
+        calculate_points(output);
 
     } else {
         LOGD(" fail");
@@ -329,7 +318,7 @@ void recognition_card_third(Mat &input, Mat &output) {
         for (int k = 0; k < 4; k++) {
             pts[k] = result_approx[k];
         }
-        calculate_points(output, 1);
+        calculate_points(output);
 
     } else {
         LOGD(" fail");
@@ -381,18 +370,15 @@ bool compareContourAreas(std::vector<cv::Point> contour1, std::vector<cv::Point>
     return (i < j);
 }
 
-void calculate_points(Mat &output, int flag) {
+void calculate_points(Mat &output) {
 
-    int sum_min = 0, sum_max = 0, diff_min = 0, diff_max = 0, result;
+    int sum_min = 0, sum_max = 0, diff_min = 0, diff_max = 0;
     float sum[4], diff[4];
 
     for (int i = 0; i < 4; i++) {
         sum[i] = pts[i].x + pts[i].y;
         diff[i] = (pts[i].y - pts[i].x);
-        /*float tmp = pts[i].x + pts[i].y;
-        if (sum_min > tmp) {
-            sum_min = i;
-        }*/
+
     }
     for (int i = 1; i < 4; i++) {
         if (sum[sum_max] < sum[i]) sum_max = i;
@@ -406,14 +392,6 @@ void calculate_points(Mat &output, int flag) {
     result_pts[2] = pts[sum_max]; //bottom-right
     result_pts[1] = pts[diff_min]; //top-right
     result_pts[3] = pts[diff_max]; //bottom-left
-
-    if(flag == 2){
-        int plusNum = 3;
-        result_pts[0].x += plusNum; result_pts[0].y += plusNum;
-        result_pts[1].x -= plusNum; result_pts[1].y += plusNum;
-        result_pts[2].x -= plusNum; result_pts[2].y -= plusNum;
-        result_pts[3].x += plusNum; result_pts[3].y -= plusNum;
-    }
 
     Point2f topLeft = result_pts[0];
     Point2f topRight = result_pts[1];

@@ -29,6 +29,7 @@ import com.google.api.services.vision.v1.model.Image;
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 import org.jetbrains.annotations.Nullable;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -151,12 +152,13 @@ public class CardOCR extends Activity {
 
     Context context;
 
-    CardOCR(Context context, Bitmap bitmap, String userid, String filename, String filePath) {
+    CardOCR(Context context, Bitmap bitmap, String userid, String filename) {
         this.context = context;
 //        callCloudVision(bitmap);
         // myApp = (BCMApplication) getApplication();
         ocruserid = userid;
         fn = filename;
+//        fp = filePath;
         Log.d(TAG, "USER체크" + userid);
         Log.d(TAG, "filename체크" + filename);
         textlist.clear();

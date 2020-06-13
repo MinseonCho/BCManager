@@ -111,6 +111,9 @@ class CardListActivity : AppCompatActivity(), OnItemClick {
                     Log.d("마이너스된 count ", myApp.count.toString())
                     if (myApp.count == 0) {
                         runOnUiThread(Runnable {
+                            intent = Intent()
+                            setResult(Activity.RESULT_OK)
+                            intent.putExtra("count", myApp.count)
                             finish()
                         })
                     }
