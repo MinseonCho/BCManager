@@ -155,6 +155,7 @@ class ConfirmCapture : AppCompatActivity(), View.OnClickListener {
                 val intent = Intent()
                 intent.putExtra("image", byteArray)
                 intent.putExtra("fileName", fileName)
+                intent.putExtra("filePath", filePath)
                 setResult(RESULT_OK, intent);
                 finish();
             }

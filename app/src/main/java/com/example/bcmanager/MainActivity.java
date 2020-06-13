@@ -370,6 +370,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 
                             Intent intent = new Intent(getApplicationContext(), ImageOCRActivity.class);
                             intent.putExtra("image", byteArray);
+//                            intent.putExtra("filename", byteArray);
                             startActivity(intent);
 
                             mHandler.post(new Runnable() {
@@ -400,6 +401,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                     byte[] bytes = data.getByteArrayExtra("image");
 
                     final String filename = data.getStringExtra("fileName");
+                    final String filePath = data.getStringExtra("filePath");
 
                     final Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
 
@@ -454,7 +456,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 
                                 userid = myApp.userID;
 
-                                cardocr = new CardOCR(getApplicationContext(), bitmapOutput, userid, filename);
+                                cardocr = new CardOCR(getApplicationContext(), bitmapOutput, userid, filename,filePath);
 
                                 runOnUiThread(new Runnable() {
                                     @Override

@@ -1,10 +1,12 @@
 package com.example.bcmanager;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
@@ -21,22 +23,33 @@ import com.google.api.services.vision.v1.model.EntityAnnotation;
 import com.google.api.services.vision.v1.model.Feature;
 import com.google.api.services.vision.v1.model.Image;
 
+import org.apache.commons.net.ftp.FTP;
+import org.apache.commons.net.ftp.FTPClient;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+import okhttp3.MediaType;
+
 public class CardOCR extends Activity {
-    private static final String CLOUD_VISION_API_KEY = "";
+    private static final String CLOUD_VISION_API_KEY = "AIzaSyB3_sf4bXDPThjn5SYMGRpsfBgTaStKBcI";
     public static String CARD_INPUT = "http://104.197.171.112/precard_input.php";
     public static final String FILE_NAME = "temp.jpg";
     private static final String ANDROID_CERT_HEADER = "X-Android-Cert";
@@ -45,7 +58,7 @@ public class CardOCR extends Activity {
     private static final int MAX_DIMENSION = 1200;
     public static AsyncResponse delegate = null;
 
-    //  private BCMApplication myApp;
+      private BCMApplication myApp;
 
     private static ArrayList<String> textlist = new ArrayList<String>();
     private static ArrayList<String> city_address = new ArrayList<String>();
@@ -64,8 +77,11 @@ public class CardOCR extends Activity {
     private static String temp;
     private static String ocruserid;
     private static String fn;
+    private static String fp;
+    public static File ocrFile;
 
     private static final String TAG = "ddd";
+    private Object OnRequestCompleteListener;
 
     public static String dd(AsyncResponse delegate) {
         Log.d("DD함수", "실행 ");
@@ -79,6 +95,8 @@ public class CardOCR extends Activity {
         InsertData task = new InsertData(delegate);
 
         result = task.execute(CARD_INPUT, nm, ph, ad, em, nb, fx, po, memo, cp, ocruserid, done, fn).toString();
+
+
 
         Log.d(TAG, "result확인 try안 = " + result);
 
@@ -106,12 +124,13 @@ public class CardOCR extends Activity {
 
     Context context;
 
-    CardOCR(Context context, Bitmap bitmap, String userid, String filename) {
+    CardOCR(Context context, Bitmap bitmap, String userid, String filename, String filePath) {
         this.context = context;
 //        callCloudVision(bitmap);
         // myApp = (BCMApplication) getApplication();
         ocruserid = userid;
         fn = filename;
+        fp = filePath;
         Log.d(TAG, "USER체크" + userid);
         Log.d(TAG, "filename체크" + filename);
         textlist.clear();
@@ -126,6 +145,30 @@ public class CardOCR extends Activity {
         memo = null;
         temp = "";
 
+        File file = new File(fp);
+
+        // If no folders
+        if (!file.exists()) {
+            file.mkdirs();
+            // Toast.makeText(this, "Success", Toast.LENGTH_SHORT).show();
+        }
+
+        File fileCacheItem = new File(fp + fn);
+        OutputStream out = null;
+
+        try {
+            fileCacheItem.createNewFile();
+            out = new FileOutputStream(fileCacheItem);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                out.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
 
     }
 
@@ -577,4 +620,80 @@ public class CardOCR extends Activity {
 
         }
     }
+    public void sendFTP(final File filename)
+
+    {
+
+        Thread thread = new Thread(new Runnable() {
+
+            @Override
+
+            public void run() {
+
+                FTPClient ftpClient = new FTPClient();
+
+
+                try {
+
+                    //ftpClient.setControlEncoding("MS949");
+
+                    ftpClient.connect("104.197.171.112", 22);
+
+                    ftpClient.login("bcm2020", "young0420");
+
+                    ftpClient.setFileType(FTP.BINARY_FILE_TYPE); // 바이너리 파일
+
+                } catch (Exception ex) {
+
+                    // error
+
+                }
+
+
+//                File uploadFile = new File(fp, fn);
+//                Log.d(TAG,"로그찍기"+fp+ "/"+ fn);
+//
+                FileInputStream fis = null;
+
+
+                try{
+
+                    ftpClient.changeWorkingDirectory("/var/www/html/dbimages"); //서버 접속 폴더
+
+                    fis = new FileInputStream(filename);
+
+                    boolean isSuccess = ftpClient.storeFile(filename.getName(), fis);
+
+                    if(isSuccess){
+
+                        // success
+
+                    }
+
+                    else {
+
+                        // fail
+
+                    }
+
+                }catch(Exception e){
+
+                    // exception error
+
+                }
+
+            }
+
+        });
+
+        thread.start();
+
+    }
+
+
+
 }
+
+
+
+
