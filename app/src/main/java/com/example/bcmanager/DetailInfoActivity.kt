@@ -1,10 +1,12 @@
 package com.example.bcmanager
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.MenuItem
 import android.view.View
+import android.widget.Toast
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.PopupMenu
@@ -16,6 +18,7 @@ import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import kotlinx.android.synthetic.main.actionbar_title.*
 import kotlinx.android.synthetic.main.activity_detail_info.*
+import kotlinx.android.synthetic.main.activity_image_o_c_r.*
 import java.net.MalformedURLException
 import java.net.URL
 import java.util.*
@@ -26,6 +29,9 @@ class DetailInfoActivity : AppCompatActivity(), View.OnClickListener, PopupMenu.
     private lateinit var httpConnection: HttpConnection
     private lateinit var cardNumber: String
     private lateinit var myApp: BCMApplication
+    private lateinit var memo: String
+    private val UPDATE_CODE = 500
+    var result: CardInfoItem.cardInfo? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_detail_info)
@@ -48,49 +54,28 @@ class DetailInfoActivity : AppCompatActivity(), View.OnClickListener, PopupMenu.
         actionbar_btn.setOnClickListener(this)
     }
 
-    fun getCardInfo() {
-        var result: CardInfoItem.cardInfo? = null
-        try {
-            httpConnection = HttpConnection(URL(MainActivity.GET_CARD_INFO))
-            httpConnection.requestGetCard(cardNumber, object : OnRequestCompleteListener {
-                override fun onSuccess(data: String?) {
-                    val gson = GsonBuilder().create()
-                    val jsonParser = JsonParser()
-                    val jsonObject = jsonParser.parse(data) as JsonObject
-                    val jsonArray = jsonObject["cardInfo"] as JsonArray
-
-                    val j = jsonArray[0].asJsonObject
-                    result = gson.fromJson(j, CardInfoItem.cardInfo::class.java)
-
-                    runOnUiThread {
-                        detail_name.text = result?.CARD_NAME.toString()
-                        detail_address.text = result?.CARD_ADDRESS.toString()
-                        detail_company.text = result?.CARD_COMPANY.toString()
-                        detail_position.text = result?.CARD_POSITION.toString()
-                        detail_fax.text = result?.CARD_FAX.toString()
-                        detail_email.text = result?.CARD_EMAIL.toString()
-                        detail_tel.text = result?.CARD_TEL.toString()
-                        detail_phone.text = result?.CARD_PHONE.toString()
-
-                        Glide.with(this@DetailInfoActivity)
-                                .load(MainActivity.IMAGE_URL+result?.CARD_IMAGE)
-                                .override(MainActivity.device_width, 400)
-                                .into(detail_card)
-                    }
-                }
-
-                override fun onError() {}
-            })
-        } catch (e: MalformedURLException) {
-            e.printStackTrace()
-        }
-    }
-
     override fun onClick(v: View?) {
         val i = v?.id
 
         when (i) {
-            R.id.detail_btn_edit -> finish()
+            R.id.detail_btn_edit -> {
+                //수정하기
+                val intent = Intent(applicationContext, RegisterActivity::class.java)
+                intent.putExtra("name", result?.CARD_NAME)
+                intent.putExtra("position", result?.CARD_POSITION)
+                intent.putExtra("company", result?.CARD_COMPANY)
+                intent.putExtra("phone", result?.CARD_PHONE)
+                intent.putExtra("number", result?.CARD_TEL)
+                intent.putExtra("email", result?.CARD_EMAIL)
+                intent.putExtra("address", result?.CARD_ADDRESS)
+                intent.putExtra("fax", result?.CARD_FAX)
+                intent.putExtra("cardNum", result?.CARD_NUMBER)
+                intent.putExtra("image", result?.CARD_IMAGE)
+                intent.putExtra("memo", memo)
+                intent.putExtra("flag", 1)
+                startActivityForResult(intent, UPDATE_CODE)
+
+            }
             R.id.detail_btn_ok -> finish()
             R.id.actionbar_btn -> {
                 showPopup(v)
@@ -128,4 +113,50 @@ class DetailInfoActivity : AppCompatActivity(), View.OnClickListener, PopupMenu.
         popup.show()
     }
 
+    fun getCardInfo() {
+
+        try {
+            httpConnection = HttpConnection(URL(MainActivity.GET_CARD_INFO))
+            httpConnection.requestGetCard(cardNumber, object : OnRequestCompleteListener {
+                override fun onSuccess(data: String?) {
+                    val gson = GsonBuilder().create()
+                    val jsonParser = JsonParser()
+                    val jsonObject = jsonParser.parse(data) as JsonObject
+                    val jsonArray = jsonObject["cardInfo"] as JsonArray
+
+                    val j = jsonArray[0].asJsonObject
+                    result = gson.fromJson(j, CardInfoItem.cardInfo::class.java)
+                    memo = j.get("CARD_MEMO").asString
+
+
+                    runOnUiThread {
+                        detail_name.text = result?.CARD_NAME.toString()
+                        detail_address.text = result?.CARD_ADDRESS.toString()
+                        detail_company.text = result?.CARD_COMPANY.toString()
+                        detail_position.text = result?.CARD_POSITION.toString()
+                        detail_fax.text = result?.CARD_FAX.toString()
+                        detail_email.text = result?.CARD_EMAIL.toString()
+                        detail_tel.text = result?.CARD_TEL.toString()
+                        detail_phone.text = result?.CARD_PHONE.toString()
+
+                        Glide.with(this@DetailInfoActivity)
+                                .load(MainActivity.IMAGE_URL + result?.CARD_IMAGE)
+                                .override(MainActivity.device_width, 400)
+                                .into(detail_card)
+                    }
+                }
+
+                override fun onError() {}
+            })
+        } catch (e: MalformedURLException) {
+            e.printStackTrace()
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if(requestCode == UPDATE_CODE && resultCode == RESULT_OK){
+            finish()
+        }
+    }
 }
