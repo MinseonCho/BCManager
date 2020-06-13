@@ -384,6 +384,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 
                             Intent intent = new Intent(getApplicationContext(), ImageOCRActivity.class);
                             intent.putExtra("image", byteArray);
+//                            intent.putExtra("filename", byteArray);
                             startActivity(intent);
 
                             mHandler.post(new Runnable() {
@@ -414,6 +415,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                     Log.d("이걸", "몇번을 하는거야");
                     byte[] bytes = data.getByteArrayExtra("image");
                     final String filename = data.getStringExtra("fileName");
+                    final String filePath = data.getStringExtra("filePath");
 
                     final Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
 
@@ -472,9 +474,11 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                     final Bitmap bitmapOutput = Bitmap.createBitmap(output.cols(), output.rows(), Bitmap.Config.RGB_565);
                     Utils.matToBitmap(output, bitmapOutput);
 
+
                     ByteArrayOutputStream stream = new ByteArrayOutputStream();
                     bitmapOutput.compress(Bitmap.CompressFormat.JPEG, 100, stream);
                     byte[] byteArray = stream.toByteArray();
+//                                cardocr = new CardOCR(getApplicationContext(), bitmapOutput, userid, filename,filePath);
 
                     userid = myApp.userID;
 

@@ -36,8 +36,13 @@ import com.google.api.services.vision.v1.model.EntityAnnotation;
 import com.google.api.services.vision.v1.model.Feature;
 import com.google.api.services.vision.v1.model.Image;
 
+import org.apache.commons.net.ftp.FTP;
+import org.apache.commons.net.ftp.FTPClient;
+
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -53,7 +58,7 @@ import java.util.Objects;
 
 public class ImageOCRActivity extends AppCompatActivity {
 
-    private static final String CLOUD_VISION_API_KEY = "";
+    private static final String CLOUD_VISION_API_KEY = "AIzaSyB3_sf4bXDPThjn5SYMGRpsfBgTaStKBcI";
     public static String CARD_INPUT = "http://104.197.171.112/card_input.php";
     public static final String FILE_NAME = "temp.jpg";
     private static final String ANDROID_CERT_HEADER = "X-Android-Cert";
@@ -161,7 +166,7 @@ public class ImageOCRActivity extends AppCompatActivity {
 
             InsertData task = new InsertData();
             task.execute(CARD_INPUT,nm,ph,ad,em,nb,fx,po,memo,cp,ocrusernum);
-
+//            sendFTP("TEST");
             finish();
         }
     };
@@ -630,5 +635,83 @@ public class ImageOCRActivity extends AppCompatActivity {
 
         }
     }
+
+//    public void sendFTP(String fName)
+//
+//    {
+//
+//        final String parameter = fName;
+//
+//
+//        Thread thread = new Thread(new Runnable() {
+//
+//            String fn = parameter;
+//
+//            @Override
+//
+//            public void run() {
+//
+//                FTPClient ftpClient = new FTPClient();
+//
+//
+//                try {
+//
+//                    //ftpClient.setControlEncoding("MS949");
+//
+//                    ftpClient.connect("104.197.171.112", 22);
+//
+//                    ftpClient.login("bcm2020", "young0420");
+//
+//                    ftpClient.setFileType(FTP.BINARY_FILE_TYPE); // 바이너리 파일
+//
+//                } catch (Exception ex) {
+//
+//                    // error
+//
+//                }
+//
+//
+//                File uploadFile = new Filen(getApplicationContext().getFilesDir() + "/"+ f);
+//                Log.d(TAG,"로그찍기"+getApplicationContext().getFilesDir() + "/"+ fn);
+//
+//                FileInputStream fis = null;
+//
+//
+//                try{
+//
+//                    ftpClient.changeWorkingDirectory("/var/www/html/dbimages"); //서버 접속 폴더
+//
+//                    fis = new FileInputStream(uploadFile);
+//
+//                    boolean isSuccess = ftpClient.storeFile(uploadFile.getName(), fis);
+//
+//                    if(isSuccess){
+//
+//                        // success
+//
+//                    }
+//
+//                    else {
+//
+//                        // fail
+//
+//                    }
+//
+//                }catch(Exception e){
+//
+//                    // exception error
+//
+//                }
+//
+//            }
+//
+//        });
+//
+//        thread.start();
+//
+//    }
+//
+
+
 
 }
