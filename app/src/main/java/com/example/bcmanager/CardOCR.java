@@ -5,6 +5,9 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.MessageQueue;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -25,11 +28,13 @@ import com.google.api.services.vision.v1.model.Image;
 
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
+import org.jetbrains.annotations.Nullable;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -44,9 +49,12 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
 import okhttp3.MediaType;
+
+import static com.google.common.collect.ComparisonChain.start;
 
 public class CardOCR extends Activity {
     private static final String CLOUD_VISION_API_KEY = "AIzaSyB3_sf4bXDPThjn5SYMGRpsfBgTaStKBcI";
@@ -58,7 +66,7 @@ public class CardOCR extends Activity {
     private static final int MAX_DIMENSION = 1200;
     public static AsyncResponse delegate = null;
 
-      private BCMApplication myApp;
+    private static BCMApplication myApp;
 
     private static ArrayList<String> textlist = new ArrayList<String>();
     private static ArrayList<String> city_address = new ArrayList<String>();
@@ -78,11 +86,17 @@ public class CardOCR extends Activity {
     private static String ocruserid;
     private static String fn;
     private static String fp;
-    public static File ocrFile;
-
+    public static File fileCacheItem;
+    public static Handler mHandler = null;
     private static final String TAG = "ddd";
-    private Object OnRequestCompleteListener;
 
+    //    public static class CallKotlin{
+//        public static void main(String[] args){
+//            Fileinput fileinput = new Fileinput(); //thread2
+//            fileinput.fileupload(fileCacheItem);
+//        }
+//
+//    }
     public static String dd(AsyncResponse delegate) {
         Log.d("DD함수", "실행 ");
         Log.d(TAG, "ad확인db" + ad);
@@ -92,11 +106,24 @@ public class CardOCR extends Activity {
 //        putData();
 //        done = "1";
         String result = "0";
-        InsertData task = new InsertData(delegate);
 
+
+        InsertData task = new InsertData(delegate); //thread1
         result = task.execute(CARD_INPUT, nm, ph, ad, em, nb, fx, po, memo, cp, ocruserid, done, fn).toString();
 
 
+        final Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Looper.prepare();
+                //MessageQueue messageQueue = Looper.myQueue();
+                Log.d(TAG, "threadsuccess");
+                Fileinput fileinput = new Fileinput(); //thread2
+                fileinput.fileupload(fileCacheItem);
+                Looper.loop();
+            }
+        });
+        thread.start();
 
         Log.d(TAG, "result확인 try안 = " + result);
 
@@ -130,7 +157,6 @@ public class CardOCR extends Activity {
         // myApp = (BCMApplication) getApplication();
         ocruserid = userid;
         fn = filename;
-        fp = filePath;
         Log.d(TAG, "USER체크" + userid);
         Log.d(TAG, "filename체크" + filename);
         textlist.clear();
@@ -144,28 +170,33 @@ public class CardOCR extends Activity {
         cp = "";
         memo = null;
         temp = "";
+        fp = context.getFilesDir().getPath();
 
-        File file = new File(fp);
+//        File file = new File(fp);
+//
+//        // If no folders
+//        if (!file.exists()) {
+//            file.mkdirs();
+//            // Toast.makeText(this, "Success", Toast.LENGTH_SHORT).show();
+//        }
 
-        // If no folders
-        if (!file.exists()) {
-            file.mkdirs();
-            // Toast.makeText(this, "Success", Toast.LENGTH_SHORT).show();
-        }
+        fileCacheItem = new File(context.getFilesDir().getPath(), fn);
+        Log.d(TAG, "getFilesDir().getPath()확인할꺼 = " + context.getFilesDir().getPath());
 
-        File fileCacheItem = new File(fp + fn);
         OutputStream out = null;
 
         try {
             fileCacheItem.createNewFile();
             out = new FileOutputStream(fileCacheItem);
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 40, out);
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
             try {
                 out.close();
+                Log.d(TAG, "trysuccess");
             } catch (IOException e) {
+                Log.d(TAG, "tryexception");
                 e.printStackTrace();
             }
         }
@@ -314,7 +345,7 @@ public class CardOCR extends Activity {
 
         Log.d(TAG, String.valueOf(city_address));
 
-        city_number.addAll(Arrays.asList( "051", "053", "032", "062", "042", "052", "044", "031", "033", "043", "041", "063", "061", "054", "055", "064","02"));
+        city_number.addAll(Arrays.asList("051", "053", "032", "062", "042", "052", "044", "031", "033", "043", "041", "063", "061", "054", "055", "064", "02"));
         job_position.addAll(Arrays.asList("회장", "부회장", "사장", "부사장", "전무", "상무", "부장", "차장", "대리", "과장", "사원", "팀장", "이사", "교수", "대표", "대표이사", "점장", "지점장"));
 
         int plus = 0;
@@ -342,7 +373,7 @@ public class CardOCR extends Activity {
                 for (int j = phindex; j < textlist.get(i).length(); j++) {
                     ph += textlist.get(i).charAt(j);
                 }
-                if(ph.contains("."))
+                if (ph.contains("."))
                     ph = ph.replace(".", "-");
             }
 
@@ -444,9 +475,9 @@ public class CardOCR extends Activity {
                         if (nb.length() < 12)
                             nb += textlist.get(i).charAt(k);
                     }
-                    if(nb.contains(")"))
-                         nb = nb.replace(")", "-");
-                    else if(nb.contains("."))
+                    if (nb.contains(")"))
+                        nb = nb.replace(")", "-");
+                    else if (nb.contains("."))
                         nb = nb.replace(".", "-");
                     break loop;
                 }
@@ -458,8 +489,8 @@ public class CardOCR extends Activity {
             if (textlist.get(i).length() <= 10) {
                 Log.d(TAG, "cp위한 nm확인 = " + nm);
                 Log.d(TAG, "po가뭣이냐" + po);
-                if(textlist.get(i).contains(nm)){}
-                else {
+                if (textlist.get(i).contains(nm)) {
+                } else {
                     if (cp.length() < 2) {
                         cp = textlist.get(i);
                         Log.d(TAG, "cp가뭣이냐" + cp);
@@ -525,7 +556,7 @@ public class CardOCR extends Activity {
         protected void onPostExecute(String result) {
             super.onPostExecute(result);
             Log.d("InsertData", "onPostExecute");
-            Log.d("InsertData result  " , result.toString());
+            Log.d("InsertData result  ", result.toString());
 
 //            delegate.processFinish(result);
 
@@ -533,7 +564,6 @@ public class CardOCR extends Activity {
             //  progressDialog.dismiss();
             //  mTextViewResult.setText("입력되었습니다.");
             Log.d(TAG, "POST response  - " + result);
-
         }
 
 
@@ -560,23 +590,66 @@ public class CardOCR extends Activity {
             Log.d(TAG, "ddongmmong" + serverURL);
             Log.d(TAG, "ddongmmong" + postParameters);
 
+            int bytesAvailable, bufferSize, bytesRead;
+            byte[] buffer;
+            int maxBufferSize = 1 * 1024 * 1024;
+
 
             try {
 
+                FileInputStream fileInputStream = new FileInputStream(fileCacheItem);
+                Log.d("파일", String.valueOf(fileCacheItem));
+                Log.d("파일", fileCacheItem.getName());
                 URL url = new URL(serverURL);
                 HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
 
-
+                String boundary = UUID.randomUUID().toString();
                 httpURLConnection.setReadTimeout(5000);
                 httpURLConnection.setConnectTimeout(5000);
                 httpURLConnection.setRequestMethod("POST");
+                httpURLConnection.setRequestProperty("Connection", "Keep-Alive");
+                httpURLConnection.setRequestProperty("ENCTYPE", "multipart/form-data");
+                httpURLConnection.setRequestProperty("Content-Type", "multipart/form-data;boundary=" + boundary);
+                httpURLConnection.setRequestProperty("uploaded_file", fn);
                 httpURLConnection.connect();
 
 
-                OutputStream outputStream = httpURLConnection.getOutputStream();
-                outputStream.write(postParameters.getBytes("UTF-8"));
-                outputStream.flush();
-                outputStream.close();
+                DataOutputStream request = new DataOutputStream(httpURLConnection.getOutputStream());
+                request.writeBytes("--" + boundary + "\r\n");
+                request.write(postParameters.getBytes("UTF-8"));
+                request.writeBytes("Content-Disposition: form-data; name=\"uploaded_file\"; filename=\"" + fn + "\"\r\n\r\n");
+//                request.writeBytes("Content-Disposition: form-data; name=\"uploaded_file\"; filename=\"" + fn + "\"" + "\r\n");
+                request.writeBytes("\r\n");
+
+//                OutputStream outputStream = httpURLConnection.getOutputStream();
+//                outputStream.write(postParameters.getBytes("UTF-8"));
+//                outputStream.flush();
+//                outputStream.close();
+
+                // create a buffer of  maximum size
+
+                bytesAvailable = fileInputStream.available();
+
+                bufferSize = Math.min(bytesAvailable, maxBufferSize);
+                buffer = new byte[bufferSize];
+
+                // read file and write it into form...
+                bytesRead = fileInputStream.read(buffer, 0, bufferSize);
+
+                while (bytesRead > 0) {
+
+                    request.write(buffer, 0, bufferSize);
+                    bytesAvailable = fileInputStream.available();
+                    bufferSize = Math.min(bytesAvailable, maxBufferSize);
+                    bytesRead = fileInputStream.read(buffer, 0, bufferSize);
+
+                }
+
+                // send multipart form data necesssary after file data...
+                request.writeBytes("\r\n");
+                request.writeBytes("--" + boundary + "--" + "\r\n");
+                request.flush();
+                request.close();
 
 
                 int responseStatusCode = httpURLConnection.getResponseCode();
@@ -620,80 +693,4 @@ public class CardOCR extends Activity {
 
         }
     }
-    public void sendFTP(final File filename)
-
-    {
-
-        Thread thread = new Thread(new Runnable() {
-
-            @Override
-
-            public void run() {
-
-                FTPClient ftpClient = new FTPClient();
-
-
-                try {
-
-                    //ftpClient.setControlEncoding("MS949");
-
-                    ftpClient.connect("104.197.171.112", 22);
-
-                    ftpClient.login("bcm2020", "young0420");
-
-                    ftpClient.setFileType(FTP.BINARY_FILE_TYPE); // 바이너리 파일
-
-                } catch (Exception ex) {
-
-                    // error
-
-                }
-
-
-//                File uploadFile = new File(fp, fn);
-//                Log.d(TAG,"로그찍기"+fp+ "/"+ fn);
-//
-                FileInputStream fis = null;
-
-
-                try{
-
-                    ftpClient.changeWorkingDirectory("/var/www/html/dbimages"); //서버 접속 폴더
-
-                    fis = new FileInputStream(filename);
-
-                    boolean isSuccess = ftpClient.storeFile(filename.getName(), fis);
-
-                    if(isSuccess){
-
-                        // success
-
-                    }
-
-                    else {
-
-                        // fail
-
-                    }
-
-                }catch(Exception e){
-
-                    // exception error
-
-                }
-
-            }
-
-        });
-
-        thread.start();
-
-    }
-
-
-
 }
-
-
-
-

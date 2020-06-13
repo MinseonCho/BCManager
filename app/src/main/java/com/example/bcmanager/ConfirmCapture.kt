@@ -64,6 +64,7 @@ class ConfirmCapture : AppCompatActivity(), View.OnClickListener {
                 dataUri = data!!.data
                 filePath = myApp!!.getRealPathFromURI(this@ConfirmCapture, dataUri)
                 val file_extn = filePath?.substring(filePath?.lastIndexOf(".")!! + 1)
+                Log.d("이미지 저장 filePath", filePath)
                 var `in`: InputStream? = null
                 `in` = contentResolver.openInputStream(dataUri)
                 bitImage = BitmapFactory.decodeStream(`in`)
@@ -72,6 +73,7 @@ class ConfirmCapture : AppCompatActivity(), View.OnClickListener {
                 val date = SimpleDateFormat("yy_MM_dd_hh_mm_ss").format(Date());
                 fileName = myApp?.userNum + "_" + date + "." + file_extn
                 tempSelectFile = File(getFilesDir().getPath(), fileName);
+                Log.d("getFilesDir확인" ,getFilesDir().getPath())
 
                 val out: OutputStream = FileOutputStream(tempSelectFile);
 
@@ -130,6 +132,10 @@ class ConfirmCapture : AppCompatActivity(), View.OnClickListener {
 
                     })
                 }
+
+                // obj가 null이 아닐 경우 작업 수행 (기존 방식)
+
+
 
                 Log.d("image_width__", bitImage?.width.toString())
                 Log.d("image_height__", bitImage?.height.toString())
