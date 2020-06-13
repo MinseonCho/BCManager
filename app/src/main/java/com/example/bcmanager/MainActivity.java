@@ -42,6 +42,12 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.gson.Gson;
@@ -86,7 +92,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
     public static String GET_CARDS_INFO = "http://104.197.171.112/get_cards.php";
     public static String GET_CARD_INFO = "http://104.197.171.112/get_card.php";
     public static String GET_UNREGISTERD_CARD_INFO = "http://104.197.171.112/get_unregisterd_card.php";
-    public static String GET_UNREGISTERD_CARD_COUNT = "http://104.197.171.112/get_count_cards.php";
+    public static String GET_UNREGISTERD_CARD_COUNT = "http://104.197.171.112/get_count_cards0.php";
     public static String CARD_INPUT = "http://104.197.171.112/card_input.php";
     public static String GET_USER_NUMBER = "http://104.197.171.112/get_user_number.php";
     public static String DELETE_ITEM = "http://104.197.171.112/delete_item.php";
@@ -114,7 +120,9 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
     private ArrayList<CardInfoItem.cardInfo> unRegedcardsList;
     private SwipeRefreshLayout refreshLayout = null;
     private int card_cound = 0;
+    private boolean forThread = false;
     CardOCR cardocr;
+    ArrayList<String> tmpCards = new ArrayList<String>(); // done == 0 인 카드 이미지들
 
     private static final String TAG = "opencv";
     public static String userid = ""; //ocr
@@ -159,6 +167,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        Log.d("MainActivity", "onCreate");
         mContext = this;
         myApp = (BCMApplication) getApplication();
 
@@ -224,8 +233,10 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 //            getUserNumber();
 //            getCardInfo();
 //            getUnregisterdCardsInfo();
+
+            getCardCount();
         } else {
-            linearGoToCardList.setVisibility(View.GONE);
+
         }
 
 
@@ -310,12 +321,13 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                if(myApp.isLogined) {
-                    cardsList.clear();
-                    getCardCount();
+                if (myApp.isLogined) {
+//                    cardsList.clear();
+                    tmpCards.clear();
+//                    getCardCount();
+                    getCardInfo();
                     refreshLayout.setRefreshing(false);
-                }
-                else{
+                } else {
                     refreshLayout.setRefreshing(false);
                 }
             }
@@ -332,7 +344,8 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         if (requestCode == REQUEST_CODE_RESTART) {
             if (resultCode == RESULT_OK) {
                 Log.d(TAG_, "onActivityResult_1");
-                startActivity(getIntent());
+//                startActivity(getIntent());
+                linearGoToCardList.setVisibility(View.GONE);
             }
         }
         if (requestCode == 100) {
@@ -398,103 +411,13 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
             if (resultCode == RESULT_OK) {
                 //        val intent = intent
                 if (data != null) {
+                    Log.d("이걸", "몇번을 하는거야");
                     byte[] bytes = data.getByteArrayExtra("image");
                     final String filename = data.getStringExtra("fileName");
 
                     final Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
 
-                    final Thread thread = new Thread((new Runnable() {
-                        @Override
-                        public void run() {
-                            //ui 작업 수행x
-                            Looper.prepare();
-                            MessageQueue messageQueue = Looper.myQueue();
-
-                            mHandler.post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    //ui 작업 수행o
-                                    cnt++;
-                                    if (cnt > 0) {
-                                        linearLayout.setVisibility(View.VISIBLE);
-                                        cnt_count_text.setText(String.valueOf(cnt));
-                                    } else {
-                                        linearLayout.setVisibility(View.GONE);
-                                    }
-                                }
-                            });
-
-                            Log.d("image사이즈", String.valueOf(bitmap.getWidth()) + " " + String.valueOf(bitmap.getHeight()));
-
-                            double image_height = bitmap.getHeight();
-                            double image_width = bitmap.getWidth();
-                            double tmps = image_width / device_width;
-                            int dst_height = (int) (image_height / (image_width / device_width));
-                            Log.d("tmps", String.valueOf(tmps));
-                            Log.d("image_height", String.valueOf(image_height));
-                            Log.d("image_width", String.valueOf(image_width));
-                            Log.d("dst_height", String.valueOf(dst_height));
-                            Bitmap image = Bitmap.createScaledBitmap(bitmap, device_width, dst_height, true);
-
-                            Mat mat_img = new Mat();
-                            Utils.bitmapToMat(image, mat_img);
-
-                            Mat output = new Mat();
-
-                            RecognitionCard(mat_img.getNativeObjAddr(), output.getNativeObjAddr());
-
-                            if (!output.empty()) {
-
-                                final Bitmap bitmapOutput = Bitmap.createBitmap(output.cols(), output.rows(), Bitmap.Config.RGB_565);
-                                Utils.matToBitmap(output, bitmapOutput);
-
-                                ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                                bitmapOutput.compress(Bitmap.CompressFormat.JPEG, 100, stream);
-                                byte[] byteArray = stream.toByteArray();
-
-                                userid = myApp.userID;
-
-                                cardocr = new CardOCR(getApplicationContext(), bitmapOutput, userid, filename);
-
-                                runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        CardOCR.LableDetectionTask task = null;
-                                        try {
-                                            task = new CardOCR.LableDetectionTask(getApplicationContext(), cardocr.prepareAnnotationRequest(bitmapOutput), MainActivity.this);
-                                            task.execute();
-                                        } catch (IOException e) {
-                                            e.printStackTrace();
-                                        }
-
-                                    }
-                                });
-
-
-                        } else {
-                            Toast.makeText(getApplicationContext(), "다시 시도해주세요.", Toast.LENGTH_SHORT).show();
-                        }
-
-                            mHandler.post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    //ui 작업 수행o
-                                    cnt--;
-                                    if (cnt > 0) {
-                                        linearLayout.setVisibility(View.VISIBLE);
-                                        cnt_count_text.setText(String.valueOf(cnt));
-                                    } else {
-                                        linearLayout.setVisibility(View.GONE);
-                                    }
-
-                                }
-                            });
-                            Looper.loop();
-
-
-                        }
-                    }));
-                    thread.start();
+                    detection(bitmap, filename);
 
                 }
             }
@@ -502,11 +425,117 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 
     }
 
+    public void detection(final Bitmap bitmap, final String filename) {
+        forThread = true;
+        final Thread thread = new Thread((new Runnable() {
+            @Override
+            public void run() {
+                //ui 작업 수행x
+                Looper.prepare();
+                MessageQueue messageQueue = Looper.myQueue();
+
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        //ui 작업 수행o
+                        cnt++;
+                        if (cnt > 0) {
+                            linearLayout.setVisibility(View.VISIBLE);
+                            cnt_count_text.setText(String.valueOf(cnt));
+                        } else {
+                            linearLayout.setVisibility(View.GONE);
+                        }
+                    }
+                });
+
+                Log.d("image사이즈", String.valueOf(bitmap.getWidth()) + " " + String.valueOf(bitmap.getHeight()));
+
+                double image_height = bitmap.getHeight();
+                double image_width = bitmap.getWidth();
+                double tmps = image_width / device_width;
+                int dst_height = (int) (image_height / (image_width / device_width));
+                Log.d("tmps", String.valueOf(tmps));
+                Log.d("image_height", String.valueOf(image_height));
+                Log.d("image_width", String.valueOf(image_width));
+                Log.d("dst_height", String.valueOf(dst_height));
+                Bitmap image = Bitmap.createScaledBitmap(bitmap, device_width, dst_height, true);
+
+                Mat mat_img = new Mat();
+                Utils.bitmapToMat(image, mat_img);
+
+                Mat output = new Mat();
+
+                RecognitionCard(mat_img.getNativeObjAddr(), output.getNativeObjAddr());
+
+                if (!output.empty()) {
+
+                    final Bitmap bitmapOutput = Bitmap.createBitmap(output.cols(), output.rows(), Bitmap.Config.RGB_565);
+                    Utils.matToBitmap(output, bitmapOutput);
+
+                    ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                    bitmapOutput.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+                    byte[] byteArray = stream.toByteArray();
+
+                    userid = myApp.userID;
+
+                    cardocr = new CardOCR(getApplicationContext(), bitmapOutput, userid, filename);
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            CardOCR.LableDetectionTask task = null;
+                            try {
+                                task = new CardOCR.LableDetectionTask(getApplicationContext(), cardocr.prepareAnnotationRequest(bitmapOutput), MainActivity.this);
+                                task.execute();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+
+                        }
+                    });
+
+
+                } else {
+                    Toast.makeText(getApplicationContext(), "다시 시도해주세요.", Toast.LENGTH_SHORT).show();
+                }
+
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        //ui 작업 수행o
+                        cnt--;
+                        if (cnt > 0) {
+                            linearLayout.setVisibility(View.VISIBLE);
+                            cnt_count_text.setText(String.valueOf(cnt));
+                        } else {
+                            forThread = false;
+                            linearLayout.setVisibility(View.GONE);
+                        }
+
+                    }
+                });
+                Looper.loop();
+
+
+            }
+        }));
+        thread.start();
+        if (!forThread) thread.interrupt();
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        Log.d("메인액티비티", "onDestroy");
+//        Thread.interrupted();
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        Log.d("메인액티비티", "onPause");
+    }
 
     public void showPopup(View v) {
         PopupMenu popup = new PopupMenu(this, v);
@@ -527,6 +556,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                 if (myApp.loginType.equals("g")) {
                     Log.d("FirebaseAuth Login", "Logout");
                     FirebaseAuth.getInstance().signOut();
+                    startActivity(getIntent());
 
                 } else {
 
@@ -552,8 +582,9 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         }
     }
 
-    public void initUserData(){
+    public void initUserData() {
         myApp.isLogined = false;
+        myApp.userNum = null;
     }
 
     public void checkCurrentUser() {
@@ -573,21 +604,56 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 
     void getCardCount() {
         try {
+
+
             HttpConnection httpConn = new HttpConnection(new URL(GET_UNREGISTERD_CARD_COUNT));
             httpConn.requestGetCards(myApp.userID, new OnRequestCompleteListener() {
                 @Override
                 public void onSuccess(@org.jetbrains.annotations.Nullable String data) {
 
                     if (data != null && !data.isEmpty()) {
-
+                        tmpCards.clear();
                         Log.d("카운트", data);
                         Gson gson = new GsonBuilder()
                                 .create();
                         JsonParser jsonParser = new JsonParser();
                         JsonObject jsonObject = (JsonObject) jsonParser.parse(data);
-                        JsonArray jsonArray = (JsonArray) jsonObject.get("cardInfo");
-                        JsonObject j = jsonArray.get(0).getAsJsonObject();
-                        myApp.count = j.get("count").getAsInt();
+                        JsonObject jsonArray = (JsonObject) jsonObject.get("cardInfo");
+                        JsonArray jObject1 = (JsonArray) jsonArray.get("count");
+                        JsonArray jObject2 = (JsonArray) jsonArray.get("image");
+
+                        myApp.count = jObject1.get(0).getAsJsonObject().get("count").getAsInt();
+
+                        for (int i = 0; i < jObject2.size(); i++) {
+                            JsonObject j = jObject2.get(i).getAsJsonObject();
+                            tmpCards.add(j.get("TCARD_IMAGE").toString().replace("\"", ""));
+                        }
+
+                        for (int i = 0; i < tmpCards.size(); i++) {
+                            final String filename = tmpCards.get(i);
+                            Glide.with(MainActivity.this)
+                                    .asBitmap().load(IMAGE_URL + filename)
+                                    .diskCacheStrategy(DiskCacheStrategy.NONE)
+                                    .skipMemoryCache(true)
+                                    .listener(new RequestListener<Bitmap>() {
+                                                  @Override
+                                                  public boolean onLoadFailed(@Nullable GlideException e, Object o, Target<Bitmap> target, boolean b) {
+                                                      return false;
+                                                  }
+
+                                                  @Override
+                                                  public boolean onResourceReady(final Bitmap bitmap, Object o, Target<Bitmap> target, DataSource dataSource, boolean b) {
+                                                      runOnUiThread(new Runnable() {
+                                                          @Override
+                                                          public void run() {
+                                                              detection(bitmap, filename);
+                                                          }
+                                                      });
+                                                      return false;
+                                                  }
+                                              }
+                                    ).submit();
+                        }
 
                         runOnUiThread(new Runnable() {
                             @Override
@@ -596,6 +662,8 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                                 if (myApp.count > 0)
                                     linearGoToCardList.setVisibility(View.VISIBLE);
                                 else linearGoToCardList.setVisibility(View.GONE);
+
+
                             }
                         });
                     }
@@ -642,6 +710,8 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                                 noCard_text.setVisibility(View.GONE);
                                 adapter = new CardRecyclerViewAdapter(MainActivity.this, cardsList);
                                 recyclerView.setAdapter(adapter);
+                                adapter.notifyDataSetChanged();
+
                             }
                         });
                     } else {
@@ -665,43 +735,13 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         }
     }
 
-
-    //    void getUserNumber() {
-//        try {
-//            HttpConnection httpConnection = new HttpConnection(new URL(GET_USER_NUMBER));
-//            httpConnection.requestGetUserNumber(myApp.userID, new OnRequestCompleteListener() {
-//                @Override
-//                public void onSuccess(@org.jetbrains.annotations.Nullable String data) {
-//                    assert data != null;
-//                    if(!data.isEmpty()) {
-//                        Log.d("성공", data);
-//                        Gson gson = new GsonBuilder().create();
-//                        JsonParser jsonParser = new JsonParser();
-//                        JsonObject jsonObject = (JsonObject) jsonParser.parse(data);
-//                        JsonArray jsonArray = (JsonArray) jsonObject.get("cardInfo");
-//                        JsonObject result = jsonArray.get(0).getAsJsonObject();
-//
-//                        myApp.userNum = String.valueOf(result.get("USER_NUMBER"));
-//
-//                        Log.d("유저넘버", myApp.userNum);
-//                    }
-//                }
-//
-//                @Override
-//                public void onError() {
-//
-//                }
-//            });
-//        } catch (MalformedURLException e) {
-//            e.printStackTrace();
-//        }
-//    }
-
     @Override
     protected void onResume() {
         super.onResume();
         Log.d("MainActivity", "onResume실행");
-        if (myApp.isLogined) getCardCount();
+        if(myApp.isLogined) getCardInfo();
+
+//        if (myApp.isLogined) getCardCount();
         if (myApp.count == 0) {
             linearGoToCardList.setVisibility(View.GONE);
         }
@@ -728,23 +768,25 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         Log.d("processFinish", "성공");
 
         String tmp = output;
-        cardsList.clear();
+
         Log.d("processFinish", " cardsList.clear(); " + cardsList.size());
         Log.d("processFinish", " output" + output);
         Log.d("output.length1", String.valueOf(output.length()));
 //        output.trim();
-        output.replaceAll(" ","");
+        output.replaceAll(" ", "");
         Log.d("output.length2", String.valueOf(output.length()));
         Log.d("output", String.valueOf(output.equals("true ")));
-        Log.d("output",output.toUpperCase());
-        if(output.equals("true")){
+        Log.d("output", output.toUpperCase());
+        if (output.equals("true")) {
             Log.d("processFinish", "내부");
         }
 //        if (Objects.equals(output, "true")) {
 //            Log.d("processFinish", "내부");
 ////            cardocr.dd();
-            cardsList.clear();
-            getCardCount();
+//        cardsList.clear();
+//        getCardCount();
+        myApp.count++;
+        linearGoToCardList.setVisibility(View.VISIBLE);
 
 
 //        }else{
