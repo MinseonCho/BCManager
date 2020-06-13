@@ -1,4 +1,5 @@
 package com.example.bcmanager
+
 import android.app.Application
 import android.util.Log
 import okhttp3.*
@@ -8,11 +9,11 @@ import java.net.URL
 import java.text.Normalizer
 import kotlin.jvm.internal.Ref
 
-class HttpConnection(url: URL): Callback  {
+class HttpConnection(url: URL) : Callback {
 
     private var url: String? = null
     private var data: String? = null
-    private var onRequestCompleteListener : OnRequestCompleteListener? = null
+    private var onRequestCompleteListener: OnRequestCompleteListener? = null
 
     private lateinit var httpConnection: HttpConnection
 
@@ -29,7 +30,7 @@ class HttpConnection(url: URL): Callback  {
         val body = MultipartBody.Builder()
                 .setType(MultipartBody.FORM)
                 .addFormDataPart("files", file.name, RequestBody.create(MultipartBody.FORM, file))
-                .addFormDataPart("USER_ID", myApp.userID )
+                .addFormDataPart("USER_ID", myApp.userID)
                 .build()
 
         val request = Request.Builder()
@@ -59,22 +60,7 @@ class HttpConnection(url: URL): Callback  {
         client.newCall(request).enqueue(this)
     }
 
-    fun requestGetCards(uID: String, callback: OnRequestCompleteListener){
-        this.onRequestCompleteListener = callback
-
-        val body = FormBody.Builder()
-                .add("USER_ID", uID)
-                .build()
-
-        val request = Request.Builder()
-                .url(url!!)
-                .post(body)
-                .build()
-
-        val client = OkHttpClient()
-        client.newCall(request).enqueue(this)
-    }
-    fun requestRcgedGetCards(uID: String, callback: OnRequestCompleteListener){
+    fun requestGetCards(uID: String, callback: OnRequestCompleteListener) {
         this.onRequestCompleteListener = callback
 
         val body = FormBody.Builder()
@@ -90,21 +76,38 @@ class HttpConnection(url: URL): Callback  {
         client.newCall(request).enqueue(this)
     }
 
+    fun requestRcgedGetCards(uID: String, callback: OnRequestCompleteListener) {
+        this.onRequestCompleteListener = callback
 
-    fun signUp(user_id: String, user_name:String, user_email: String){
+        val body = FormBody.Builder()
+                .add("USER_ID", uID)
+                .build()
+
+        val request = Request.Builder()
+                .url(url!!)
+                .post(body)
+                .build()
+
+        val client = OkHttpClient()
+        client.newCall(request).enqueue(this)
+    }
+
+
+    fun signUp(user_id: String, user_name: String, user_email: String) {
         httpConnection = HttpConnection(URL(url))
-        httpConnection.requestSignUp(user_name, user_id, user_email, object : OnRequestCompleteListener{
+        httpConnection.requestSignUp(user_name, user_id, user_email, object : OnRequestCompleteListener {
             override fun onSuccess(data: String?) {
 
             }
 
             override fun onError() {
-               Log.d("Sign Up Failed","")
+                Log.d("Sign Up Failed", "")
             }
 
-        } )
+        })
     }
-    fun requestGetCard(cardNumber: String, callback: OnRequestCompleteListener){
+
+    fun requestGetCard(cardNumber: String, callback: OnRequestCompleteListener) {
         this.onRequestCompleteListener = callback
 
         val body = FormBody.Builder()
@@ -120,7 +123,7 @@ class HttpConnection(url: URL): Callback  {
         client.newCall(request).enqueue(this)
     }
 
-    fun requestRegister(tCardNumber: String, userNum: String, callback: OnRequestCompleteListener){
+    fun requestRegister(tCardNumber: String, userNum: String, callback: OnRequestCompleteListener) {
         this.onRequestCompleteListener = callback
 
         val body = FormBody.Builder()
@@ -137,7 +140,7 @@ class HttpConnection(url: URL): Callback  {
         client.newCall(request).enqueue(this)
     }
 
-    fun requestDeleteItem(cardNumber: String, callback: OnRequestCompleteListener){
+    fun requestDeleteItem(cardNumber: String, callback: OnRequestCompleteListener) {
         this.onRequestCompleteListener = callback
 
         val body = FormBody.Builder()
@@ -152,7 +155,8 @@ class HttpConnection(url: URL): Callback  {
         val client = OkHttpClient()
         client.newCall(request).enqueue(this)
     }
-    fun requestGetUserNumber(uID: String, callback: OnRequestCompleteListener){
+
+    fun requestGetUserNumber(uID: String, callback: OnRequestCompleteListener) {
         this.onRequestCompleteListener = callback
 
         val body = FormBody.Builder()
@@ -168,6 +172,32 @@ class HttpConnection(url: URL): Callback  {
         client.newCall(request).enqueue(this)
     }
 
+    fun requestUpdateInfos(cardNumber: String, name: String, company: String, positon: String,
+                           email: String, phone: String, tel: String, address: String, fax: String, callback: OnRequestCompleteListener) {
+        this.onRequestCompleteListener = callback
+
+        val body = FormBody.Builder()
+                .add("CARD_NUMBER", cardNumber)
+                .add("CARD_NAME", name)
+                .add("CARD_COMPANY", company)
+                .add("CARD_POSITION", positon)
+                .add("CARD_PHONE", phone)
+                .add("CARD_TEL", tel)
+                .add("CARD_FAX", fax)
+                .add("CARD_ADDRESS", address)
+                .add("CARD_EMAIL", email)
+                .build()
+
+        val request = Request.Builder()
+                .url(url!!)
+                .post(body)
+                .build()
+
+        val client = OkHttpClient()
+        client.newCall(request).enqueue(this)
+    }
+
+
     override fun onFailure(call: Call, e: IOException) {
         onRequestCompleteListener?.onError()
         println("error on httpConnection")
@@ -182,8 +212,15 @@ class HttpConnection(url: URL): Callback  {
         }
         onRequestCompleteListener?.onSuccess(data)
     }
+
     private fun parse(response: String?) {
         this.data = response  //when I debug this, it contains data I need.
     }
 
+}
+
+
+interface OnRequestCompleteListener {
+    fun onSuccess(data: String?)
+    fun onError()
 }

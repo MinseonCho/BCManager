@@ -91,6 +91,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
     public static String GET_USER_NUMBER = "http://104.197.171.112/get_user_number.php";
     public static String DELETE_ITEM = "http://104.197.171.112/delete_item.php";
     public static String REGISTER_CARD = "http://104.197.171.112/moveToCardTB.php";
+    public static String UPDATE_CARD_INFOS = "http://104.197.171.112/update_infos.php";
     /**
      * end
      */
@@ -398,7 +399,6 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                 //        val intent = intent
                 if (data != null) {
                     byte[] bytes = data.getByteArrayExtra("image");
-
                     final String filename = data.getStringExtra("fileName");
 
                     final Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
@@ -537,9 +537,6 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                         public void onCompleteLogout() {
                             initUserData();
                             startActivity(getIntent());
-//                            Intent intent = new Intent(MainActivity.this, MainActivity.class);
-//                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-//                            startActivity(intent);
                         }
                     });
                 }
@@ -561,25 +558,8 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 
     public void checkCurrentUser() {
         // [START check_current_user]
-//        user = FirebaseAuth.getInstance().getCurrentUser();
         if (myApp.isLogined) {
 
-//            Log.d("파이어베이스 로그인", "");
-//            // User is signed in
-//            Log.d("INFOuserName", user.getDisplayName() + "");
-//            Log.d("INFOemail", user.getEmail() + "");
-//            Log.d("INFOuserphonenumber", user.getPhoneNumber() + "");
-//            Log.d("INFOUID", user.getUid() + "");
-//            Log.d("INFOphotourl", String.valueOf(user.getPhotoUrl()) + "");
-//            myApp.userID = user.getUid().toString();
-//            myApp.loginType = "g";
-//            myApp.userEmail = user.getEmail();
-//            if (user.getPhotoUrl() != null) myApp.userImage = user.getPhotoUrl().toString();
-//            myApp.userName = user.getDisplayName();
-//            myApp.isLogined = true;
-
-            //인식완료됐는데 등록안한 명함이 있는지확인하기.
-//            linearGoToCardList.setVisibility(View.VISIBLE);
             welcome.setText(myApp.userName + " 님 인식된 \n명함을 확인하세요!");
         } else {
             linearGoToCardList.setVisibility(View.GONE);
