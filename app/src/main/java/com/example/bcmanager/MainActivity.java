@@ -304,32 +304,36 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         }
 
         //Receive a value from KakaoLink
-//        try {
-//            Intent intent = getIntent();
-//            if (Intent.ACTION_VIEW.equals(intent.getAction())) {
-//                Uri uri = intent.getData();
-//                if (uri != null) {
-//                    int card_number = Integer.parseInt(Objects.requireNonNull(uri.getQueryParameter("CARD_NUMBER")));
-//                    Log.d("카카오카드넘버", "In Main Acitivty" + String.valueOf(card_number));
-//                }
-//            }
-//        } catch (NumberFormatException e) {
-//            Log.d("카카오톡 ", "NumberFormatException " + e.getMessage());
-//        } catch (RuntimeException e) {
-//            Log.d("카카오톡 ", "RuntimeException " + e.getMessage());
-//        }
+        try {
+            Intent intent = getIntent();
+            if (Intent.ACTION_VIEW.equals(intent.getAction())) {
+                Uri uri = intent.getData();
+                if (uri != null) {
+                    int card_number = Integer.parseInt(Objects.requireNonNull(uri.getQueryParameter("CARD_NUMBER")));
+                    Log.d("카카오카드넘버", "In Main Acitivty" + String.valueOf(card_number));
+                    Intent goToCardInfo = new Intent(getApplicationContext(), DetailInfoActivity.class);
+                    goToCardInfo.putExtra("cardNumber", card_number);
+                    goToCardInfo.putExtra("flag", 503);
+                    startActivity(goToCardInfo);
+                }
+            }
+        } catch (NumberFormatException e) {
+            Log.d("카카오톡 ", "NumberFormatException " + e.getMessage());
+        } catch (RuntimeException e) {
+            Log.d("카카오톡 ", "RuntimeException " + e.getMessage());
+        }
 
         //End of kakaolink
 
-        Intent intent = getIntent();
-        if (intent.getIntExtra("kakaoCardNumber", 0) != 0) {
-            Log.d(TAG_, "kakaoCardNumber 받음");
-
-            Intent goToCardInfo = new Intent(getApplicationContext(), DetailInfoActivity.class);
-            goToCardInfo.putExtra("cardNmber", intent.getIntExtra("kakaoCardNumber", 0));
-            goToCardInfo.putExtra("flag", 503);
-            startActivity(goToCardInfo);
-        }
+//        Intent intent = getIntent();
+//        if (intent.getIntExtra("kakaoCardNumber", 0) != 0) {
+//            Log.d(TAG_, "kakaoCardNumber 받음");
+//
+//            Intent goToCardInfo = new Intent(getApplicationContext(), DetailInfoActivity.class);
+//            goToCardInfo.putExtra("cardNmber", intent.getIntExtra("kakaoCardNumber", 0));
+//            goToCardInfo.putExtra("flag", 503);
+//            startActivity(goToCardInfo);
+//        }
 
         refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override

@@ -181,23 +181,26 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener, CoroutineScope 
         Session.getCurrentSession().checkAndImplicitOpen()
 
 
-        //Receive a value from KakaoLink
+        val intent = intent;
+        if(intent.getStringExtra("code").equals("detailActivity") ){
+
+        }
 
         //Receive a value from KakaoLink
-        try {
-            val intent = intent
-            if (Intent.ACTION_VIEW == intent.action) {
-                val uri = intent.data
-                if (uri != null) {
-                    kakaoCardNumber = Objects.requireNonNull(uri.getQueryParameter("CARD_NUMBER")).toInt()
-                    Log.d("카카오카드넘버", "In Login Activity "+ kakaoCardNumber.toString())
-                }
-            }
-        } catch (e: NumberFormatException) {
-            Log.d("카카오톡 ", "NumberFormatException " + e.message)
-        } catch (e: RuntimeException) {
-            Log.d("카카오톡 ", "RuntimeException " + e.message)
-        }
+//        try {
+//            val intent = intent
+//            if (Intent.ACTION_VIEW == intent.action) {
+//                val uri = intent.data
+//                if (uri != null) {
+//                    kakaoCardNumber = Objects.requireNonNull(uri.getQueryParameter("CARD_NUMBER")).toInt()
+//                    Log.d("카카오카드넘버", "In Login Activity "+ kakaoCardNumber.toString())
+//                }
+//            }
+//        } catch (e: NumberFormatException) {
+//            Log.d("카카오톡 ", "NumberFormatException " + e.message)
+//        } catch (e: RuntimeException) {
+//            Log.d("카카오톡 ", "RuntimeException " + e.message)
+//        }
 
         //End of kakaolink
     }

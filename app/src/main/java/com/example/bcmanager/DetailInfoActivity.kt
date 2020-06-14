@@ -33,6 +33,7 @@ class DetailInfoActivity : AppCompatActivity(), View.OnClickListener, PopupMenu.
     private lateinit var myApp: BCMApplication
     private lateinit var memo: String
     private val UPDATE_CODE = 500
+    private val LOGIN_CODE = 505
     var result: CardInfoItem.cardInfo? = null
 
 
@@ -50,9 +51,20 @@ class DetailInfoActivity : AppCompatActivity(), View.OnClickListener, PopupMenu.
         cardNumber = detailIntent.getIntExtra("cardNumber", 0).toString()
         flagForBtn = detailIntent.getIntExtra("flag", 0);
 
+
         myApp = application as BCMApplication
         Log.d("cardNumber", cardNumber)
-        if (!cardNumber.equals("0")) getCardInfo()
+
+        if (myApp.isLogined) {
+
+            if (!cardNumber.equals("0")) getCardInfo()
+        }else{
+            Toast.makeText(applicationContext, "로그인이 필요합니다. ", Toast.LENGTH_LONG);
+            val intent = Intent(applicationContext, LoginActivity::class.java)
+            intent.putExtra("code", "detailActivity")
+            startActivityForResult(intent,LOGIN_CODE )
+        }
+
 
         detail_btn_edit.setOnClickListener(this)
         detail_btn_ok.setOnClickListener(this)
@@ -87,6 +99,7 @@ class DetailInfoActivity : AppCompatActivity(), View.OnClickListener, PopupMenu.
                 else {
                     //공유 후 등록 page
                     Log.d("DetailInfoActivity", "공유 후 등록 페이지")
+
                     registerCard()
                 }
             }
@@ -108,7 +121,7 @@ class DetailInfoActivity : AppCompatActivity(), View.OnClickListener, PopupMenu.
                     override fun onError() {
                         Log.d("삭제 결과", "실패")
                         runOnUiThread(Runnable {
-                            Toast.makeText(applicationContext,"삭제에 실패하였습니다.", Toast.LENGTH_SHORT);
+                            Toast.makeText(applicationContext, "삭제에 실패하였습니다.", Toast.LENGTH_SHORT);
                         })
                     }
 
