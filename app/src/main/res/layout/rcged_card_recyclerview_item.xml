@@ -41,6 +41,7 @@
                     android:textStyle="bold" />
 
                 <TextView
+                    android:id="@+id/result_text"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="클릭하여 등록하세요"

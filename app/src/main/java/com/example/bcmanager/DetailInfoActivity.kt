@@ -24,14 +24,18 @@ import java.net.URL
 import java.util.*
 
 //메인 -> 카드클릭 -> 다이어로그 -> 상세보기
+//카카오 공유
 class DetailInfoActivity : AppCompatActivity(), View.OnClickListener, PopupMenu.OnMenuItemClickListener {
 
     private lateinit var httpConnection: HttpConnection
     private lateinit var cardNumber: String
+    private var flagForBtn = 0
     private lateinit var myApp: BCMApplication
     private lateinit var memo: String
     private val UPDATE_CODE = 500
     var result: CardInfoItem.cardInfo? = null
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_detail_info)
@@ -44,10 +48,11 @@ class DetailInfoActivity : AppCompatActivity(), View.OnClickListener, PopupMenu.
 
         val detailIntent = intent
         cardNumber = detailIntent.getIntExtra("cardNumber", 0).toString()
+        flagForBtn = detailIntent.getIntExtra("flag", 0);
 
         myApp = application as BCMApplication
         Log.d("cardNumber", cardNumber)
-        getCardInfo()
+        if (!cardNumber.equals("0")) getCardInfo()
 
         detail_btn_edit.setOnClickListener(this)
         detail_btn_ok.setOnClickListener(this)
@@ -76,7 +81,14 @@ class DetailInfoActivity : AppCompatActivity(), View.OnClickListener, PopupMenu.
                 startActivityForResult(intent, UPDATE_CODE)
 
             }
-            R.id.detail_btn_ok -> finish()
+            R.id.detail_btn_ok -> {
+                if(flagForBtn == 0) finish();  //detail page
+                else{
+                    //공유 후 등록 page
+                    Log.d("DetailInfoActivity", "공유 후 등록 페이지")
+                    registerCard()
+                }
+            }
             R.id.actionbar_btn -> {
                 showPopup(v)
             }
@@ -155,8 +167,32 @@ class DetailInfoActivity : AppCompatActivity(), View.OnClickListener, PopupMenu.
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if(requestCode == UPDATE_CODE && resultCode == RESULT_OK){
+        if (requestCode == UPDATE_CODE && resultCode == RESULT_OK) {
             finish()
         }
+    }
+
+    fun registerCard(){
+        val httpConnection = HttpConnection(URL(MainActivity.INSERT_CARD_INFOS))
+        httpConnection.requestInsertCardInfo(cardNumber, myApp.userNum, object : OnRequestCompleteListener{
+            override fun onSuccess(data: String?) {
+                if( data != null && data.isNotEmpty()){
+                    if(data.equals("1")){
+                        runOnUiThread(Runnable {
+                            Toast.makeText(applicationContext, "등록되었습니다.", Toast.LENGTH_SHORT);
+                            finish()
+                        })
+                    }
+                }
+            }
+
+            override fun onError() {
+                runOnUiThread(Runnable {
+                    Toast.makeText(applicationContext, "다시 등록해 주십시오..", Toast.LENGTH_SHORT);
+                    finish()
+                })
+            }
+
+        })
     }
 }
