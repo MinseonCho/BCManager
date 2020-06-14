@@ -110,7 +110,7 @@ class CardListActivity : AppCompatActivity(), OnItemClick {
         }
     }
 
-    fun deleteItem(value: String) {
+    public fun deleteItem(value: String) {
 
         val httpConnection = HttpConnection(URL(MainActivity.DELETE_ITEM))
         httpConnection.requestDeleteItem(value, object : OnRequestCompleteListener {

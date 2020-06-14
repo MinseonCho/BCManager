@@ -57,6 +57,7 @@ class DetailInfoActivity : AppCompatActivity(), View.OnClickListener, PopupMenu.
         detail_btn_edit.setOnClickListener(this)
         detail_btn_ok.setOnClickListener(this)
         actionbar_btn.setOnClickListener(this)
+        detail_delete.setOnClickListener(this)
     }
 
     override fun onClick(v: View?) {
@@ -82,8 +83,8 @@ class DetailInfoActivity : AppCompatActivity(), View.OnClickListener, PopupMenu.
 
             }
             R.id.detail_btn_ok -> {
-                if(flagForBtn == 0) finish();  //detail page
-                else{
+                if (flagForBtn == 0) finish();  //detail page
+                else {
                     //공유 후 등록 page
                     Log.d("DetailInfoActivity", "공유 후 등록 페이지")
                     registerCard()
@@ -91,6 +92,27 @@ class DetailInfoActivity : AppCompatActivity(), View.OnClickListener, PopupMenu.
             }
             R.id.actionbar_btn -> {
                 showPopup(v)
+            }
+            R.id.detail_delete -> {
+                val httpConnection = HttpConnection(URL(MainActivity.DELETE_CARD))
+                httpConnection.requestDeleteItem(cardNumber, object : OnRequestCompleteListener {
+                    override fun onSuccess(data: String?) {
+                        if (data != null && data.isNotEmpty()) {
+                            Log.d("deleteItem data ", data)
+                            runOnUiThread(Runnable {
+                                finish()
+                            })
+                        }
+                    }
+
+                    override fun onError() {
+                        Log.d("삭제 결과", "실패")
+                        runOnUiThread(Runnable {
+                            Toast.makeText(applicationContext,"삭제에 실패하였습니다.", Toast.LENGTH_SHORT);
+                        })
+                    }
+
+                })
             }
 
         }
@@ -172,12 +194,12 @@ class DetailInfoActivity : AppCompatActivity(), View.OnClickListener, PopupMenu.
         }
     }
 
-    fun registerCard(){
+    fun registerCard() {
         val httpConnection = HttpConnection(URL(MainActivity.INSERT_CARD_INFOS))
-        httpConnection.requestInsertCardInfo(cardNumber, myApp.userNum, object : OnRequestCompleteListener{
+        httpConnection.requestInsertCardInfo(cardNumber, myApp.userNum, object : OnRequestCompleteListener {
             override fun onSuccess(data: String?) {
-                if( data != null && data.isNotEmpty()){
-                    if(data.equals("1")){
+                if (data != null && data.isNotEmpty()) {
+                    if (data.equals("1")) {
                         runOnUiThread(Runnable {
                             Toast.makeText(applicationContext, "등록되었습니다.", Toast.LENGTH_SHORT);
                             finish()

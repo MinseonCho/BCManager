@@ -100,6 +100,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
     public static String UPDATE_CARD_INFOS = "http://104.197.171.112/update_infos.php";
     public static String INSERT_CARD_INFOS = "http://104.197.171.112/insert_card_info.php";
     public static String UPDATE_TCARD_RESULT = "http://104.197.171.112/update_tcard_result.php";
+    public static String DELETE_CARD = "http://104.197.171.112/delete_item_cardtb.php";
     /**
      * end
      */
