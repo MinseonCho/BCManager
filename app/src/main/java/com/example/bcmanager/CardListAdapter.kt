@@ -2,10 +2,12 @@ package com.example.bcmanager
 
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.TextView
 import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -38,6 +40,17 @@ class CardListAdapter(val context: Context, val cardList: ArrayList<CardInfoItem
         Glide.with(context).load(url)
                 .apply(RequestOptions.fitCenterTransform())
                 .into(holder.cardImage)
+
+
+
+        if(item.CARD_MEMO == null || item.CARD_MEMO == "null"){
+            Log.d("과연?1", item.CARD_MEMO + " 하하")
+            holder.resulText.text = "인식에 실패했습니다."
+        }else{
+            Log.d("과연?2", item.CARD_MEMO)
+            holder.resulText.text = "클릭하여 등록하세요."
+        }
+
         holder.cv.setOnClickListener {
             val intent = Intent(context, RegisterActivity::class.java)
             intent.putExtra("name", item.CARD_NAME)
@@ -87,6 +100,7 @@ class CardListAdapter(val context: Context, val cardList: ArrayList<CardInfoItem
         val cv = itemView.findViewById<CardView>(R.id.rcged_rcy_cardview)
         val cardImage = itemView.findViewById<ImageView>(R.id.rcged_image)
         val delete = itemView.findViewById<ImageView>(R.id.delete)
+        val resulText = itemView.findViewById<TextView>(R.id.result_text)
 
     }
 }

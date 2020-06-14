@@ -46,9 +46,9 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
-        <activity android:name=".RegisterActivity"></activity>
+        <activity android:name=".SearchingActivity"></activity>
+        <activity android:name=".RegisterActivity" />
         <activity android:name=".CardListActivity" />
-        <activity android:name=".SearchActivity" />
 
         <meta-data
             android:name="com.kakao.sdk.AppKey"
@@ -76,8 +76,9 @@
         </activity>
         <activity android:name=".ImageOCRActivity" />
         <activity android:name=".ConfirmCapture" />
-        <activity android:name=".CameraActivity"
-            android:hardwareAccelerated="false"/>
+        <activity
+            android:name=".CameraActivity"
+            android:hardwareAccelerated="false" />
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />

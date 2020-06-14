@@ -17,12 +17,27 @@
             android:layout_height="match_parent"
             android:orientation="vertical">
 
-            <ImageView
-                android:adjustViewBounds="true"
-                android:id="@+id/detail_card"
+            <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="10dp" />
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:id="@+id/detail_card"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    android:adjustViewBounds="true" />
+
+                <ImageView
+                    android:id="@+id/detail_delete"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_alignEnd="@+id/detail_card"
+                    android:layout_alignBottom="@+id/detail_card"
+                    android:layout_marginEnd="10dp"
+                    android:layout_marginBottom="10dp"
+                    android:src="@drawable/bin" />
+            </RelativeLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -37,8 +52,8 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="2"
-                    android:textStyle="bold"
-                    android:text="이름" />
+                    android:text="이름"
+                    android:textStyle="bold" />
 
                 <TextView
                     android:id="@+id/detail_name"
@@ -69,8 +84,8 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="2"
-                    android:textStyle="bold"
-                    android:text="회사" />
+                    android:text="회사"
+                    android:textStyle="bold" />
 
                 <TextView
                     android:id="@+id/detail_company"
@@ -102,8 +117,8 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="2"
-                    android:textStyle="bold"
-                    android:text="직급" />
+                    android:text="직급"
+                    android:textStyle="bold" />
 
                 <TextView
                     android:id="@+id/detail_position"
@@ -135,8 +150,8 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="2"
-                    android:textStyle="bold"
-                    android:text="이메일" />
+                    android:text="이메일"
+                    android:textStyle="bold" />
 
                 <TextView
                     android:id="@+id/detail_email"
@@ -169,8 +184,8 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="2"
-                    android:textStyle="bold"
-                    android:text="핸드폰" />
+                    android:text="핸드폰"
+                    android:textStyle="bold" />
 
                 <TextView
                     android:id="@+id/detail_phone"
@@ -202,8 +217,8 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="2"
-                    android:textStyle="bold"
-                    android:text="유선전화" />
+                    android:text="유선전화"
+                    android:textStyle="bold" />
 
                 <TextView
                     android:id="@+id/detail_tel"
@@ -235,8 +250,8 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="2"
-                    android:textStyle="bold"
-                    android:text="주소" />
+                    android:text="주소"
+                    android:textStyle="bold" />
 
                 <TextView
                     android:id="@+id/detail_address"
@@ -268,8 +283,8 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="2"
-                    android:textStyle="bold"
-                    android:text="팩스" />
+                    android:text="팩스"
+                    android:textStyle="bold" />
 
                 <TextView
                     android:id="@+id/detail_fax"
@@ -281,9 +296,9 @@
 
 
             <RelativeLayout
-                android:layout_marginTop="50dp"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="match_parent"
+                android:layout_marginTop="50dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"

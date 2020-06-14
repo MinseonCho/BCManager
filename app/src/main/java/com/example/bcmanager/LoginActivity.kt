@@ -57,6 +57,7 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener, CoroutineScope 
     var user: FirebaseUser? = null
     var GOOGLE_LOGIN_CODE = 9001
     var progressDialog: ProgressDialog? = null
+    var kakaoCardNumber: Int = 0
 
     private lateinit var mJob: Job
     override val coroutineContext: CoroutineContext
@@ -101,9 +102,7 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener, CoroutineScope 
                     getUserNumber()
                     val intent = Intent(this@LoginActivity, MainActivity::class.java)
                     intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
-//                    intent.putExtra("kUserID", result.id.toString())
-//                    intent.putExtra("KUserName", result.nickname)
-//                    intent.putExtra("KUserImage",result.profileImagePath)
+                    intent.putExtra("kakaoCardNumber", kakaoCardNumber)
                     startActivity(intent)
                     finish()
 
@@ -182,6 +181,25 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener, CoroutineScope 
         Session.getCurrentSession().checkAndImplicitOpen()
 
 
+        //Receive a value from KakaoLink
+
+        //Receive a value from KakaoLink
+        try {
+            val intent = intent
+            if (Intent.ACTION_VIEW == intent.action) {
+                val uri = intent.data
+                if (uri != null) {
+                    kakaoCardNumber = Objects.requireNonNull(uri.getQueryParameter("CARD_NUMBER")).toInt()
+                    Log.d("카카오카드넘버", "In Login Activity "+ kakaoCardNumber.toString())
+                }
+            }
+        } catch (e: NumberFormatException) {
+            Log.d("카카오톡 ", "NumberFormatException " + e.message)
+        } catch (e: RuntimeException) {
+            Log.d("카카오톡 ", "RuntimeException " + e.message)
+        }
+
+        //End of kakaolink
     }
 
     fun googleLogin() {
@@ -243,34 +261,6 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener, CoroutineScope 
         auth.signOut()
     }
 
-//    private fun sendEmailVerification() {
-//        // Disable button
-//        login_btn_verification.isEnabled = false
-//
-//        // Send verification email
-//        // [START send_email_verification]
-//        val user = auth.currentUser
-//        user?.sendEmailVerification()
-//                ?.addOnCompleteListener(this) { task ->
-//                    // [START_EXCLUDE]
-//                    // Re-enable button
-//                    login_btn_verification.isEnabled = true
-//
-//                    if (task.isSuccessful) {
-//                        Toast.makeText(baseContext,
-//                                "Verification email sent to ${user.email} ",
-//                                Toast.LENGTH_SHORT).show()
-//                    } else {
-//                        Log.e(TAG, "sendEmailVerification", task.exception)
-//                        Toast.makeText(baseContext,
-//                                "Failed to send verification email.",
-//                                Toast.LENGTH_SHORT).show()
-//                    }
-//                    // [END_EXCLUDE]
-//                }
-//        // [END send_email_verification]
-//    }
-
 
     fun moveMainPage() {
         Log.d("LoginActivity", "moveMainPage")
@@ -278,6 +268,7 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener, CoroutineScope 
         getUserNumber()
         val intent = Intent(this, MainActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+        intent.putExtra("kakaoCardNumber", kakaoCardNumber)
         startActivity(intent)
         finish()
     }

@@ -197,6 +197,38 @@ class HttpConnection(url: URL) : Callback {
         client.newCall(request).enqueue(this)
     }
 
+    fun requestInsertCardInfo(cardNumber: String, userNum: String,callback: OnRequestCompleteListener) {
+        this.onRequestCompleteListener = callback
+
+        val body = FormBody.Builder()
+                .add("CARD_NUMBER", cardNumber)
+                .add("USER_NUMBER", userNum)
+                .build()
+
+        val request = Request.Builder()
+                .url(url!!)
+                .post(body)
+                .build()
+
+        val client = OkHttpClient()
+        client.newCall(request).enqueue(this)
+    }
+
+    fun requestUpdateTcardResult(tCardImage: String,callback: OnRequestCompleteListener) {
+        this.onRequestCompleteListener = callback
+
+        val body = FormBody.Builder()
+                .add("TCARD_IMAGE", tCardImage)
+                .build()
+
+        val request = Request.Builder()
+                .url(url!!)
+                .post(body)
+                .build()
+
+        val client = OkHttpClient()
+        client.newCall(request).enqueue(this)
+    }
 
     override fun onFailure(call: Call, e: IOException) {
         onRequestCompleteListener?.onError()

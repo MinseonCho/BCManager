@@ -98,6 +98,9 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
     public static String DELETE_ITEM = "http://104.197.171.112/delete_item.php";
     public static String REGISTER_CARD = "http://104.197.171.112/moveToCardTB.php";
     public static String UPDATE_CARD_INFOS = "http://104.197.171.112/update_infos.php";
+    public static String INSERT_CARD_INFOS = "http://104.197.171.112/insert_card_info.php";
+    public static String UPDATE_TCARD_RESULT = "http://104.197.171.112/update_tcard_result.php";
+    public static String DELETE_CARD = "http://104.197.171.112/delete_item_cardtb.php";
     /**
      * end
      */
@@ -301,22 +304,32 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         }
 
         //Receive a value from KakaoLink
-        try {
-            Intent intent = getIntent();
-            if (Intent.ACTION_VIEW.equals(intent.getAction())) {
-                Uri uri = intent.getData();
-                if (uri != null) {
-                    int card_number = Integer.parseInt(Objects.requireNonNull(uri.getQueryParameter("CARD_NUMBER")));
-                    Log.d("카카오카드넘버", String.valueOf(card_number));
-                }
-            }
-        } catch (NumberFormatException e) {
-            Log.d("카카오톡 ", "NumberFormatException " + e.getMessage());
-        } catch (RuntimeException e) {
-            Log.d("카카오톡 ", "RuntimeException " + e.getMessage());
-        }
+//        try {
+//            Intent intent = getIntent();
+//            if (Intent.ACTION_VIEW.equals(intent.getAction())) {
+//                Uri uri = intent.getData();
+//                if (uri != null) {
+//                    int card_number = Integer.parseInt(Objects.requireNonNull(uri.getQueryParameter("CARD_NUMBER")));
+//                    Log.d("카카오카드넘버", "In Main Acitivty" + String.valueOf(card_number));
+//                }
+//            }
+//        } catch (NumberFormatException e) {
+//            Log.d("카카오톡 ", "NumberFormatException " + e.getMessage());
+//        } catch (RuntimeException e) {
+//            Log.d("카카오톡 ", "RuntimeException " + e.getMessage());
+//        }
 
         //End of kakaolink
+
+        Intent intent = getIntent();
+        if (intent.getIntExtra("kakaoCardNumber", 0) != 0) {
+            Log.d(TAG_, "kakaoCardNumber 받음");
+
+            Intent goToCardInfo = new Intent(getApplicationContext(), DetailInfoActivity.class);
+            goToCardInfo.putExtra("cardNmber", intent.getIntExtra("kakaoCardNumber", 0));
+            goToCardInfo.putExtra("flag", 503);
+            startActivity(goToCardInfo);
+        }
 
         refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
@@ -412,10 +425,8 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
             if (resultCode == RESULT_OK) {
                 //        val intent = intent
                 if (data != null) {
-                    Log.d("이걸", "몇번을 하는거야");
                     byte[] bytes = data.getByteArrayExtra("image");
                     final String filename = data.getStringExtra("fileName");
-                    final String filePath = data.getStringExtra("filePath");
 
                     final Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
 
@@ -500,6 +511,10 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 
 
                 } else {
+                    final Bitmap failedBitmap = Bitmap.createBitmap(mat_img.cols(), mat_img.rows(), Bitmap.Config.RGB_565);
+                    Utils.matToBitmap(mat_img, failedBitmap);
+                    updateTcardResult(filename);
+                    Log.d("파일네임", filename);
                     Toast.makeText(getApplicationContext(), "다시 시도해주세요.", Toast.LENGTH_SHORT).show();
                 }
 
@@ -548,6 +563,27 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         if (myApp.isLogined) inflater.inflate(R.menu.menu_login, popup.getMenu());
         else inflater.inflate(R.menu.menu, popup.getMenu());
         popup.show();
+    }
+
+    public void updateTcardResult(String tCardImage) {
+        try {
+            HttpConnection httpConnection = new HttpConnection(new URL(UPDATE_TCARD_RESULT));
+            httpConnection.requestUpdateTcardResult(tCardImage, new OnRequestCompleteListener() {
+                @Override
+                public void onSuccess(@org.jetbrains.annotations.Nullable String data) {
+                    if (data != null && !data.isEmpty()) {
+                        if (data.equals("1")) Log.d("MainActivity", "update TcardTb result 성공");
+                    }
+                }
+
+                @Override
+                public void onError() {
+                    Log.d("MainActivity", "update TcardTb result 실패");
+                }
+            });
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -743,7 +779,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
     protected void onResume() {
         super.onResume();
         Log.d("MainActivity", "onResume실행");
-        if(myApp.isLogined) getCardInfo();
+        if (myApp.isLogined) getCardInfo();
 
 //        if (myApp.isLogined) getCardCount();
         if (myApp.count == 0) {

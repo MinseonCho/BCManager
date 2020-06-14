@@ -14,6 +14,7 @@ import com.google.gson.GsonBuilder
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
+import com.google.gson.reflect.TypeToken
 import kotlinx.android.synthetic.main.activity_card_list.*
 import java.net.MalformedURLException
 import java.net.URL
@@ -68,14 +69,24 @@ class CardListActivity : AppCompatActivity(), OnItemClick {
                                 .create()
                         val jsonParser = JsonParser()
                         val jsonObject = jsonParser.parse(data) as JsonObject
-                        val jsonArray = jsonObject["cardInfo"] as JsonArray
+                        val cardInfo = jsonObject["cardInfo"] as JsonObject
+                        var unrcgedData = cardInfo.get("unrcgedData").asJsonArray
+                        var resultData = cardInfo.get("resultData").asJsonArray
                         var result: cardInfo?
-                        Log.d("CardListActivity", "jsonArray.size =" + jsonArray.size())
+                        Log.d("CardListActivity", "unrcgedData.size =" + unrcgedData.size())
+                        Log.d("CardListActivity", "resultData.size =" + resultData.size())
                         cardList.clear()
                         countOfCard = 0
-                        for (i in 0 until jsonArray.size()) {
-                            val j = jsonArray[i].asJsonObject
-                            result = gson.fromJson(j, cardInfo::class.java)
+
+                        for (i in 0 until unrcgedData.size()) {
+                            val j = unrcgedData.get(i).asJsonObject
+                            result = gson.fromJson(j, CardInfoItem.cardInfo::class.java)
+                            cardList.add(result)
+                        }
+
+                        for (i in 0 until resultData.size()) {
+                            val j = resultData.get(i).asJsonObject
+                            result = gson.fromJson(j, CardInfoItem.cardInfo::class.java)
                             cardList.add(result)
                         }
                         runOnUiThread {
@@ -99,7 +110,7 @@ class CardListActivity : AppCompatActivity(), OnItemClick {
         }
     }
 
-    fun deleteItem(value: String) {
+    public fun deleteItem(value: String) {
 
         val httpConnection = HttpConnection(URL(MainActivity.DELETE_ITEM))
         httpConnection.requestDeleteItem(value, object : OnRequestCompleteListener {
