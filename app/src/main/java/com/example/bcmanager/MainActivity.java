@@ -102,6 +102,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
     public static String UPDATE_TCARD_RESULT = "http://104.197.171.112/update_tcard_result.php";
     public static String DELETE_CARD = "http://104.197.171.112/delete_item_cardtb.php";
     public static String INSERT_CARD_INFOS_FROM_CAMERA = "http://104.197.171.112/insert_card_from_camera.php";
+    public static String INSERT_CARD_INFOS_CARDTB = "http://104.197.171.112/register_card.php";
     /**
      * end
      */
@@ -320,9 +321,6 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                 if (uri != null) {
                     kakaoLinkNum = Integer.parseInt(Objects.requireNonNull(uri.getQueryParameter("CARD_NUMBER")));
                     Log.d("카카오카드넘버", "In Main Acitivty" + String.valueOf(kakaoLinkNum));
-
-
-
                 }
             }
         } catch (NumberFormatException e) {
@@ -332,11 +330,13 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         }
 
         if(myApp.isLogined && kakaoLinkNum != 0){
+            Log.d("카카오톡공유", "로그인 OK, 바로 Detail페이지로!");
             Intent goToCardInfo = new Intent(getApplicationContext(), DetailInfoActivity.class);
             goToCardInfo.putExtra("cardNumber", kakaoLinkNum);
             goToCardInfo.putExtra("flag", 503);
             startActivity(goToCardInfo);
         }else if(!myApp.isLogined && kakaoLinkNum != 0){
+            Log.d("카카오톡공유", "로그인 NO, 바로 로그인 페이지로!");
             Intent goToLogin = new Intent(getApplicationContext(), LoginActivity.class);
 //            goToLogin.putExtra("flag", "FROMMAIN");
             startActivity(goToLogin);
