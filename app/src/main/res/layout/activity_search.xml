@@ -6,12 +6,18 @@
     android:layout_height="match_parent"
     tools:context=".SearchingActivity">
 
-    <EditText
-        android:layout_marginStart="10dp"
-        android:layout_marginEnd="10dp"
-        android:layout_marginTop="10dp"
+<!--    <EditText-->
+<!--        android:layout_marginStart="10dp"-->
+<!--        android:layout_marginEnd="10dp"-->
+<!--        android:layout_marginTop="10dp"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:background="@drawable/alert_gray_border"/>-->
+
+    <ImageView
+        android:id="@+id/imageview"
+        android:adjustViewBounds="true"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@drawable/alert_gray_border"/>
+        android:layout_height="wrap_content"/>
 
 </RelativeLayout>

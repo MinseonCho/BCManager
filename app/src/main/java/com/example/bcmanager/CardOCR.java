@@ -4,6 +4,9 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
@@ -54,7 +57,7 @@ import static com.google.common.collect.ComparisonChain.start;
 
 public class CardOCR extends Activity {
     private static final String CLOUD_VISION_API_KEY = "AIzaSyB3_sf4bXDPThjn5SYMGRpsfBgTaStKBcI";
-    public static String CARD_INPUT = "http://104.197.171.112/precard_input1.php";
+    public static String CARD_INPUT = "http://104.197.171.112/precard_input2.php";
     public static final String FILE_NAME = "temp.jpg";
     private static final String ANDROID_CERT_HEADER = "X-Android-Cert";
     private static final String ANDROID_PACKAGE_HEADER = "X-Android-Package";
@@ -85,6 +88,7 @@ public class CardOCR extends Activity {
     public static File fileCacheItem;
     public static Handler mHandler = null;
     private static final String TAG = "ddd";
+    public Bitmap bitmap_;
 
     //    public static class CallKotlin{
 //        public static void main(String[] args){
@@ -152,6 +156,7 @@ public class CardOCR extends Activity {
 //        callCloudVision(bitmap);
         // myApp = (BCMApplication) getApplication();
         ocruserid = userid;
+        this.bitmap_ = bitmap;
         fn = filename;
 //        fp = filePath;
         Log.d(TAG, "USER체크" + userid);
@@ -178,24 +183,23 @@ public class CardOCR extends Activity {
 //        }
         fileCacheItem = new File(fp, fn);
         Log.d(TAG, "getFilesDir().getPath()확인할꺼 = " + fileCacheItem.toString());
-
-        OutputStream out = null;
+        Drawable drawable = context.getResources().getDrawable(R.drawable.check, null);
+        Bitmap tbitmap = ((BitmapDrawable)drawable).getBitmap();
 
         try {
-            fileCacheItem.createNewFile();
-            out = new FileOutputStream(fileCacheItem);
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 40, out);
+//            fileCacheItem.createNewFile();
+            OutputStream out = new FileOutputStream(fileCacheItem);
+            tbitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
+            out.close();
+
+            Log.d("찾아보자", fileCacheItem.getName());
+            Log.d("찾아보자", fileCacheItem.getPath());
         } catch (Exception e) {
             e.printStackTrace();
             Log.d(TAG, "예외냐");
         } finally {
-            try {
-                out.close();
-                Log.d(TAG, "trysuccess");
-            } catch (IOException e) {
-                Log.d(TAG, "tryexception");
-                e.printStackTrace();
-            }
+
+            Log.d(TAG, "trysuccess");
         }
 
     }
@@ -560,14 +564,14 @@ public class CardOCR extends Activity {
         protected void onPostExecute(String result) {
             super.onPostExecute(result);
             Log.d("InsertData", "onPostExecute");
-            Log.d("InsertData result  ", result.toString());
+//            Log.d("InsertData result  ", result.toString());
 
 //            delegate.processFinish(result);
 
             delegate.processFinish(result);
             //  progressDialog.dismiss();
             //  mTextViewResult.setText("입력되었습니다.");
-            Log.d(TAG, "POST response  - " + result);
+//            Log.d(TAG, "POST response  - " + result);
         }
 
 
@@ -601,7 +605,15 @@ public class CardOCR extends Activity {
                 FileInputStream fileInputStream = new FileInputStream(fileCacheItem);
                 Log.d("파일", String.valueOf(fileCacheItem));
                 Log.d("파일", fileCacheItem.getName());
-                Log.d("파일", fileCacheItem.getAbsolutePath());
+                Log.d("파일", fileCacheItem.getPath());
+
+//
+//                String filePath = fileCacheItem.getPath();
+//                Bitmap bitmapss = BitmapFactory.decodeFile(filePath);
+//                Log.d("파일", String.valueOf(bitmapss.getByteCount()));
+//                Log.d("파일", String.valueOf(bitmapss.getWidth()));
+//                Log.d("파일", String.valueOf(bitmapss.getHeight()));
+
                 URL url = new URL(serverURL);
                 HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
 
@@ -614,21 +626,30 @@ public class CardOCR extends Activity {
                 httpURLConnection.setDoInput(true);
                 httpURLConnection.setDoOutput(true);
                 httpURLConnection.setUseCaches(false);
+//                httpURLConnection.setRequestProperty("Content-Type: application/octet-stream");
                 httpURLConnection.setRequestMethod("POST");
                 httpURLConnection.setRequestProperty("Connection", "Keep-Alive");
                 httpURLConnection.setRequestProperty("ENCTYPE", "multipart/form-data");
                 httpURLConnection.setRequestProperty("Content-Type", "multipart/form-data;boundary=" + boundary);
-                httpURLConnection.setRequestProperty("uploaded_file", fp);
+                httpURLConnection.setRequestProperty("uploaded_file", fn);
+                Log.d("파일fnfnfnfnfnfn", fn);
                 httpURLConnection.connect();
 
 
                 DataOutputStream request = new DataOutputStream(httpURLConnection.getOutputStream());
                 request.writeBytes(twoHyphens + boundary + lineEnd);
-                request.write(postParameters.getBytes("UTF-8"));
-                request.writeBytes("Content-Disposition: form-data; name=\"uploaded_file\"; filename=\"" + fp + "\""+ lineEnd);
+//                request.write(postParameters.getBytes("UTF-8"));
+                request.writeBytes(twoHyphens + boundary + lineEnd);
+                request.writeBytes("Content-Disposition: form-data; name=\"uploaded_file\"; filename=\"" + fn + "\""+ lineEnd);
 //                request.writeBytes("Content-Disposition: form-data; name=\"uploaded_file\"; filename=\"" + fn + "\"\r\n\r\n");
 //                request.writeBytes("Content-Disposition: form-data; name=\"uploaded_file\"; filename=\"" + fn + "\"" + "\r\n");
                 request.writeBytes(lineEnd);
+                request.writeBytes(fn);
+                request.writeBytes(lineEnd);
+
+
+
+
 
 //                OutputStream outputStream = httpURLConnection.getOutputStream();
 //                outputStream.write(postParameters.getBytes("UTF-8"));
@@ -655,10 +676,10 @@ public class CardOCR extends Activity {
                 }
 
                 // send multipart form data necesssary after file data...
-//                request.writeBytes(lineEnd);
-//                request.writeBytes(twoHyphens + boundary + twoHyphens + lineEnd);
-//                request.flush();
-//                request.close();
+                request.writeBytes(lineEnd);
+                request.writeBytes(twoHyphens + boundary + twoHyphens + lineEnd);
+                request.flush();
+                request.close();
 
 
                 int responseStatusCode = httpURLConnection.getResponseCode();
@@ -681,12 +702,12 @@ public class CardOCR extends Activity {
                 String line = null;
 
                 while ((line = bufferedReader.readLine()) != null) {
-                    Log.d("에러어어엉2", " 와일 몇번? : ");
+//                    Log.d("에러어어엉2", " 와일 몇번? : ");
                     sb.append(line);
-                    Log.d("에러어어엉2", sb.toString());
+//                    Log.d("에러어어엉2", sb.toString());
                 }
 
-                Log.d("에러어어엉21", sb.toString());
+//                Log.d("에러어어엉21", sb.toString());
                 bufferedReader.close();
                 Log.d("에러어어엉22", sb.toString());
 

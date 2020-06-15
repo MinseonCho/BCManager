@@ -137,9 +137,9 @@ class ConfirmCapture : AppCompatActivity(), View.OnClickListener {
 
 
 
-                Log.d("image_width__", bitImage?.width.toString())
-                Log.d("image_height__", bitImage?.height.toString())
-                Log.d("image_height__", bitImage?.byteCount.toString())
+                Log.d("파일image_width__", bitImage?.width.toString())
+                Log.d("파일image_height__", bitImage?.height.toString())
+                Log.d("파일image_byteCount__", bitImage?.byteCount.toString())
                 val stream = ByteArrayOutputStream()
                 if (bitImage?.width!! > 2000) {
 //                    val options: BitmapFactory.Options = BitmapFactory.Options()

@@ -311,10 +311,10 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                 if (uri != null) {
                     int card_number = Integer.parseInt(Objects.requireNonNull(uri.getQueryParameter("CARD_NUMBER")));
                     Log.d("카카오카드넘버", "In Main Acitivty" + String.valueOf(card_number));
-                    Intent goToCardInfo = new Intent(getApplicationContext(), DetailInfoActivity.class);
-                    goToCardInfo.putExtra("cardNumber", card_number);
-                    goToCardInfo.putExtra("flag", 503);
-                    startActivity(goToCardInfo);
+//                    Intent goToCardInfo = new Intent(getApplicationContext(), DetailInfoActivity.class);
+//                    goToCardInfo.putExtra("cardNumber", card_number);
+//                    goToCardInfo.putExtra("flag", 503);
+//                    startActivity(goToCardInfo);
                 }
             }
         } catch (NumberFormatException e) {
@@ -831,6 +831,13 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 //        getCardCount();
         myApp.count++;
         linearGoToCardList.setVisibility(View.VISIBLE);
+
+//        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+//        bitmap.compress(Bitmap.CompressFormat.JPEG, 50, stream);
+//        byte[] byteArray = stream.toByteArray();
+//
+//        Intent min = new Intent(getApplicationContext(), SearchingActivity.class);
+//        min.put
 
 
 //        }else{
