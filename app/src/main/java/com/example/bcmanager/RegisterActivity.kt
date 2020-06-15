@@ -36,6 +36,7 @@ class RegisterActivity : AppCompatActivity(), View.OnClickListener {
         intent_ = intent
         if (intent_ != null) {
             flag = intent_!!.getIntExtra("flag", 0)
+            Log.d("플래그", flag.toString());
             Glide.with(this)
                     .load(MainActivity.IMAGE_URL + intent_!!.getStringExtra("image"))
                     .into(card_image)
@@ -61,9 +62,11 @@ class RegisterActivity : AppCompatActivity(), View.OnClickListener {
         when (i) {
             R.id.ocrbtn -> {
                 if (flag != null && flag == 1) {
+                    Log.d("플래그", flag.toString());
                     Log.d("ResiterActivity", "CardInfo 수정 요청")
                     updateInfos()
                 } else {
+                    Log.d("ResiterActivity", "CARD_TB에 저장 / TCARD_TB꺼 삭제 / 해당 리스트에서 삭제")
                     //CARD_TB에 저장 / TCARD_TB꺼 삭제 / 해당 리스트에서 삭제
                     val httpConnection = HttpConnection(URL(MainActivity.REGISTER_CARD))
                     httpConnection.requestRegister(tCardNumber, myApp.userNum, object : OnRequestCompleteListener {

@@ -11,32 +11,31 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="70dp"
+        android:layout_height="51dp"
         android:orientation="horizontal">
 
 
-<!--        <EditText-->
-<!--            android:id="@+id/search_part"-->
-<!--            android:layout_width="291dp"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:layout_centerVertical="true"-->
-<!--            android:layout_marginStart="20dp"-->
-<!--            android:layout_marginTop="10dp"-->
-<!--            android:layout_marginEnd="10dp"-->
-<!--            android:background="@color/my_lightgray"-->
-<!--            android:hint="Search" />-->
+        <EditText
+            android:id="@+id/search_part"
+            android:layout_width="291dp"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="10dp"
+            android:background="@color/my_lightgray"
+            android:hint="Search" />
 
-        <SearchView
-            android:id="@+id/search_view"
-            android:layout_width="317dp"
-            android:layout_height="match_parent" />
+        <!--        <SearchView-->
+        <!--            android:id="@+id/search_view"-->
+        <!--            android:layout_width="317dp"-->
+        <!--            android:layout_height="match_parent" />-->
 
         <Button
             android:id="@+id/search_btn"
             android:layout_width="50dp"
             android:layout_height="30dp"
-
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="10dp"
             android:layout_marginEnd="30dp"
             android:layout_marginBottom="20dp"
             android:background="@color/browser_actions_bg_grey"
@@ -45,17 +44,36 @@
 
     </LinearLayout>
 
-    <androidx.core.widget.NestedScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/search_card_list"
+        <TextView
+            android:id="@+id/textview_SearchedCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp" />
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="5dp"
+            android:text="검색된 명합"
+            android:textColor="@android:color/darker_gray"
+            android:textStyle="bold" />
 
-    </androidx.core.widget.NestedScrollView>
+        <TextView
+            android:id="@+id/textview_noSearchCard"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="50dp"
+            android:text="검색된 명함이 없습니다!"
+            android:textColor="@android:color/darker_gray"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:visibility="gone" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+
 
 
 

@@ -1,21 +1,49 @@
 package com.example.bcmanager;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.SearchView;
+import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
 import java.util.Objects;
 
 public class SearchingActivity extends AppCompatActivity {
 
     private BCMApplication myApp;
-    private SearchView mSearchView;
-//    public ImageView iv;
+    private ArrayList<CardInfoItem.cardInfo> SearchCardsList;
+    private Button btn_Search;
+    private TextView noSearchCard_text;
+    private TextView SearchedCard_text;
+    private CardRecyclerViewAdapter Searchadapter = null;
+    private RecyclerView recyclerView;
+    ArrayList<String> SearchtmpCards = new ArrayList<String>(); // done == 0 인 카드 이미지들
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -25,47 +53,104 @@ public class SearchingActivity extends AppCompatActivity {
         getSupportActionBar().setCustomView(R.layout.actionbar_title_nobtn); // 커스텀 사용할 파일 위치
         getSupportActionBar().setTitle("BCManager");
 
+        noSearchCard_text = findViewById(R.id.textview_noSearchCard);
+        SearchedCard_text = findViewById(R.id.textview_SearchedCard);
+        recyclerView = findViewById(R.id.recyclerview);
+        btn_Search = findViewById(R.id.search_btn);
+
+
         myApp = (BCMApplication) getApplication(); //user정보 가져오기
 
         Intent intent = getIntent();
+        SearchCardsList = new ArrayList<>();
+        LinearLayoutManager mLayoutManager = new LinearLayoutManager(this);
+        mLayoutManager.setReverseLayout(true);
+        mLayoutManager.setStackFromEnd(true);
+        recyclerView.setLayoutManager(mLayoutManager);
 
-        final SearchView searchView;
-        searchView = findViewById(R.id.search_view);
+        recyclerView.setNestedScrollingEnabled(false);
 
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+        if (SearchCardsList.isEmpty()) {
+            SearchedCard_text.setVisibility(View.GONE);
+            noSearchCard_text.setVisibility(View.VISIBLE);
+        }
+
+        btn_Search.setOnClickListener(new View.OnClickListener() {
 
             @Override
-            public boolean onQueryTextSubmit(String s) { //검색 버튼 눌러졌을 때 이벤트
-                return false;
-            }
+            public void onClick(View v) {
+                getCardInfo();
 
-            @Override
-            public boolean onQueryTextChange(String s) { //검색어가 변경되었을때 이벤트
-                return false;
-            }
+//                Intent search = new Intent(getApplicationContext(), SearchingActivity.class);
+//                startActivity(search);
 
+
+//                Bitmap bitmap = ((BitmapDrawable) Objects.requireNonNull(getDrawable(R.drawable.document2))).getBitmap();
+//                Test test = new Test(getApplicationContext(), bitmap);
+//                test.dd();
+
+//                Test test = new Test(getApplicationContext());
+//                test.dd();
+
+            }
         });
 
-        Button submitBtn = findViewById(R.id.search_btn);
-        submitBtn.setOnClickListener(new Button.OnClickListener() {
 
-            @Override
-            public void onClick(View view) {
-                searchView.setQuery(searchView.getQuery(), true);
+    }
 
 
-            }
+    void getCardInfo() {
+        try {
+            HttpConnection httpConn = new HttpConnection(new URL(MainActivity.GET_CARDS_INFO));
+            httpConn.requestGetCards(myApp.userID, new OnRequestCompleteListener() {
+                @Override
+                public void onSuccess(@org.jetbrains.annotations.Nullable String data) {
 
-        });
+                    if (data != null && !data.isEmpty()) {
+                        SearchCardsList.clear();
+                        Log.d("성공 ", data);
+                        Gson gson = new GsonBuilder().create();
+                        JsonParser jsonParser = new JsonParser();
+                        JsonObject jsonObject = (JsonObject) jsonParser.parse(data);
+                        JsonArray jsonArray = (JsonArray) jsonObject.get("cardInfo");
 
-//        iv = findViewById(R.id.imageview);
+                        CardInfoItem.cardInfo result;
+                        for (int i = 0; i < jsonArray.size(); i++) {
+                            final JsonObject j = jsonArray.get(i).getAsJsonObject();
+                            result = gson.fromJson(j, CardInfoItem.cardInfo.class);
+                            SearchCardsList.add(result);
+                        }
 
-//        if( intent != null){
-//            byte[] bytes = intent.getByteArrayExtra("data");
-//            Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-//            iv.setImageBitmap(bitmap);
-//        }
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+//                                Log.d(TAG_, String.valueOf(SearchCardsList.size()));
+                                SearchedCard_text.setVisibility(View.VISIBLE);
+                               noSearchCard_text.setVisibility(View.GONE);
+                                Searchadapter = new CardRecyclerViewAdapter(SearchingActivity.this, SearchCardsList);
+                                recyclerView.setAdapter(Searchadapter);
+                                Searchadapter.notifyDataSetChanged();
 
+                            }
+                        });
+                    } else {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                SearchedCard_text.setVisibility(View.GONE);
+                                noSearchCard_text.setVisibility(View.VISIBLE);
+                            }
+                        });
+                    }
+                }
 
+                @Override
+                public void onError() {
+
+                }
+            });
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
     }
 }
