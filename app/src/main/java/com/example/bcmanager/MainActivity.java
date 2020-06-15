@@ -101,6 +101,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
     public static String INSERT_CARD_INFOS = "http://104.197.171.112/insert_card_info.php";
     public static String UPDATE_TCARD_RESULT = "http://104.197.171.112/update_tcard_result.php";
     public static String DELETE_CARD = "http://104.197.171.112/delete_item_cardtb.php";
+    public static String INSERT_CARD_INFOS_FROM_CAMERA = "http://104.197.171.112/insert_card_from_camera.php";
     /**
      * end
      */
@@ -132,9 +133,13 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
     private static final int REQUEST_CODE_GALLERY = 200;
     private static final int REQUEST_CODE = 300;
     private static final int REQUEST_CODE_RESTART = 400;
+    private static final int REQUEST_CODE_FOR_OCR = 700;
+    private static final int REQUEST_CODE_FOR_LOGIN = 800;
 
     public static HttpConnection httpConn;
     public static Context mContext;
+    public static int kakaoLinkNum =0;
+
 
     Handler mHandler = null;
     static int cnt = 0;
@@ -196,6 +201,9 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         btn_goToCardList = findViewById(R.id.btn_goToCardList);
         refreshLayout = findViewById(R.id.refresh_layout);
 
+
+
+
         //체크해야 할 것: 로그인 여부, 등록된 카드가져오기, 인식됐지만 등록안된 카드 들고오기
         checkCurrentUser();
         getAppKeyHash();
@@ -233,11 +241,12 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
             Log.d("ID", myApp.loginType);
             Log.d("ID", myApp.userEmail);
             Log.d("ID", myApp.userName);
+
+            getCardCount();
 //            getUserNumber();
 //            getCardInfo();
 //            getUnregisterdCardsInfo();
 
-            getCardCount();
         } else {
 
         }
@@ -312,18 +321,28 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
             if (Intent.ACTION_VIEW.equals(intent.getAction())) {
                 Uri uri = intent.getData();
                 if (uri != null) {
-                    int card_number = Integer.parseInt(Objects.requireNonNull(uri.getQueryParameter("CARD_NUMBER")));
-                    Log.d("카카오카드넘버", "In Main Acitivty" + String.valueOf(card_number));
-//                    Intent goToCardInfo = new Intent(getApplicationContext(), DetailInfoActivity.class);
-//                    goToCardInfo.putExtra("cardNumber", card_number);
-//                    goToCardInfo.putExtra("flag", 503);
-//                    startActivity(goToCardInfo);
+                    kakaoLinkNum = Integer.parseInt(Objects.requireNonNull(uri.getQueryParameter("CARD_NUMBER")));
+                    Log.d("카카오카드넘버", "In Main Acitivty" + String.valueOf(kakaoLinkNum));
+
+
+
                 }
             }
         } catch (NumberFormatException e) {
             Log.d("카카오톡 ", "NumberFormatException " + e.getMessage());
         } catch (RuntimeException e) {
             Log.d("카카오톡 ", "RuntimeException " + e.getMessage());
+        }
+
+        if(myApp.isLogined && kakaoLinkNum != 0){
+            Intent goToCardInfo = new Intent(getApplicationContext(), DetailInfoActivity.class);
+            goToCardInfo.putExtra("cardNumber", kakaoLinkNum);
+            goToCardInfo.putExtra("flag", 503);
+            startActivity(goToCardInfo);
+        }else if(!myApp.isLogined && kakaoLinkNum != 0){
+            Intent goToLogin = new Intent(getApplicationContext(), LoginActivity.class);
+//            goToLogin.putExtra("flag", "FROMMAIN");
+            startActivity(goToLogin);
         }
 
         //End of kakaolink
@@ -368,6 +387,12 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                 linearGoToCardList.setVisibility(View.GONE);
             }
         }
+//        if (requestCode == REQUEST_CODE_FOR_LOGIN) {
+//            if (resultCode == RESULT_OK) {
+//                //로그인 성공해서 올 경우
+//                getCardCount();
+//            }
+//        }
         if (requestCode == 100) {
             if (resultCode == RESULT_OK) {
                 if (data != null) {
@@ -405,7 +430,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                             Intent intent = new Intent(getApplicationContext(), ImageOCRActivity.class);
                             intent.putExtra("image", byteArray);
 //                            intent.putExtra("filename", byteArray);
-                            startActivity(intent);
+                            startActivityForResult(intent, REQUEST_CODE_FOR_OCR);
 
                             mHandler.post(new Runnable() {
                                 @Override
@@ -442,6 +467,12 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                 }
             }
         }
+        if (requestCode == REQUEST_CODE_FOR_OCR) {
+            if (resultCode == RESULT_OK) {
+                linearGoToCardList.setVisibility(View.VISIBLE);
+            }
+        }
+
 
     }
 
@@ -500,7 +531,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 
                     userid = myApp.userID;
 
-                    cardocr = new CardOCR(getApplicationContext(), bitmapOutput, userid, filename);
+                    cardocr = new CardOCR(getApplicationContext(), bitmapOutput, userid, filename, myApp);
 
                     runOnUiThread(new Runnable() {
                         @Override
@@ -652,7 +683,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
     void getCardCount() {
         try {
 
-
+            Log.d("겟카운트", "실행");
             HttpConnection httpConn = new HttpConnection(new URL(GET_UNREGISTERD_CARD_COUNT));
             httpConn.requestGetCards(myApp.userID, new OnRequestCompleteListener() {
                 @Override
@@ -817,7 +848,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         String tmp = output;
 
         Log.d("processFinish", " cardsList.clear(); " + cardsList.size());
-        Log.d("processFinish", " output" + output);
+//        Log.d("processFinish", " output" + output);
         Log.d("output.length1", String.valueOf(output.length()));
 //        output.trim();
         output.replaceAll(" ", "");
@@ -833,7 +864,12 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 //        cardsList.clear();
 //        getCardCount();
         myApp.count++;
-        linearGoToCardList.setVisibility(View.VISIBLE);
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                linearGoToCardList.setVisibility(View.VISIBLE);
+            }
+        });
 
 //        ByteArrayOutputStream stream = new ByteArrayOutputStream();
 //        bitmap.compress(Bitmap.CompressFormat.JPEG, 50, stream);

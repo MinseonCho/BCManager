@@ -1,6 +1,5 @@
 package com.example.bcmanager
 
-import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -18,7 +17,6 @@ import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import kotlinx.android.synthetic.main.actionbar_title.*
 import kotlinx.android.synthetic.main.activity_detail_info.*
-import kotlinx.android.synthetic.main.activity_image_o_c_r.*
 import java.net.MalformedURLException
 import java.net.URL
 import java.util.*
@@ -166,30 +164,33 @@ class DetailInfoActivity : AppCompatActivity(), View.OnClickListener, PopupMenu.
             httpConnection = HttpConnection(URL(MainActivity.GET_CARD_INFO))
             httpConnection.requestGetCard(cardNumber, object : OnRequestCompleteListener {
                 override fun onSuccess(data: String?) {
-                    val gson = GsonBuilder().create()
-                    val jsonParser = JsonParser()
-                    val jsonObject = jsonParser.parse(data) as JsonObject
-                    val jsonArray = jsonObject["cardInfo"] as JsonArray
 
-                    val j = jsonArray[0].asJsonObject
-                    result = gson.fromJson(j, CardInfoItem.cardInfo::class.java)
-                    memo = j.get("CARD_MEMO").asString
+                    if(data != null) {
+                        val gson = GsonBuilder().create()
+                        val jsonParser = JsonParser()
+                        val jsonObject = jsonParser.parse(data) as JsonObject
+                        val jsonArray = jsonObject["cardInfo"] as JsonArray
+
+                        val j = jsonArray[0].asJsonObject
+                        result = gson.fromJson(j, CardInfoItem.cardInfo::class.java)
+                        memo = j.get("CARD_MEMO").asString
 
 
-                    runOnUiThread {
-                        detail_name.text = result?.CARD_NAME.toString()
-                        detail_address.text = result?.CARD_ADDRESS.toString()
-                        detail_company.text = result?.CARD_COMPANY.toString()
-                        detail_position.text = result?.CARD_POSITION.toString()
-                        detail_fax.text = result?.CARD_FAX.toString()
-                        detail_email.text = result?.CARD_EMAIL.toString()
-                        detail_tel.text = result?.CARD_TEL.toString()
-                        detail_phone.text = result?.CARD_PHONE.toString()
+                        runOnUiThread {
+                            detail_name.text = result?.CARD_NAME.toString()
+                            detail_address.text = result?.CARD_ADDRESS.toString()
+                            detail_company.text = result?.CARD_COMPANY.toString()
+                            detail_position.text = result?.CARD_POSITION.toString()
+                            detail_fax.text = result?.CARD_FAX.toString()
+                            detail_email.text = result?.CARD_EMAIL.toString()
+                            detail_tel.text = result?.CARD_TEL.toString()
+                            detail_phone.text = result?.CARD_PHONE.toString()
 
-                        Glide.with(this@DetailInfoActivity)
-                                .load(MainActivity.IMAGE_URL + result?.CARD_IMAGE)
-                                .override(MainActivity.device_width, 400)
-                                .into(detail_card)
+                            Glide.with(this@DetailInfoActivity)
+                                    .load(MainActivity.IMAGE_URL + result?.CARD_IMAGE)
+                                    .override(MainActivity.device_width, 400)
+                                    .into(detail_card)
+                        }
                     }
                 }
 
@@ -215,6 +216,7 @@ class DetailInfoActivity : AppCompatActivity(), View.OnClickListener, PopupMenu.
                     if (data.equals("1")) {
                         runOnUiThread(Runnable {
                             Toast.makeText(applicationContext, "등록되었습니다.", Toast.LENGTH_SHORT);
+                            MainActivity.kakaoLinkNum = 0;
                             finish()
                         })
                     }

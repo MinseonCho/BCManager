@@ -58,6 +58,7 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener, CoroutineScope 
     var GOOGLE_LOGIN_CODE = 9001
     var progressDialog: ProgressDialog? = null
     var kakaoCardNumber: Int = 0
+    var loginType: String = "FROMSTART"
 
     private lateinit var mJob: Job
     override val coroutineContext: CoroutineContext
@@ -180,27 +181,27 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener, CoroutineScope 
         Session.getCurrentSession().addCallback(sessionCallback);
         Session.getCurrentSession().checkAndImplicitOpen()
 
-//
+
 //        val intent = intent;
-//        if(intent.getStringExtra("code").equals("detailActivity") ){
-//
+//        if(intent.getStringExtra("flag").equals("FROMMAIN") ){
+//            loginType = "FROMMAIN"
 //        }
 
         //Receive a value from KakaoLink
-        try {
-            val intent = intent
-            if (Intent.ACTION_VIEW == intent.action) {
-                val uri = intent.data
-                if (uri != null) {
-                    kakaoCardNumber = Objects.requireNonNull(uri.getQueryParameter("CARD_NUMBER")).toInt()
-                    Log.d("카카오카드넘버", "In Login Activity "+ kakaoCardNumber.toString())
-                }
-            }
-        } catch (e: NumberFormatException) {
-            Log.d("카카오톡 ", "NumberFormatException " + e.message)
-        } catch (e: RuntimeException) {
-            Log.d("카카오톡 ", "RuntimeException " + e.message)
-        }
+//        try {
+//            val intent = intent
+//            if (Intent.ACTION_VIEW == intent.action) {
+//                val uri = intent.data
+//                if (uri != null) {
+//                    kakaoCardNumber = Objects.requireNonNull(uri.getQueryParameter("CARD_NUMBER")).toInt()
+//                    Log.d("카카오카드넘버", "In Login Activity "+ kakaoCardNumber.toString())
+//                }
+//            }
+//        } catch (e: NumberFormatException) {
+//            Log.d("카카오톡 ", "NumberFormatException " + e.message)
+//        } catch (e: RuntimeException) {
+//            Log.d("카카오톡 ", "RuntimeException " + e.message)
+//        }
 
         //End of kakaolink
     }
@@ -283,7 +284,7 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener, CoroutineScope 
             httpConnection.requestGetUserNumber(myApp.userID, object : OnRequestCompleteListener {
                 override fun onSuccess(data: String?) {
                     assert(data != null)
-                    if (!data!!.isEmpty()) {
+                    data?.let {
                         Log.d("성공", data)
                         val gson = GsonBuilder().create()
                         val jsonParser = JsonParser()

@@ -2,6 +2,7 @@ package com.example.bcmanager
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.drawable.GradientDrawable
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -12,13 +13,16 @@ import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
+import com.makeramen.roundedimageview.RoundedImageView
 
 class CardListAdapter(val context: Context, val cardList: ArrayList<CardInfoItem.cardInfo>, listener: OnItemClick) : RecyclerView.Adapter<CardListAdapter.CardHolder>() {
 
     private var myApp: BCMApplication? = null
     private var mCallback: OnItemClick? = null
+    private var drawable_: GradientDrawable? = null
 
     init {
+//        drawable_ = context.getDrawable(R.drawable.background_rounding) as GradientDrawable
         myApp = context.applicationContext as BCMApplication
         mCallback = listener
     }
@@ -39,8 +43,8 @@ class CardListAdapter(val context: Context, val cardList: ArrayList<CardInfoItem
 
         Glide.with(context).load(url)
                 .apply(RequestOptions.fitCenterTransform())
+                .override(400,200)
                 .into(holder.cardImage)
-
 
 
         if(item.CARD_MEMO == null || item.CARD_MEMO == "null"){

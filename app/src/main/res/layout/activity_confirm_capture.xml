@@ -7,14 +7,16 @@
     android:orientation="vertical"
     tools:context=".ConfirmCapture">
 
+
     <ImageView
         android:id="@+id/test_image"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:adjustViewBounds="true"
-        android:src="@drawable/test_11" />
+        android:src="@drawable/gray_card" />
 
     <LinearLayout
+        android:layout_marginBottom="10dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"

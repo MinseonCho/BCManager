@@ -121,7 +121,7 @@ class ConfirmCapture : AppCompatActivity(), View.OnClickListener {
                 myApp?.let {
                     httpConnection.requestInsertImage(tempSelectFile, it, object : OnRequestCompleteListener {
                         override fun onSuccess(data: String?) {
-                            if (data!!.isNotEmpty()) {
+                            if (data!!.isNotEmpty() && data!=null) {
                                 Log.d("이미지 저장 성공", data)
                             }
                         }

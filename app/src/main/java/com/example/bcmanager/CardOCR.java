@@ -30,6 +30,7 @@ import com.google.api.services.vision.v1.model.Feature;
 import com.google.api.services.vision.v1.model.Image;
 
 
+import org.jetbrains.annotations.Nullable;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
@@ -57,7 +58,7 @@ import static com.google.common.collect.ComparisonChain.start;
 
 public class CardOCR extends Activity {
     private static final String CLOUD_VISION_API_KEY = "AIzaSyB3_sf4bXDPThjn5SYMGRpsfBgTaStKBcI";
-    public static String CARD_INPUT = "http://104.197.171.112/precard_input2.php";
+    public static String CARD_INPUT = "http://104.197.171.112/precard_input_min.php";
     public static final String FILE_NAME = "temp.jpg";
     private static final String ANDROID_CERT_HEADER = "X-Android-Cert";
     private static final String ANDROID_PACKAGE_HEADER = "X-Android-Package";
@@ -97,61 +98,56 @@ public class CardOCR extends Activity {
 //        }
 //
 //    }
-    public static String dd(AsyncResponse delegate) {
-        Log.d("DD함수", "실행 ");
-        Log.d(TAG, "ad확인db" + ad);
-        Log.d(TAG, "nm확인db" + nm);
-        Log.d(TAG, "fx확인db" + fx);
-        Log.d(TAG, "cp확인db" + cp);
+    public static String dd(final AsyncResponse delegate) {
+            Log.d("DD함수", "실행 ");
+            Log.d(TAG, "ad확인db" + ad);
+            Log.d(TAG, "nm확인db" + nm);
+            Log.d(TAG, "fx확인db" + fx);
+            Log.d(TAG, "cp확인db" + cp);
 //        putData();
 //        done = "1";
-        String result = "0";
+            String result = "0";
 
 
-        InsertData task = new InsertData(delegate); //thread1
-        result = task.execute(CARD_INPUT, nm, ph, ad, em, nb, fx, po, memo, cp, ocruserid, done, fn).toString();
+            CardInfoItem.detectedCardInfo tmpResult = new CardInfoItem.detectedCardInfo(fileCacheItem.getName(),nm, po, ph, nb, fx, ad, cp, em, memo);
+        HttpConnection httpConnection = null;
+        Log.d("httpConnection _", tmpResult.getCARD_IMAGE());
+        Log.d("httpConnection __", fileCacheItem.getName());
+        Log.d("httpConnection __", tmpResult.getCARD_NAME());
+        try {
+            httpConnection = new HttpConnection(new URL(CARD_INPUT));
+            httpConnection.requestInsertInfos(fileCacheItem, myApp.userID, tmpResult, new OnRequestCompleteListener() {
+                @Override
+                public void onSuccess(@Nullable String data) {
+                    if( data != null && !data.isEmpty()){
+                        Log.d("httpConnectiononSuccess", data);
+                        delegate.processFinish(data);
+                    }
+                }
 
+                @Override
+                public void onError() {
+                    Log.d("httpConnectiononError", "onError");
+                }
+            });
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
 
-//        final Thread thread = new Thread(new Runnable() {
-//            @Override
-//            public void run() {
-//                Looper.prepare();
-//                //MessageQueue messageQueue = Looper.myQueue();
-//                Log.d(TAG, "threadsuccess");
-//                Fileinput fileinput = new Fileinput(); //thread2
-//                fileinput.fileupload(fileCacheItem);
-//                Looper.loop();
-//            }
-//        });
-//        thread.start();
+//        InsertData task = new InsertData(delegate); //thread1
+//        result = task.execute(CARD_INPUT, nm, ph, ad, em, nb, fx, po, memo, cp, ocruserid, done, fn).toString();
+
 
         Log.d(TAG, "result확인 try안 = " + result);
 
 
-//        if (result.isEmpty() || result.equals("") || result == null || result.contains("Error")) {
-        if (result.equals("true")) {
-            result = "1";
-        } else {
-            result = "0";
-        }
-
-        //        putData();
-//        Log.d(TAG,"result확인 if 전 = "+result);
-//        if(result != "0"){
-////            result = "1";
-        Log.d(TAG, "result확인db " + result);
-//        }
         return result;
     }
 
-//    public static String putData(){
-//        Log.d("putData함수 확인",done);
-//        return done;
-//    }
 
     Context context;
 
-    CardOCR(Context context, Bitmap bitmap, String userid, String filename) {
+    CardOCR(Context context, Bitmap bitmap, String userid, String filename, BCMApplication myApp) {
         this.context = context;
 //        callCloudVision(bitmap);
         // myApp = (BCMApplication) getApplication();
@@ -161,6 +157,7 @@ public class CardOCR extends Activity {
 //        fp = filePath;
         Log.d(TAG, "USER체크" + userid);
         Log.d(TAG, "filename체크" + filename);
+        CardOCR.myApp = myApp;
         textlist.clear();
         ph = "";
         nm = "";
@@ -174,22 +171,24 @@ public class CardOCR extends Activity {
         temp = "";
         fp = context.getFilesDir().getPath();
         Log.d(TAG, "FP 확인 할꺼 = " + fp);
+
 //        File file = new File(fp);
-//
-//        // If no folders
-//        if (!file.exists()) {
-//            file.mkdirs();
-//            // Toast.makeText(this, "Success", Toast.LENGTH_SHORT).show();
-//        }
+////
+////        // If no folders
+////        if (!file.exists()) {
+////            file.mkdirs();
+////            // Toast.makeText(this, "Success", Toast.LENGTH_SHORT).show();
+////        }
+
         fileCacheItem = new File(fp, fn);
         Log.d(TAG, "getFilesDir().getPath()확인할꺼 = " + fileCacheItem.toString());
-        Drawable drawable = context.getResources().getDrawable(R.drawable.check, null);
-        Bitmap tbitmap = ((BitmapDrawable)drawable).getBitmap();
+//        Drawable drawable = context.getResources().getDrawable(R.drawable.check, null);
+//        Bitmap tbitmap = ((BitmapDrawable)drawable).getBitmap();
 
         try {
 //            fileCacheItem.createNewFile();
             OutputStream out = new FileOutputStream(fileCacheItem);
-            tbitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
             out.close();
 
             Log.d("찾아보자", fileCacheItem.getName());
@@ -202,10 +201,10 @@ public class CardOCR extends Activity {
             Log.d(TAG, "trysuccess");
         }
 
+
+
     }
 
-
-    //메인에서 인식 함수 실행 -> 결과 받고 -> dd함수 실행? 하면 될까?
 
     public Vision.Images.Annotate prepareAnnotationRequest(final Bitmap bitmap) throws IOException {
         HttpTransport httpTransport = AndroidHttp.newCompatibleTransport();
@@ -568,7 +567,7 @@ public class CardOCR extends Activity {
 
 //            delegate.processFinish(result);
 
-            delegate.processFinish(result);
+
             //  progressDialog.dismiss();
             //  mTextViewResult.setText("입력되었습니다.");
 //            Log.d(TAG, "POST response  - " + result);
@@ -599,127 +598,151 @@ public class CardOCR extends Activity {
             Log.d(TAG, "ddongmmong" + postParameters);
 
 
-
-            try {
-
-                FileInputStream fileInputStream = new FileInputStream(fileCacheItem);
-                Log.d("파일", String.valueOf(fileCacheItem));
-                Log.d("파일", fileCacheItem.getName());
-                Log.d("파일", fileCacheItem.getPath());
-
+//            HttpConnection httpConnection = null;
+//            try {
+//                httpConnection = new HttpConnection(new URL(MainActivity.INSERT_IMAGE_URL));
+//                httpConnection.requestInsertImage(fileCacheItem, myApp, new OnRequestCompleteListener() {
+//                    @Override
+//                    public void onSuccess(@Nullable String data) {
+//                        if( data != null && !data.isEmpty()){
+//                            Log.d("onSuccess", data);
+//                            delegate.processFinish(data);
+//                        }
+//                    }
 //
-//                String filePath = fileCacheItem.getPath();
-//                Bitmap bitmapss = BitmapFactory.decodeFile(filePath);
-//                Log.d("파일", String.valueOf(bitmapss.getByteCount()));
-//                Log.d("파일", String.valueOf(bitmapss.getWidth()));
-//                Log.d("파일", String.valueOf(bitmapss.getHeight()));
-
-                URL url = new URL(serverURL);
-                HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
-
-//                String boundary = "*****";
-////                String lineEnd = "\r\n";
-////                String twoHuphens = "--";
-//                String boundary = UUID.randomUUID().toString();
-                httpURLConnection.setReadTimeout(5000);
-                httpURLConnection.setConnectTimeout(5000);
-                httpURLConnection.setDoInput(true);
-                httpURLConnection.setDoOutput(true);
-                httpURLConnection.setUseCaches(false);
-//                httpURLConnection.setRequestProperty("Content-Type: application/octet-stream");
-                httpURLConnection.setRequestMethod("POST");
-                httpURLConnection.setRequestProperty("Connection", "Keep-Alive");
-                httpURLConnection.setRequestProperty("ENCTYPE", "multipart/form-data");
-                httpURLConnection.setRequestProperty("Content-Type", "multipart/form-data;boundary=" + boundary);
-                httpURLConnection.setRequestProperty("uploaded_file", fn);
-                Log.d("파일fnfnfnfnfnfn", fn);
-                httpURLConnection.connect();
+//                    @Override
+//                    public void onError() {
+//                        Log.d("onError", "onError");
+//                    }
+//                });
+//            } catch (MalformedURLException e) {
+//                e.printStackTrace();
+//            }
 
 
-                DataOutputStream request = new DataOutputStream(httpURLConnection.getOutputStream());
-                request.writeBytes(twoHyphens + boundary + lineEnd);
-//                request.write(postParameters.getBytes("UTF-8"));
-                request.writeBytes(twoHyphens + boundary + lineEnd);
-                request.writeBytes("Content-Disposition: form-data; name=\"uploaded_file\"; filename=\"" + fn + "\""+ lineEnd);
-//                request.writeBytes("Content-Disposition: form-data; name=\"uploaded_file\"; filename=\"" + fn + "\"\r\n\r\n");
-//                request.writeBytes("Content-Disposition: form-data; name=\"uploaded_file\"; filename=\"" + fn + "\"" + "\r\n");
-                request.writeBytes(lineEnd);
-                request.writeBytes(fn);
-                request.writeBytes(lineEnd);
-
-
-
-
-
-//                OutputStream outputStream = httpURLConnection.getOutputStream();
-//                outputStream.write(postParameters.getBytes("UTF-8"));
-//                outputStream.flush();
-//                outputStream.close();
-
-                // create a buffer of  maximum size
-
-                bytesAvailable = fileInputStream.available();
-
-                bufferSize = Math.min(bytesAvailable, maxBufferSize);
-                buffer = new byte[bufferSize];
-
-                // read file and write it into form...
-                bytesRead = fileInputStream.read(buffer, 0, bufferSize);
-
-                while (bytesRead > 0) { //buffer에 담기
-
-                    request.write(buffer, 0, bufferSize);
-                    bytesAvailable = fileInputStream.available();
-                    bufferSize = Math.min(bytesAvailable, maxBufferSize);
-                    bytesRead = fileInputStream.read(buffer, 0, bufferSize);
-
-                }
-
-                // send multipart form data necesssary after file data...
-                request.writeBytes(lineEnd);
-                request.writeBytes(twoHyphens + boundary + twoHyphens + lineEnd);
-                request.flush();
-                request.close();
-
-
-                int responseStatusCode = httpURLConnection.getResponseCode();
-                Log.d(TAG, "POST response code - " + responseStatusCode);
-
-                InputStream inputStream;
-                if (responseStatusCode == HttpURLConnection.HTTP_OK) {
-                    Log.d("에러어어엉2", "HttpURLConnection.HTTP_OK");
-                    inputStream = httpURLConnection.getInputStream();
-                } else {
-                    Log.d("에러어어엉2", "HttpURLConnection.HTTP_NO");
-                    inputStream = httpURLConnection.getErrorStream();
-                }
-
-
-                InputStreamReader inputStreamReader = new InputStreamReader(inputStream, "UTF-8");
-                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-
-                StringBuilder sb = new StringBuilder();
-                String line = null;
-
-                while ((line = bufferedReader.readLine()) != null) {
-//                    Log.d("에러어어엉2", " 와일 몇번? : ");
-                    sb.append(line);
-//                    Log.d("에러어어엉2", sb.toString());
-                }
-
-//                Log.d("에러어어엉21", sb.toString());
-                bufferedReader.close();
-                Log.d("에러어어엉22", sb.toString());
-
-                return sb.toString();
-
-
-            } catch (Exception e) {
-
-                Log.d(TAG, "InsertData: Error ", e);
-
-                return new String("Error: " + e.getMessage());
-            }
+            return "1";
+//            try {
+//
+//                FileInputStream fileInputStream = new FileInputStream(fileCacheItem);
+//                Log.d("파일", String.valueOf(fileCacheItem));
+//                Log.d("파일", fileCacheItem.getName());
+//                Log.d("파일", fileCacheItem.getPath());
+//
+////
+////                String filePath = fileCacheItem.getPath();
+////                Bitmap bitmapss = BitmapFactory.decodeFile(filePath);
+////                Log.d("파일", String.valueOf(bitmapss.getByteCount()));
+////                Log.d("파일", String.valueOf(bitmapss.getWidth()));
+////                Log.d("파일", String.valueOf(bitmapss.getHeight()));
+//
+//                URL url = new URL(serverURL);
+//                HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
+//
+////                String boundary = "*****";
+//////                String lineEnd = "\r\n";
+//////                String twoHuphens = "--";
+////                String boundary = UUID.randomUUID().toString();
+//                httpURLConnection.setReadTimeout(5000);
+//                httpURLConnection.setConnectTimeout(5000);
+//                httpURLConnection.setDoInput(true);
+//                httpURLConnection.setDoOutput(true);
+//                httpURLConnection.setUseCaches(false);
+////                httpURLConnection.setRequestProperty("Content-Type: application/octet-stream");
+//                httpURLConnection.setRequestMethod("POST");
+//                httpURLConnection.setRequestProperty("Connection", "Keep-Alive");
+//                httpURLConnection.setRequestProperty("ENCTYPE", "multipart/form-data");
+//                httpURLConnection.setRequestProperty("Content-Type", "multipart/form-data;boundary=" + boundary);
+//                httpURLConnection.setRequestProperty("uploaded_file", fn);
+//                Log.d("파일fnfnfnfnfnfn", fn);
+//                httpURLConnection.connect();
+//
+//
+//                DataOutputStream request = new DataOutputStream(httpURLConnection.getOutputStream());
+//                request.writeBytes(twoHyphens + boundary + lineEnd);
+////                request.write(postParameters.getBytes("UTF-8"));
+//                request.writeBytes(twoHyphens + boundary + lineEnd);
+//                request.writeBytes("Content-Disposition: form-data; name=\"uploaded_file\"; filename=\"" + fn + "\""+ lineEnd);
+////                request.writeBytes("Content-Disposition: form-data; name=\"uploaded_file\"; filename=\"" + fn + "\"\r\n\r\n");
+////                request.writeBytes("Content-Disposition: form-data; name=\"uploaded_file\"; filename=\"" + fn + "\"" + "\r\n");
+//                request.writeBytes(lineEnd);
+//                request.writeBytes(fn);
+//                request.writeBytes(lineEnd);
+//
+//
+//
+//
+//
+////                OutputStream outputStream = httpURLConnection.getOutputStream();
+////                outputStream.write(postParameters.getBytes("UTF-8"));
+////                outputStream.flush();
+////                outputStream.close();
+//
+//                // create a buffer of  maximum size
+//
+//                bytesAvailable = fileInputStream.available();
+//
+//                bufferSize = Math.min(bytesAvailable, maxBufferSize);
+//                buffer = new byte[bufferSize];
+//
+//                // read file and write it into form...
+//                bytesRead = fileInputStream.read(buffer, 0, bufferSize);
+//
+//                while (bytesRead > 0) { //buffer에 담기
+//
+//                    request.write(buffer, 0, bufferSize);
+//                    bytesAvailable = fileInputStream.available();
+//                    bufferSize = Math.min(bytesAvailable, maxBufferSize);
+//                    bytesRead = fileInputStream.read(buffer, 0, bufferSize);
+//
+//                }
+//
+//                // send multipart form data necesssary after file data...
+//                request.writeBytes(lineEnd);
+//                request.writeBytes(twoHyphens + boundary + twoHyphens + lineEnd);
+//                request.flush();
+//
+//
+//
+//                int responseStatusCode = httpURLConnection.getResponseCode();
+//                Log.d(TAG, "POST response code - " + responseStatusCode);
+//
+//                InputStream inputStream;
+//                if (responseStatusCode == HttpURLConnection.HTTP_OK) {
+//                    Log.d("에러어어엉2", "HttpURLConnection.HTTP_OK");
+//                    inputStream = httpURLConnection.getInputStream();
+//                } else {
+//                    Log.d("에러어어엉2", "HttpURLConnection.HTTP_NO");
+//                    inputStream = httpURLConnection.getErrorStream();
+//                }
+//
+//
+//                InputStreamReader inputStreamReader = new InputStreamReader(inputStream, "UTF-8");
+//                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+//
+//                StringBuilder sb = new StringBuilder();
+//                String line = null;
+//
+//                while ((line = bufferedReader.readLine()) != null) {
+////                    Log.d("에러어어엉2", " 와일 몇번? : ");
+//                    sb.append(line);
+////                    Log.d("에러어어엉2", sb.toString());
+//                }
+//
+////                Log.d("에러어어엉21", sb.toString());
+//                request.close();
+//
+//                bufferedReader.close();
+//                Log.d("에러어어엉22", sb.toString());
+//
+//                return sb.toString();
+//
+//
+//            } catch (Exception e) {
+//
+//                Log.d(TAG, "InsertData: Error ", e);
+//
+//                return new String("Error: " + e.getMessage());
+//            }
 
         }
     }
