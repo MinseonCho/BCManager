@@ -289,6 +289,9 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
             @Override
             public void onClick(View v) {
 
+                Intent search = new Intent(getApplicationContext(), SearchingActivity.class);
+                startActivity(search);
+
 
 //                Bitmap bitmap = ((BitmapDrawable) Objects.requireNonNull(getDrawable(R.drawable.document2))).getBitmap();
 //                Test test = new Test(getApplicationContext(), bitmap);
@@ -872,7 +875,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 //        bitmap.compress(Bitmap.CompressFormat.JPEG, 50, stream);
 //        byte[] byteArray = stream.toByteArray();
 //
-//        Intent min = new Intent(getApplicationContext(), SearchingActivity.class);
+ //       Intent min = new Intent(getApplicationContext(), SearchingActivity.class);
 //        min.put
 
 

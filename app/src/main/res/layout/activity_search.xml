@@ -1,23 +1,62 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@android:color/white"
+    android:gravity="center_horizontal"
+    android:orientation="vertical"
     tools:context=".SearchingActivity">
 
-<!--    <EditText-->
-<!--        android:layout_marginStart="10dp"-->
-<!--        android:layout_marginEnd="10dp"-->
-<!--        android:layout_marginTop="10dp"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:background="@drawable/alert_gray_border"/>-->
-
-    <ImageView
-        android:id="@+id/imageview"
-        android:adjustViewBounds="true"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="70dp"
+        android:orientation="horizontal">
 
-</RelativeLayout>
+
+<!--        <EditText-->
+<!--            android:id="@+id/search_part"-->
+<!--            android:layout_width="291dp"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_centerVertical="true"-->
+<!--            android:layout_marginStart="20dp"-->
+<!--            android:layout_marginTop="10dp"-->
+<!--            android:layout_marginEnd="10dp"-->
+<!--            android:background="@color/my_lightgray"-->
+<!--            android:hint="Search" />-->
+
+        <SearchView
+            android:id="@+id/search_view"
+            android:layout_width="317dp"
+            android:layout_height="match_parent" />
+
+        <Button
+            android:id="@+id/search_btn"
+            android:layout_width="50dp"
+            android:layout_height="30dp"
+
+            android:layout_marginTop="20dp"
+            android:layout_marginEnd="30dp"
+            android:layout_marginBottom="20dp"
+            android:background="@color/browser_actions_bg_grey"
+            android:text="검색" />
+
+
+    </LinearLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/search_card_list"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp" />
+
+    </androidx.core.widget.NestedScrollView>
+
+
+
+</LinearLayout>
