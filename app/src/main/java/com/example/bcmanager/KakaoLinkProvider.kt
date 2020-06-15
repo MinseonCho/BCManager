@@ -25,6 +25,8 @@ object KakaoLinkProvider {
 
     // 공유하기 눌렀을 때 처리
     fun sendKakaoLink(context: Context, cardNumber: Int, cardImage: String) {
+
+        Log.d("KakaoLinkProvider", "card Image Path : " + MainActivity.IMAGE_URL + cardImage )
         val params = FeedTemplate
                 .newBuilder(ContentObject.newBuilder("BCManager",
                         MainActivity.IMAGE_URL + cardImage,

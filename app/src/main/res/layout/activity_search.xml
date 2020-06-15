@@ -12,12 +12,15 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="51dp"
+        android:weightSum="4"
+        android:gravity="center_horizontal"
         android:orientation="horizontal">
 
 
         <EditText
             android:id="@+id/search_part"
-            android:layout_width="291dp"
+            android:layout_width="0dp"
+            android:layout_weight="3"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:layout_marginStart="20dp"
@@ -33,7 +36,8 @@
 
         <Button
             android:id="@+id/search_btn"
-            android:layout_width="50dp"
+            android:layout_width="0dp"
+            android:layout_weight="1"
             android:layout_height="30dp"
             android:layout_marginTop="10dp"
             android:layout_marginEnd="30dp"
@@ -52,7 +56,7 @@
             android:layout_marginStart="10dp"
             android:layout_marginTop="20dp"
             android:layout_marginBottom="5dp"
-            android:text="검색된 명합"
+            android:text="검색된 명함"
             android:textColor="@android:color/darker_gray"
             android:textStyle="bold" />
 

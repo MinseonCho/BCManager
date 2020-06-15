@@ -209,6 +209,7 @@ class HttpConnection(url: URL) : Callback {
                            email: String, phone: String, tel: String, address: String, fax: String, memo: String, callback: OnRequestCompleteListener) {
         this.onRequestCompleteListener = callback
 
+        Log.d("ResiterActivity", "requestInsertCardTB")
         val body = FormBody.Builder()
                 .add("USER_NUMBER", userNum)
                 .add("CARD_IMAGE", cardImage)

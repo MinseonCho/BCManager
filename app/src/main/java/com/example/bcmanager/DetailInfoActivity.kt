@@ -50,7 +50,8 @@ class DetailInfoActivity : AppCompatActivity(), View.OnClickListener, PopupMenu.
 
         //메인 리스트에서 선택했을 시 flag == 0
         //kako link에서 왔을 시 flag == 503
-        flagForBtn = detailIntent.getIntExtra("flag", 0);
+        flagForBtn = detailIntent.getIntExtra("flag", 0)
+        Log.d("플래그포버튼", flagForBtn.toString())
         if(flagForBtn == 503) MainActivity.kakaoLinkNum = 0; //메인에 갔을 때 다시 띄우지 않게
 
 
@@ -220,8 +221,13 @@ class DetailInfoActivity : AppCompatActivity(), View.OnClickListener, PopupMenu.
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
+
+        Log.d("ResiterActivity", "DetailinfoActivity onActivityResult")
         if (requestCode == UPDATE_CODE && resultCode == RESULT_OK) {
+            Log.d("ResiterActivity", "requestCode == UPDATE_CODE,  resultCode == RESULT_OK")
             finish()
+        }else{
+            Log.d("ResiterActivity", "requestCode == UPDATE_CODE,  resultCode == RESULT_NO")
         }
     }
 

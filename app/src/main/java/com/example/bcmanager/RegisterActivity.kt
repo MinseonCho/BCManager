@@ -138,26 +138,34 @@ class RegisterActivity : AppCompatActivity(), View.OnClickListener {
 
     fun insertInfosToCardTB() {
         //flag == 2 등록요청(INSERT INTO CARD_TB -> 카카오 링크에서 온 경우)
-
+        Log.d("ResiterActivity", "insertInfosToCardTB 진입")
         val httpConnection = HttpConnection(URL(MainActivity.INSERT_CARD_INFOS_CARDTB))
         httpConnection.requestInsertCardTB(myApp.userNum, cardImage, name.text.toString(),
                 company.text.toString(), position.text.toString(), email.text.toString(),
                 phone.text.toString(), number.text.toString(), address.text.toString(),
                 fax.text.toString(), memo.text.toString(), object : OnRequestCompleteListener {
+
             override fun onSuccess(data: String?) {
                 if (data != null && data.isNotEmpty()) {
                     if (data.equals("1")) {
                         Log.d("ResiterActivity", "kakao 등록 성공")
+                        Log.d("ResiterActivity", "결과1 : " + data)
                         Log.d("ResiterActivity", "kakao 카드 넘버 : " + MainActivity.kakaoLinkNum)
 //                        intent = Intent();
 //                        setResult(Activity.RESULT_OK, intent);
+                        intent = Intent();
+                        setResult(Activity.RESULT_OK, intent);
                         finish()
+                    }else{
+                        Log.d("ResiterActivity", "결과2 : " + data)
                     }
                 }
             }
 
             override fun onError() {
+                Log.d("ResiterActivity", "결과3 : " + "실패")
                 outMessage(0)
+
             }
 
         })

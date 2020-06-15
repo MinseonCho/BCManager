@@ -42,101 +42,107 @@ class CardRecyclerViewAdapter(val context: Context, val cardList: ArrayList<Card
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         Log.d("onBindViewHolder", "")
-        val instance = cardList[position]
-        val cardNumber = cardList[position].CARD_NUMBER
-        if (holder is Holder) {
-            val url = MainActivity.IMAGE_URL + instance.CARD_IMAGE
+        try{
+            val instance = cardList[position]
+            val cardNumber = cardList[position].CARD_NUMBER
+            if (holder is Holder) {
+                val url = MainActivity.IMAGE_URL + instance.CARD_IMAGE
 
-            GlideApp.with(context).load(url)
-                    .apply(RequestOptions.fitCenterTransform())
-                    .override(MainActivity.device_width, 400)
-                    .into(holder.card!!)
+                GlideApp.with(context).load(url)
+                        .apply(RequestOptions.fitCenterTransform())
+                        .override(MainActivity.device_width, 400)
+                        .into(holder.card!!)
 
-            holder.changeVisibility(selectedItems.get(position));
+                holder.changeVisibility(selectedItems.get(position));
 
-            holder.cv?.setOnClickListener {
+                holder.cv?.setOnClickListener {
 
-                if (selectedItems.get(position)) {
-                    // 펼쳐진 Item을 클릭 시
-                    selectedItems.delete(position);
-                } else {
-                    // 직전의 클릭됐던 Item의 클릭상태를 지움
-                    selectedItems.delete(prePosition);
-                    // 클릭한 Item의 position을 저장
-                    selectedItems.put(position, true);
+                    if (selectedItems.get(position)) {
+                        // 펼쳐진 Item을 클릭 시
+                        selectedItems.delete(position);
+                    } else {
+                        // 직전의 클릭됐던 Item의 클릭상태를 지움
+                        selectedItems.delete(prePosition);
+                        // 클릭한 Item의 position을 저장
+                        selectedItems.put(position, true);
+                    }
+                    // 해당 포지션의 변화를 알림
+                    if (prePosition != -1) notifyItemChanged(prePosition);
+                    notifyItemChanged(position);
+                    // 클릭된 position 저장
+                    prePosition = position;
+
                 }
-                // 해당 포지션의 변화를 알림
-                if (prePosition != -1) notifyItemChanged(prePosition);
-                notifyItemChanged(position);
-                // 클릭된 position 저장
-                prePosition = position;
 
-            }
-
-            holder.linear_info?.setOnClickListener {
-                val intent = Intent(context, DetailInfoActivity::class.java)
+                holder.linear_info?.setOnClickListener {
+                    val intent = Intent(context, DetailInfoActivity::class.java)
                     Log.d("카드넘버", cardNumber.toString())
                     intent.putExtra("cardNumber", cardNumber)
                     context.startActivity(intent)
-            }
-            holder.linear_contact?.setOnClickListener {
-                // Creates a new Intent to insert a contact
-                val intent = Intent(ContactsContract.Intents.Insert.ACTION).apply {
-                    // Sets the MIME type to match the Contacts Provider
-                    type = ContactsContract.RawContacts.CONTENT_TYPE
                 }
-                intent.apply {
-                    // Inserts an email address
-                    putExtra(ContactsContract.Intents.Insert.EMAIL, instance.CARD_EMAIL)
-                    /*
-                     * In this example, sets the email type to be a work email.
-                     * You can set other email types as necessary.
-                     */
-                    putExtra(
-                            ContactsContract.Intents.Insert.EMAIL_TYPE,
-                            ContactsContract.CommonDataKinds.Email.TYPE_WORK
-                    )
-                    // Inserts a phone number
-                    putExtra(ContactsContract.Intents.Insert.PHONE, instance.CARD_PHONE)
-                    putExtra(ContactsContract.Intents.Insert.NAME, instance.CARD_NAME)
-                    putExtra(ContactsContract.Intents.Insert.COMPANY, instance.CARD_COMPANY)
-                    putExtra(ContactsContract.Intents.Insert.JOB_TITLE, instance.CARD_POSITION)
+                holder.linear_contact?.setOnClickListener {
+                    // Creates a new Intent to insert a contact
+                    val intent = Intent(ContactsContract.Intents.Insert.ACTION).apply {
+                        // Sets the MIME type to match the Contacts Provider
+                        type = ContactsContract.RawContacts.CONTENT_TYPE
+                    }
+                    intent.apply {
+                        // Inserts an email address
+                        putExtra(ContactsContract.Intents.Insert.EMAIL, instance.CARD_EMAIL)
+                        /*
+                         * In this example, sets the email type to be a work email.
+                         * You can set other email types as necessary.
+                         */
+                        putExtra(
+                                ContactsContract.Intents.Insert.EMAIL_TYPE,
+                                ContactsContract.CommonDataKinds.Email.TYPE_WORK
+                        )
+                        // Inserts a phone number
+                        putExtra(ContactsContract.Intents.Insert.PHONE, instance.CARD_PHONE)
+                        putExtra(ContactsContract.Intents.Insert.NAME, instance.CARD_NAME)
+                        putExtra(ContactsContract.Intents.Insert.COMPANY, instance.CARD_COMPANY)
+                        putExtra(ContactsContract.Intents.Insert.JOB_TITLE, instance.CARD_POSITION)
 
-                    /*
-                     * In this example, sets the phone type to be a work phone.
-                     * You can set other phone types as necessary.
-                     */
-                    putExtra(
-                            ContactsContract.Intents.Insert.PHONE_TYPE,
-                            ContactsContract.CommonDataKinds.Phone.TYPE_WORK
-                    )
+                        /*
+                         * In this example, sets the phone type to be a work phone.
+                         * You can set other phone types as necessary.
+                         */
+                        putExtra(
+                                ContactsContract.Intents.Insert.PHONE_TYPE,
+                                ContactsContract.CommonDataKinds.Phone.TYPE_WORK
+                        )
+                    }
+
+                    /* Sends the Intent
+                 */
+                    context.startActivity(intent)
+
+                }
+                holder.linear_dial?.setOnClickListener {
+                    val telStr = "tel:" + instance.CARD_PHONE
+                    val intent = Intent("android.intent.action.DIAL")
+                    intent.data = Uri.parse(telStr)
+                    context.startActivity(intent)
+                }
+                holder.linear_message?.setOnClickListener {
+                    val intent = Intent(Intent.ACTION_SENDTO)
+                    val uri = Uri.parse("sms:" + instance.CARD_PHONE)
+
+                    intent.data = uri
+
+                    context.startActivity(intent)
+                }
+                holder.linear_share?.setOnClickListener {
+                    val customDialogForCard:CustomDialogForCard = CustomDialogForCard(context, instance)
+                    customDialogForCard.callDialog()
                 }
 
-                /* Sends the Intent
-             */
-                context.startActivity(intent)
-
             }
-            holder.linear_dial?.setOnClickListener {
-                val telStr = "tel:" + instance.CARD_PHONE
-                val intent = Intent("android.intent.action.DIAL")
-                intent.data = Uri.parse(telStr)
-                context.startActivity(intent)
-            }
-            holder.linear_message?.setOnClickListener {
-                val intent = Intent(Intent.ACTION_SENDTO)
-                val uri = Uri.parse("sms:" + instance.CARD_PHONE)
-
-                intent.data = uri
-
-                context.startActivity(intent)
-            }
-            holder.linear_share?.setOnClickListener {
-              val customDialogForCard:CustomDialogForCard = CustomDialogForCard(context, instance)
-                customDialogForCard.callDialog()
-            }
-
+        }catch (e: IndexOutOfBoundsException){
+            Log.d("CardRecyclerViewAdapter", "IndexOutOfBoundsException")
         }
+
+
 
 
 
