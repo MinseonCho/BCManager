@@ -182,10 +182,10 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener, CoroutineScope 
         Session.getCurrentSession().checkAndImplicitOpen()
 
 
-        val intent = intent;
-        if(intent.getStringExtra("flag").equals("FROMMAIN") ){
-            loginType = "FROMMAIN"
-        }
+//        val intent = intent;
+//        if(intent.getStringExtra("flag").equals("FROMMAIN") ){
+//            loginType = "FROMMAIN"
+//        }
 
         //Receive a value from KakaoLink
 //        try {

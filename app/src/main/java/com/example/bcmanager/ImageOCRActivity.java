@@ -3,6 +3,7 @@ package com.example.bcmanager;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -52,6 +53,7 @@ import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Objects;
 
@@ -144,6 +146,7 @@ public class ImageOCRActivity extends AppCompatActivity {
             byte[] bytes = intent.getByteArrayExtra("image");
             bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
             cardImage.setImageBitmap(bitmap);
+            callCloudVision(bitmap);
 //            uploadImage(bitmap);
             //Log.d("image사이즈", bitmap.width.toString() + " " +bitmap.height.toString())
         }
@@ -154,7 +157,9 @@ public class ImageOCRActivity extends AppCompatActivity {
         @Override
         public void onClick(View view) {
 
-            String date = new SimpleDateFormat("yy_MM_dd_hh_mm_ss").format(new Data());
+           String date = new SimpleDateFormat("yy_MM_dd_hh_mm_ss").format(Calendar.getInstance().getTime());
+
+
             String fileName = myApp.userNum + "_" + date + "." + "jpg";
             File tempSelectFile = new File(getFilesDir().getPath(), fileName);
             Log.d("getFilesDir확인", getFilesDir().getPath());
@@ -189,15 +194,21 @@ public class ImageOCRActivity extends AppCompatActivity {
             Log.d("httpConnection __", tempSelectFile.getName());
             Log.d("httpConnection __", tmpResult.getCARD_NAME());
             try {
-                httpConnection = new HttpConnection(new URL(CARD_INPUT));
+                httpConnection = new HttpConnection(new URL(MainActivity.INSERT_CARD_INFOS_FROM_CAMERA));
                 httpConnection.requestInsertInfos(tempSelectFile, myApp.userNum, tmpResult, new OnRequestCompleteListener() {
                     @Override
                     public void onSuccess(@Nullable String data) {
                         if (data != null && !data.isEmpty()) {
                             Log.d("httpConnectiononSuccess", data);
-                            Intent intent = new Intent();
-                            setResult(RESULT_OK, intent);
-                            finish();
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Intent intent = new Intent();
+                                    setResult(RESULT_OK, intent);
+                                    finish();
+                                }
+                            });
+
                         }
                     }
 

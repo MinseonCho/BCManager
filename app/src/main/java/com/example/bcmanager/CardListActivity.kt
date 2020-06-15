@@ -10,10 +10,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.bcmanager.CardInfoItem.cardInfo
 import com.google.android.material.snackbar.Snackbar
-import com.google.gson.GsonBuilder
-import com.google.gson.JsonArray
-import com.google.gson.JsonObject
-import com.google.gson.JsonParser
+import com.google.gson.*
 import com.google.gson.reflect.TypeToken
 import kotlinx.android.synthetic.main.activity_card_list.*
 import java.net.MalformedURLException
@@ -64,39 +61,46 @@ class CardListActivity : AppCompatActivity(), OnItemClick {
                 override fun onSuccess(data: String?) {
                     if (data != null && !data.isEmpty()) {
 
-                        Log.d("성공_등록안된카드", data)
-                        val gson = GsonBuilder()
-                                .create()
-                        val jsonParser = JsonParser()
-                        val jsonObject = jsonParser.parse(data) as JsonObject
-                        val cardInfo = jsonObject["cardInfo"] as JsonObject
-                        var unrcgedData = cardInfo.get("unrcgedData").asJsonArray
-                        var resultData = cardInfo.get("resultData").asJsonArray
-                        var result: cardInfo?
-                        Log.d("CardListActivity", "unrcgedData.size =" + unrcgedData.size())
-                        Log.d("CardListActivity", "resultData.size =" + resultData.size())
-                        cardList.clear()
-                        countOfCard = 0
+                        try {
+                            Log.d("성공_등록안된카드", data)
+                            val gson = GsonBuilder()
+                                    .setLenient()
+                                    .create()
+                            val jsonParser = JsonParser()
+                            val jsonObject = jsonParser.parse(data) as JsonObject
+                            val cardInfo = jsonObject["cardInfo"] as JsonObject
+                            var unrcgedData = cardInfo.get("unrcgedData").asJsonArray
+                            var resultData = cardInfo.get("resultData").asJsonArray
+                            var result: cardInfo?
+                            Log.d("CardListActivity", "unrcgedData.size =" + unrcgedData.size())
+                            Log.d("CardListActivity", "resultData.size =" + resultData.size())
+                            cardList.clear()
+                            countOfCard = 0
 
-                        for (i in 0 until unrcgedData.size()) {
-                            val j = unrcgedData.get(i).asJsonObject
-                            result = gson.fromJson(j, CardInfoItem.cardInfo::class.java)
-                            cardList.add(result)
+                            for (i in 0 until unrcgedData.size()) {
+                                val j = unrcgedData.get(i).asJsonObject
+                                result = gson.fromJson(j, CardInfoItem.cardInfo::class.java)
+                                cardList.add(result)
+                            }
+
+                            for (i in 0 until resultData.size()) {
+                                val j = resultData.get(i).asJsonObject
+                                result = gson.fromJson(j, CardInfoItem.cardInfo::class.java)
+                                cardList.add(result)
+                            }
+                            runOnUiThread {
+                                countOfCard = cardList.size;
+                                Log.d("인식된 카드 리스트 사이즈 : ", cardList.size.toString())
+                                if(countOfCard == 0) finish()
+                                cardListAdapter = CardListAdapter(this@CardListActivity, cardList, this@CardListActivity)
+                                rcged_card_recyclerview.adapter = cardListAdapter
+
+
+                            }
+                        }catch (e: JsonSyntaxException){
+
                         }
 
-                        for (i in 0 until resultData.size()) {
-                            val j = resultData.get(i).asJsonObject
-                            result = gson.fromJson(j, CardInfoItem.cardInfo::class.java)
-                            cardList.add(result)
-                        }
-                        runOnUiThread {
-                            countOfCard = cardList.size;
-                            Log.d("인식된 카드 리스트 사이즈 : ", cardList.size.toString())
-                            cardListAdapter = CardListAdapter(this@CardListActivity, cardList, this@CardListActivity)
-                            rcged_card_recyclerview.adapter = cardListAdapter
-
-
-                        }
                     } else {
                         Log.d("CardListActivity", "카드없음")
                         finish()

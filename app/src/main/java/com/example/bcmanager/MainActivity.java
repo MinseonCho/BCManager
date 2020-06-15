@@ -202,6 +202,8 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         refreshLayout = findViewById(R.id.refresh_layout);
 
 
+
+
         //체크해야 할 것: 로그인 여부, 등록된 카드가져오기, 인식됐지만 등록안된 카드 들고오기
         checkCurrentUser();
         getAppKeyHash();
@@ -336,7 +338,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
             startActivity(goToCardInfo);
         }else if(!myApp.isLogined && kakaoLinkNum != 0){
             Intent goToLogin = new Intent(getApplicationContext(), LoginActivity.class);
-            goToLogin.putExtra("flag", "FROMMAIN");
+//            goToLogin.putExtra("flag", "FROMMAIN");
             startActivity(goToLogin);
         }
 
