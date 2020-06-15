@@ -47,20 +47,24 @@ class DetailInfoActivity : AppCompatActivity(), View.OnClickListener, PopupMenu.
 
         val detailIntent = intent
         cardNumber = detailIntent.getIntExtra("cardNumber", 0).toString()
+
+        //메인 리스트에서 선택했을 시 flag == 0
+        //kako link에서 왔을 시 flag == 503
         flagForBtn = detailIntent.getIntExtra("flag", 0);
+        if(flagForBtn == 503) MainActivity.kakaoLinkNum = 0; //메인에 갔을 때 다시 띄우지 않게
+
 
 
         myApp = application as BCMApplication
         Log.d("cardNumber", cardNumber)
 
         if (myApp.isLogined) {
-
             if (!cardNumber.equals("0")) getCardInfo()
-        }else{
+        } else {
             Toast.makeText(applicationContext, "로그인이 필요합니다. ", Toast.LENGTH_LONG);
             val intent = Intent(applicationContext, LoginActivity::class.java)
             intent.putExtra("code", "detailActivity")
-            startActivityForResult(intent,LOGIN_CODE )
+            startActivityForResult(intent, LOGIN_CODE)
         }
 
 
@@ -76,6 +80,8 @@ class DetailInfoActivity : AppCompatActivity(), View.OnClickListener, PopupMenu.
         when (i) {
             R.id.detail_btn_edit -> {
                 //수정하기
+
+                //수정
                 val intent = Intent(applicationContext, RegisterActivity::class.java)
                 intent.putExtra("name", result?.CARD_NAME)
                 intent.putExtra("position", result?.CARD_POSITION)
@@ -88,8 +94,19 @@ class DetailInfoActivity : AppCompatActivity(), View.OnClickListener, PopupMenu.
                 intent.putExtra("cardNum", result?.CARD_NUMBER)
                 intent.putExtra("image", result?.CARD_IMAGE)
                 intent.putExtra("memo", memo)
-                intent.putExtra("flag", 1)
+
+
+                if (flagForBtn == 0) {
+                    //메인카드 상세정보 클릭 -> 수정하기 -> 완료 시 DB 내용 업데이트 후 메인화면으로 이동
+                    intent.putExtra("flag", 1)
+                } else {
+                    //kakao link 수정
+                    //수정하기 -> 완료 -> DB에 INSERT
+                    intent.putExtra("flag", 2)
+                }
+
                 startActivityForResult(intent, UPDATE_CODE)
+
 
             }
             R.id.detail_btn_ok -> {
@@ -165,7 +182,7 @@ class DetailInfoActivity : AppCompatActivity(), View.OnClickListener, PopupMenu.
             httpConnection.requestGetCard(cardNumber, object : OnRequestCompleteListener {
                 override fun onSuccess(data: String?) {
 
-                    if(data != null) {
+                    if (data != null) {
                         val gson = GsonBuilder().create()
                         val jsonParser = JsonParser()
                         val jsonObject = jsonParser.parse(data) as JsonObject

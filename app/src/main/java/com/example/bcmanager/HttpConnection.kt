@@ -120,12 +120,23 @@ class HttpConnection(url: URL) : Callback {
         client.newCall(request).enqueue(this)
     }
 
-    fun requestRegister(tCardNumber: String, userNum: String, callback: OnRequestCompleteListener) {
+    fun requestRegister(tCardNumber: String, userNum: String, cardImage: String, name: String, company: String, positon: String,
+                        email: String, phone: String, tel: String, address: String, fax: String, memo: String, callback: OnRequestCompleteListener) {
         this.onRequestCompleteListener = callback
 
         val body = FormBody.Builder()
                 .add("TCARD_NUMBER", tCardNumber)
                 .add("USER_NUMBER", userNum)
+                .add("CARD_IMAGE", cardImage)
+                .add("CARD_NAME", name)
+                .add("CARD_COMPANY", company)
+                .add("CARD_POSITION", positon)
+                .add("CARD_PHONE", phone)
+                .add("CARD_TEL", tel)
+                .add("CARD_FAX", fax)
+                .add("CARD_ADDRESS", address)
+                .add("CARD_EMAIL", email)
+                .add("CARD_MEMO", memo)
                 .build()
 
         val request = Request.Builder()
@@ -183,6 +194,33 @@ class HttpConnection(url: URL) : Callback {
                 .add("CARD_FAX", fax)
                 .add("CARD_ADDRESS", address)
                 .add("CARD_EMAIL", email)
+                .build()
+
+        val request = Request.Builder()
+                .url(url!!)
+                .post(body)
+                .build()
+
+        val client = OkHttpClient()
+        client.newCall(request).enqueue(this)
+    }
+
+    fun requestInsertCardTB(userNum: String, cardImage:String ,name: String, company: String, positon: String,
+                           email: String, phone: String, tel: String, address: String, fax: String, memo: String, callback: OnRequestCompleteListener) {
+        this.onRequestCompleteListener = callback
+
+        val body = FormBody.Builder()
+                .add("USER_NUMBER", userNum)
+                .add("CARD_IMAGE", cardImage)
+                .add("CARD_NAME", name)
+                .add("CARD_COMPANY", company)
+                .add("CARD_POSITION", positon)
+                .add("CARD_PHONE", phone)
+                .add("CARD_TEL", tel)
+                .add("CARD_FAX", fax)
+                .add("CARD_ADDRESS", address)
+                .add("CARD_EMAIL", email)
+                .add("CARD_MEMO", memo)
                 .build()
 
         val request = Request.Builder()
