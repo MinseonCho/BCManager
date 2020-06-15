@@ -39,6 +39,7 @@ class CardListAdapter(val context: Context, val cardList: ArrayList<CardInfoItem
 
         Glide.with(context).load(url)
                 .apply(RequestOptions.fitCenterTransform())
+                .override(400,200)
                 .into(holder.cardImage)
 
 

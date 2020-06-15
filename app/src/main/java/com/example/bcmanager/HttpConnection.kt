@@ -1,13 +1,10 @@
 package com.example.bcmanager
 
-import android.app.Application
 import android.util.Log
 import okhttp3.*
 import java.io.File
 import java.io.IOException
 import java.net.URL
-import java.text.Normalizer
-import kotlin.jvm.internal.Ref
 
 class HttpConnection(url: URL) : Callback {
 
@@ -62,7 +59,7 @@ class HttpConnection(url: URL) : Callback {
 
     fun requestGetCards(uID: String, callback: OnRequestCompleteListener) {
         this.onRequestCompleteListener = callback
-
+        Log.d("겟카운트", "requestGetCards실행")
         val body = FormBody.Builder()
                 .add("USER_ID", uID)
                 .build()
@@ -229,7 +226,45 @@ class HttpConnection(url: URL) : Callback {
         val client = OkHttpClient()
         client.newCall(request).enqueue(this)
     }
+//    CardOCR.ph = ""
+//    CardOCR.nm = ""
+//    CardOCR.ad = ""
+//    CardOCR.em = ""
+//    CardOCR.nb = ""
+//    CardOCR.fx = ""
+//    CardOCR.po = ""
+//    CardOCR.cp = ""
+//    CardOCR.memo = null
 
+
+    //갤러리 사진 등록/ 카메라 사진 등록 모두 쓰임
+    fun requestInsertInfos(file: File, uID: String, detectedCardInfo: CardInfoItem.detectedCardInfo, callback: OnRequestCompleteListener) {
+        this.onRequestCompleteListener = callback
+
+        val body = MultipartBody.Builder()
+                .setType(MultipartBody.FORM)
+                .addFormDataPart("files", file.name, RequestBody.create(MultipartBody.FORM, file))
+                .addFormDataPart("USER_ID", uID)
+                .addFormDataPart("CARD_IMAGE", detectedCardInfo.CARD_IMAGE)
+                .addFormDataPart("CARD_NAME", detectedCardInfo.CARD_NAME)
+                .addFormDataPart("CARD_POSITION", detectedCardInfo.CARD_POSITION)
+                .addFormDataPart("CARD_PHONE", detectedCardInfo.CARD_PHONE)
+                .addFormDataPart("CARD_TEL", detectedCardInfo.CARD_TEL)
+                .addFormDataPart("CARD_ADDRESS", detectedCardInfo.CARD_ADDRESS)
+                .addFormDataPart("CARD_FAX", detectedCardInfo.CARD_FAX)
+                .addFormDataPart("CARD_COMPANY", detectedCardInfo.CARD_COMPANY)
+                .addFormDataPart("CARD_EMAIL", detectedCardInfo.CARD_EMAIL)
+                .addFormDataPart("CARD_MEMO", detectedCardInfo.CARD_MEMO)
+                .build()
+
+        val request = Request.Builder()
+                .url(url!!)
+                .post(body)
+                .build()
+
+        val client = OkHttpClient()
+        client.newCall(request).enqueue(this)
+    }
     override fun onFailure(call: Call, e: IOException) {
         onRequestCompleteListener?.onError()
         println("error on httpConnection")
@@ -237,9 +272,14 @@ class HttpConnection(url: URL) : Callback {
 
     override fun onResponse(call: Call, response: Response) {
         if (response.isSuccessful) {
-            val body = response.body()?.string()
-//            Log.d("TAG",body);
-            parse(body)
+
+            try {
+                val body = response.body()?.string()
+                parse(body)
+            } catch (e: IOException) {
+                // Signal to the user failure here, re-throw the exception, or
+                // whatever else you want to do on failure
+            }
 
         }
         onRequestCompleteListener?.onSuccess(data)
