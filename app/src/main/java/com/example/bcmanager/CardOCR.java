@@ -346,7 +346,8 @@ public class CardOCR extends Activity {
         Log.d(TAG, String.valueOf(city_address));
 
         city_number.addAll(Arrays.asList("051", "053", "032", "062", "042", "052", "044", "031", "033", "043", "041", "063", "061", "054", "055", "064", "02"));
-        job_position.addAll(Arrays.asList("회장", "부회장", "사장", "부사장", "전무", "상무", "부장", "차장", "대리", "과장", "사원", "팀장", "이사", "교수", "대표", "대표이사", "점장", "지점장"));
+        job_position.addAll(Arrays.asList("학회장","회장", "부회장", "사장", "부사장", "전무", "상무", "부장", "차장", "대리", "과장", "사원", "팀장",
+                "교수", "대표", "대표이사", "점장", "지점장","개발자","프로그래머","CEO","ceo","이사"));
 
         int plus = 0;
         for (int i = 0; i < message.length(); i++) {
@@ -394,6 +395,8 @@ public class CardOCR extends Activity {
                         em = em.replace("E-mail", "");
                     else if (textlist.get(i).contains("이메일:"))
                         em = em.replace("이메일:", "");
+                    else if (textlist.get(i).contains("E."))
+                        em = em.replace("E.", "");
                 }
             } else if (textlist.get(i).contains(".com")) {
                 if (em.length() < 2) {
@@ -487,17 +490,11 @@ public class CardOCR extends Activity {
         for (int i = 0; i < textlist.size(); i++) {
 
             if (textlist.get(i).length() <= 10) {
-                Log.d(TAG, "cp위한 nm확인 = " + nm);
-                Log.d(TAG, "po가뭣이냐" + po);
                 if (textlist.get(i).contains(nm)) {
                 } else {
                     if (cp.length() < 2) {
                         cp = textlist.get(i);
                         Log.d(TAG, "cp가뭣이냐" + cp);
-//                        if(cp == po){ //po랑 cp랑 같을때가 문제임 -> 아직 cameraocr에 적용 안했음
-//                            cp = "";
-//                            Log.d(TAG, "cp위한 po확인3 = " + cp);
-//                        }
                     }
                 }
             }
