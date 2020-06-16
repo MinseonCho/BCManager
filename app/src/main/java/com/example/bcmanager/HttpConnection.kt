@@ -73,6 +73,23 @@ class HttpConnection(url: URL) : Callback {
         client.newCall(request).enqueue(this)
     }
 
+    fun requestSearchGetCards(uID: String, search : String,callback: OnRequestCompleteListener) {
+        this.onRequestCompleteListener = callback
+        Log.d("겟카운트", "requestSearchGetCards실행")
+        val body = FormBody.Builder()
+                .add("USER_ID", uID)
+                .add("SEARCH", search)
+                .build()
+
+        val request = Request.Builder()
+                .url(url!!)
+                .post(body)
+                .build()
+
+        val client = OkHttpClient()
+        client.newCall(request).enqueue(this)
+    }
+
     fun requestRcgedGetCards(uID: String, callback: OnRequestCompleteListener) {
         this.onRequestCompleteListener = callback
 
