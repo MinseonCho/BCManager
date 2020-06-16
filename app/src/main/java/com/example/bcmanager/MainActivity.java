@@ -553,6 +553,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                     Utils.matToBitmap(mat_img, failedBitmap);
                     updateTcardResult(filename);
                     Log.d("파일네임", filename);
+                    linearGoToCardList.setVisibility(View.VISIBLE);
                     Toast.makeText(getApplicationContext(), "다시 시도해주세요.", Toast.LENGTH_SHORT).show();
                 }
 
