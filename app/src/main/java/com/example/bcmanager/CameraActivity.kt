@@ -98,22 +98,29 @@ class CameraActivity : AppCompatActivity(), CameraBridgeViewBase.CvCameraViewLis
 //
 //
                         ImageProcessing(tmpImage!!.nativeObjAddr)
-                        val resultBitmap =
-                                Bitmap.createBitmap(tmpImage.cols(), tmpImage.rows(), Bitmap.Config.RGB_565)
 
-                        if (tmpImage != null) {
+                        Log.d("커피비 1", "ㅇㅇ");
+
+                        runOnUiThread {
+                            val resultBitmap =
+                                    Bitmap.createBitmap(tmpImage.cols(), tmpImage.rows(), Bitmap.Config.RGB_565)
+                            Log.d("커피비 2", "ㅇㅇ");
                             Utils.matToBitmap(tmpImage, resultBitmap)
-
+                            Log.d("커피비 3", "ㅇㅇ");
                             val matrix: Matrix = Matrix()
                             matrix.postRotate(90F)
-
+                            Log.d("커피비 4", "ㅇㅇ");
                             rotatedBitmap = Bitmap.createBitmap(resultBitmap, 0, 0, resultBitmap!!.getWidth(), resultBitmap!!.height, matrix, true)
-
+                            Log.d("커피비 5", "ㅇㅇ");
                             image?.setImageBitmap(rotatedBitmap)
-
+                            Log.d("커피비 6", "ㅇㅇ");
                             llBottom!!.visibility = View.VISIBLE
+                            Log.d("커피비 7", "ㅇㅇ");
                             button!!.hide()
+                            Log.d("커피비 8", "ㅇㅇ");
                             mOpenCvCameraView!!.disableView()
+                            Log.d("커피비 9", "ㅇㅇ");
+
                         }
 
 
