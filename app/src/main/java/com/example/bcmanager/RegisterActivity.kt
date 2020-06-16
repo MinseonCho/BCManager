@@ -27,7 +27,7 @@ class RegisterActivity : AppCompatActivity(), View.OnClickListener {
 
         Objects.requireNonNull(supportActionBar)!!.setDisplayShowTitleEnabled(false)
         supportActionBar!!.displayOptions = ActionBar.DISPLAY_SHOW_CUSTOM // 커스텀 사용
-        supportActionBar!!.setCustomView(R.layout.actionbar_title) // 커스텀 사용할 파일 위치
+        supportActionBar!!.setCustomView(R.layout.actionbar_title_nobtn) // 커스텀 사용할 파일 위치
         supportActionBar!!.title = "BCManager"
 
         myApp = application as BCMApplication
