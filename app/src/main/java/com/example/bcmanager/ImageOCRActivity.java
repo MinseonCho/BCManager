@@ -472,6 +472,8 @@ public class ImageOCRActivity extends AppCompatActivity {
                         em = em.replace("E-mail.", "");
                     else if (textlist.get(i).contains("이메일:"))
                         em = em.replace("이메일:", "");
+                    else if (textlist.get(i).contains("E"))
+                        em = em.replace("E", "");
                 }
             } else if (textlist.get(i).contains(".com")) {
                 if (em.length() < 2) {
@@ -483,6 +485,7 @@ public class ImageOCRActivity extends AppCompatActivity {
         Log.d(TAG, ph);
         Log.d(TAG, nm);
         Log.d(TAG, em);
+
         fx = Fxdetection("F.", fx);
         fx = Fxdetection("FAX", fx);
         fx = Fxdetection("Fax", fx);
@@ -571,7 +574,7 @@ public class ImageOCRActivity extends AppCompatActivity {
         return message.toString();
     }
 
-    private static String Fxdetection(String findstring, String detailstring) { //휴대폰 & 팩스번호 추출
+    private static String Fxdetection(String findstring, String detailstring) { //팩스번호 추출
         Log.d("TAG", "Fxdetection진입성공 ");
         int faxindex = 0;
         for (int i = 0; i < textlist.size(); i++) {
