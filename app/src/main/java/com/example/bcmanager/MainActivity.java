@@ -537,6 +537,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
+                            Log.d("여기야 여기", "       ");
                             CardOCR.LableDetectionTask task = null;
                             try {
                                 task = new CardOCR.LableDetectionTask(getApplicationContext(), cardocr.prepareAnnotationRequest(bitmapOutput), MainActivity.this);

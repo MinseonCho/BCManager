@@ -213,7 +213,7 @@ void recognition_card_sec(Mat &input, Mat &output) {
     input.convertTo(output, CV_8UC3);
     cvtColor(input, grayInput, COLOR_RGB2GRAY);
 
-    Canny(grayInput, tmp, 75, 200, 3, false); // tmp = canny 결과
+    Canny(grayInput, tmp, 50, 200, 3, false); // tmp = canny 결과
     Mat closed_img;
     Matx<uchar, 3, 3> mask;
     mask << 0, 1, 0,

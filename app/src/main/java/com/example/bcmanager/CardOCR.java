@@ -395,8 +395,8 @@ public class CardOCR extends Activity {
                         em = em.replace("E-mail", "");
                     else if (textlist.get(i).contains("이메일:"))
                         em = em.replace("이메일:", "");
-                    else if (textlist.get(i).contains("E."))
-                        em = em.replace("E.", "");
+                    else if (textlist.get(i).contains("E"))
+                        em = em.replace("E", "");
                 }
             } else if (textlist.get(i).contains(".com")) {
                 if (em.length() < 2) {
