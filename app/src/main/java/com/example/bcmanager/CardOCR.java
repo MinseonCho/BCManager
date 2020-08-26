@@ -57,7 +57,7 @@ import okhttp3.MediaType;
 import static com.google.common.collect.ComparisonChain.start;
 
 public class CardOCR extends Activity {
-    private static final String CLOUD_VISION_API_KEY = "AIzaSyAsY-ymen9GHizAysYXt9BMoTX-J4D5Sc0";
+    private static final String CLOUD_VISION_API_KEY = "AIzaSyAorR7rj2NM5euIUYoTZvguZz1KPxBNXNI";
     public static String CARD_INPUT = "http://pmy0420.cafe24.com/precard_input_min.php";
     public static final String FILE_NAME = "temp.jpg";
     private static final String ANDROID_CERT_HEADER = "X-Android-Cert";
@@ -91,13 +91,7 @@ public class CardOCR extends Activity {
     private static final String TAG = "ddd";
     public Bitmap bitmap_;
 
-    //    public static class CallKotlin{
-//        public static void main(String[] args){
-//            Fileinput fileinput = new Fileinput(); //thread2
-//            fileinput.fileupload(fileCacheItem);
-//        }
-//
-//    }
+
     public static String dd(final AsyncResponse delegate) {
             Log.d("DD함수", "실행 ");
             Log.d(TAG, "ad확인db" + ad);
@@ -172,13 +166,7 @@ public class CardOCR extends Activity {
         fp = context.getFilesDir().getPath();
         Log.d(TAG, "FP 확인 할꺼 = " + fp);
 
-//        File file = new File(fp);
-////
-////        // If no folders
-////        if (!file.exists()) {
-////            file.mkdirs();
-////            // Toast.makeText(this, "Success", Toast.LENGTH_SHORT).show();
-////        }
+
 
         fileCacheItem = new File(fp, fn);
         Log.d(TAG, "getFilesDir().getPath()확인할꺼 = " + fileCacheItem.toString());
@@ -210,6 +198,8 @@ public class CardOCR extends Activity {
         HttpTransport httpTransport = AndroidHttp.newCompatibleTransport();
         JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
 
+        Log.d("api테스트2","..." );
+
         VisionRequestInitializer requestInitializer =
                 new VisionRequestInitializer(CLOUD_VISION_API_KEY) {
                     /**
@@ -239,6 +229,7 @@ public class CardOCR extends Activity {
                 new BatchAnnotateImagesRequest();
         batchAnnotateImagesRequest.setRequests(new ArrayList<AnnotateImageRequest>() {{
             AnnotateImageRequest annotateImageRequest = new AnnotateImageRequest();
+            Log.d("api테스트3","..." );
 
             // Add the image
             Image base64EncodedImage = new Image();
@@ -251,6 +242,7 @@ public class CardOCR extends Activity {
             // Base64 encode the JPEG
             base64EncodedImage.encodeContent(imageBytes);
             annotateImageRequest.setImage(base64EncodedImage);
+            Log.d("api테스트4","122" );
 
             // add the features we want
             annotateImageRequest.setFeatures(new ArrayList<Feature>() {{
@@ -298,7 +290,7 @@ public class CardOCR extends Activity {
                 Log.d(TAG, "failed to make API request because of other IOException " +
                         e.getMessage());
             }
-
+            Log.d("api테스트","123" );
             return "Cloud Vision API request failed. Check logs for details.";
         }
 
