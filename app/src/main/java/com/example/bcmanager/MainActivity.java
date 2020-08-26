@@ -85,25 +85,25 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
     /**
      * url
      */
-    public static String IMAGE_URL = "http://104.197.171.112/dbimages/";
-    public static String INSERT_IMAGE_URL = "http://104.197.171.112/insert_image.php";
-    public static String GET_IMAGE_URL = "http://104.197.171.112/get_image.php";
-    public static String SIGNUP_URL = "http://104.197.171.112/signup.php";
-    public static String GET_CARDS_INFO = "http://104.197.171.112/get_cards.php";
-    public static String GET_CARD_INFO = "http://104.197.171.112/get_card.php";
-    public static String GET_UNREGISTERD_CARD_INFO = "http://104.197.171.112/get_unregisterd_card.php";
-    public static String GET_UNREGISTERD_CARD_COUNT = "http://104.197.171.112/get_count_cards0.php";
-    public static String CARD_INPUT = "http://104.197.171.112/card_input.php";
-    public static String GET_USER_NUMBER = "http://104.197.171.112/get_user_number.php";
-    public static String DELETE_ITEM = "http://104.197.171.112/delete_item.php";
-    public static String REGISTER_CARD = "http://104.197.171.112/moveToCardTB.php";
-    public static String UPDATE_CARD_INFOS = "http://104.197.171.112/update_infos.php";
-    public static String INSERT_CARD_INFOS = "http://104.197.171.112/insert_card_info.php";
-    public static String UPDATE_TCARD_RESULT = "http://104.197.171.112/update_tcard_result.php";
+    public static String IMAGE_URL = "http://pmy0420.cafe24.com/dbimages/";
+    public static String INSERT_IMAGE_URL = "http://pmy0420.cafe24.com/insert_image.php";
+    public static String GET_IMAGE_URL = "http://pmy0420.cafe24.com/get_image.php";
+    public static String SIGNUP_URL = "http://pmy0420.cafe24.comsignup.php";
+    public static String GET_CARDS_INFO = "http://pmy0420.cafe24.com/get_cards.php";
+    public static String GET_CARD_INFO = "http://pmy0420.cafe24.com/get_card.php";
+    public static String GET_UNREGISTERD_CARD_INFO = "http://pmy0420.cafe24.com/get_unregisterd_card.php";
+    public static String GET_UNREGISTERD_CARD_COUNT = "http://pmy0420.cafe24.com/get_count_cards0.php";
+    public static String CARD_INPUT = "http://pmy0420.cafe24.com/card_input.php";
+    public static String GET_USER_NUMBER = "http://pmy0420.cafe24.com/get_user_number.php";
+    public static String DELETE_ITEM = "http://pmy0420.cafe24.com/delete_item.php";
+    public static String REGISTER_CARD = "http://pmy0420.cafe24.com/moveToCardTB.php";
+    public static String UPDATE_CARD_INFOS = "http://pmy0420.cafe24.com/update_infos.php";
+    public static String INSERT_CARD_INFOS = "http://pmy0420.cafe24.com/insert_card_info.php";
+    public static String UPDATE_TCARD_RESULT = "http://pmy0420.cafe24.com/update_tcard_result.php";
     public static String DELETE_CARD = "http://104.197.171.112/delete_item_cardtb.php";
-    public static String INSERT_CARD_INFOS_FROM_CAMERA = "http://104.197.171.112/insert_card_from_camera.php";
-    public static String INSERT_CARD_INFOS_CARDTB = "http://104.197.171.112/register_card.php";
-    public static String  SEARCH_CARD_GET_INFO= "http://104.197.171.112/get_searchcard.php";
+    public static String INSERT_CARD_INFOS_FROM_CAMERA = "http://pmy0420.cafe24.com/insert_card_from_camera.php";
+    public static String INSERT_CARD_INFOS_CARDTB = "http://pmy0420.cafe24.com/register_card.php";
+    public static String  SEARCH_CARD_GET_INFO= "http://pmy0420.cafe24.com/get_searchcard.php";
     /**
      * end
      */

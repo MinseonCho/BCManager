@@ -60,8 +60,8 @@ import java.util.Objects;
 
 public class ImageOCRActivity extends AppCompatActivity {
 
-    private static final String CLOUD_VISION_API_KEY = "AIzaSyB3_sf4bXDPThjn5SYMGRpsfBgTaStKBcI";
-    public static String CARD_INPUT = "http://104.197.171.112/card_input.php";
+    private static final String CLOUD_VISION_API_KEY = "AIzaSyAsY-ymen9GHizAysYXt9BMoTX-J4D5Sc0";
+    public static String CARD_INPUT = "http://pmy0420.cafe24.com/card_input.php";
     public static final String FILE_NAME = "temp.jpg";
     private static final String ANDROID_CERT_HEADER = "X-Android-Cert";
     private static final String ANDROID_PACKAGE_HEADER = "X-Android-Package";
