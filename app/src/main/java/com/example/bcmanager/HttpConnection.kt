@@ -282,16 +282,6 @@ class HttpConnection(url: URL) : Callback {
         val client = OkHttpClient()
         client.newCall(request).enqueue(this)
     }
-//    CardOCR.ph = ""
-//    CardOCR.nm = ""
-//    CardOCR.ad = ""
-//    CardOCR.em = ""
-//    CardOCR.nb = ""
-//    CardOCR.fx = ""
-//    CardOCR.po = ""
-//    CardOCR.cp = ""
-//    CardOCR.memo = null
-
 
     //갤러리 사진 등록/ 카메라 사진 등록 모두 쓰임
     fun requestInsertInfos(file: File, uID: String, detectedCardInfo: CardInfoItem.detectedCardInfo, callback: OnRequestCompleteListener) {

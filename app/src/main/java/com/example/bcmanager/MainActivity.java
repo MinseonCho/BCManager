@@ -88,7 +88,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
     public static String IMAGE_URL = "http://pmy0420.cafe24.com/dbimages/";
     public static String INSERT_IMAGE_URL = "http://pmy0420.cafe24.com/insert_image.php";
     public static String GET_IMAGE_URL = "http://pmy0420.cafe24.com/get_image.php";
-    public static String SIGNUP_URL = "http://pmy0420.cafe24.comsignup.php";
+    public static String SIGNUP_URL = "http://pmy0420.cafe24.com/signup.php";
     public static String GET_CARDS_INFO = "http://pmy0420.cafe24.com/get_cards.php";
     public static String GET_CARD_INFO = "http://pmy0420.cafe24.com/get_card.php";
     public static String GET_UNREGISTERD_CARD_INFO = "http://pmy0420.cafe24.com/get_unregisterd_card.php";

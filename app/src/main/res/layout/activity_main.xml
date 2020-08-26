@@ -150,8 +150,9 @@
                             android:layout_height="80dp"
                             android:background="@android:color/transparent"
                             android:scaleType="centerCrop"
-                            android:src="@drawable/search" />
-
+                            app:srcCompat="@drawable/search"
+                            tools:ignore="ContentDescription" />
+<!--                        android:src="@drawable/search"-->
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
