@@ -294,12 +294,6 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                 startActivity(search);
 
 
-//                Bitmap bitmap = ((BitmapDrawable) Objects.requireNonNull(getDrawable(R.drawable.document2))).getBitmap();
-//                Test test = new Test(getApplicationContext(), bitmap);
-//                test.dd();
-
-//                Test test = new Test(getApplicationContext());
-//                test.dd();
 
             }
         });
@@ -348,15 +342,6 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 
         //End of kakaolink
 
-//        Intent intent = getIntent();
-//        if (intent.getIntExtra("kakaoCardNumber", 0) != 0) {
-//            Log.d(TAG_, "kakaoCardNumber 받음");
-//
-//            Intent goToCardInfo = new Intent(getApplicationContext(), DetailInfoActivity.class);
-//            goToCardInfo.putExtra("cardNmber", intent.getIntExtra("kakaoCardNumber", 0));
-//            goToCardInfo.putExtra("flag", 503);
-//            startActivity(goToCardInfo);
-//        }
 
         refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
@@ -388,12 +373,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                 linearGoToCardList.setVisibility(View.GONE);
             }
         }
-//        if (requestCode == REQUEST_CODE_FOR_LOGIN) {
-//            if (resultCode == RESULT_OK) {
-//                //로그인 성공해서 올 경우
-//                getCardCount();
-//            }
-//        }
+
         if (requestCode == 100) {
             if (resultCode == RESULT_OK) {
                 if (data != null) {
@@ -666,6 +646,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
     public void initUserData() {
         myApp.isLogined = false;
         myApp.userNum = null;
+        myApp.userImage = null;
     }
 
     public void checkCurrentUser() {
@@ -850,22 +831,12 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 
         String tmp = output;
 
-        Log.d("processFinish", " cardsList.clear(); " + cardsList.size());
-//        Log.d("processFinish", " output" + output);
-        Log.d("output.length1", String.valueOf(output.length()));
-//        output.trim();
         output.replaceAll(" ", "");
-        Log.d("output.length2", String.valueOf(output.length()));
-        Log.d("output", String.valueOf(output.equals("true ")));
-        Log.d("output", output.toUpperCase());
+
         if (output.equals("true")) {
             Log.d("processFinish", "내부");
         }
-//        if (Objects.equals(output, "true")) {
-//            Log.d("processFinish", "내부");
-////            cardocr.dd();
-//        cardsList.clear();
-//        getCardCount();
+
         myApp.count++;
         runOnUiThread(new Runnable() {
             @Override
@@ -873,18 +844,6 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                 linearGoToCardList.setVisibility(View.VISIBLE);
             }
         });
-
-//        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-//        bitmap.compress(Bitmap.CompressFormat.JPEG, 50, stream);
-//        byte[] byteArray = stream.toByteArray();
-//
- //       Intent min = new Intent(getApplicationContext(), SearchingActivity.class);
-//        min.put
-
-
-//        }else{
-//            Log.d("processFinish", "실패");
-//        }
     }
 
 }
