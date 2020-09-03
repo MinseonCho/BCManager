@@ -103,7 +103,7 @@ public class CardOCR extends Activity {
             String result = "0";
 
 
-            CardInfoItem.detectedCardInfo tmpResult = new CardInfoItem.detectedCardInfo(fileCacheItem.getName(),nm, po, ph, nb, fx, ad, cp, em, memo);
+        CardInfoItem.detectedCardInfo tmpResult = new CardInfoItem.detectedCardInfo(fileCacheItem.getName(),nm, po, ph, nb, fx, ad, cp, em, memo);
         HttpConnection httpConnection = null;
         Log.d("httpConnection _", tmpResult.getCARD_IMAGE());
         Log.d("httpConnection __", fileCacheItem.getName());
