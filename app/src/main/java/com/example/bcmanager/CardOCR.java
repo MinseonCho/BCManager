@@ -364,31 +364,38 @@ public class CardOCR extends Activity {
             if (textlist.get(i).contains("010")) {
                 phindex = textlist.get(i).indexOf("010");
                 for (int j = phindex; j < textlist.get(i).length(); j++) {
-                    ph += textlist.get(i).charAt(j);
-                }
-                if (ph.contains("."))
-                    ph = ph.replace(".", "-");
-            }
+                    if (textlist.get(i).charAt(j) >= 48 && textlist.get(i).charAt(j) <= 57) {
+                        if (ph.length() < 11)
+                            ph += textlist.get(i).charAt(j);
+                        else
+                            break;
 
+                    }
+                }
+            }
 
             if (textlist.get(i).contains("@")) {
                 if (em.length() < 2) {
                     em = textlist.get(i);
+                    int emlength = em.length();
 
                     if (textlist.get(i).contains("email."))
-                        em = em.replace("email.", "");
+                        em = em.substring(em.lastIndexOf("email.")+1,emlength);
                     else if (textlist.get(i).contains("Email."))
-                        em = em.replace("Email.", "");
+                        em = em.substring(em.lastIndexOf("Email.")+1,emlength);
                     else if (textlist.get(i).contains("E-Mail."))
-                        em = em.replace("E-Mail.", "");
+                        em = em.substring(em.lastIndexOf("E-Mail.")+1,emlength);
                     else if (textlist.get(i).contains("E-mail."))
-                        em = em.replace("E-mail.", "");
+                        em = em.substring(em.lastIndexOf("E-mail.")+1,emlength);
                     else if (textlist.get(i).contains("E-mail"))
+//                        em =em.substring(em.lastIndexOf("E-mail")+1,emlength);
                         em = em.replace("E-mail", "");
                     else if (textlist.get(i).contains("이메일:"))
-                        em = em.replace("이메일:", "");
-                    else if (textlist.get(i).contains("E"))
-                        em = em.replace("E", "");
+                        em =em.substring(em.lastIndexOf("이메일:")+1,emlength);
+                    else if (textlist.get(i).contains("E."))
+                        em = em.substring(em.lastIndexOf("E.")+1,emlength);
+//                    else if (textlist.get(i).contains("E"))
+//                        em = em.substring(em.lastIndexOf("E")+1,emlength);
                 }
             } else if (textlist.get(i).contains(".com")) {
                 if (em.length() < 2) {
